@@ -42,7 +42,7 @@ const copyToClipboard = async (text, button) => {
             <div class="flex">
               <input 
                 type="text" 
-                class="flex-1 bg-gray-50 border border-gray-300 rounded-l-lg px-4 py-3 text-slate-800 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-slate-500" 
+                class="flex-1 bg-primary-50/50 dark:bg-gray-700 border border-primary-200 dark:border-gray-600 rounded-l-lg px-4 py-3 text-slate-800 dark:text-gray-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" 
                 :value="appStore.config.location" 
                 @focus="$event.target.select()" 
                 readonly
