@@ -94,8 +94,16 @@ func HandlePing6(c *gin.Context) {
 		return
 	}
 
-	// Read output line by line
+	// Send initial message
+	fmt.Printf("[Ping6] Command started successfully\n")
+
+	// Read output in a goroutine but don't block with cmd.Wait()
+	// Let the goroutine handle the output and the handler can return
 	go func() {
+		defer func() {
+			cmd.Process.Kill()
+		}()
+
 		buf := make([]byte, 1024)
 		remainingData := ""
 		seq := 0
@@ -103,6 +111,7 @@ func HandlePing6(c *gin.Context) {
 		for {
 			n, err := output.Read(buf)
 			if err != nil {
+				fmt.Printf("[Ping6] Read error: %v\n", err)
 				return
 			}
 
@@ -179,9 +188,7 @@ func HandlePing6(c *gin.Context) {
 		}
 	}()
 
-	// Wait for command to complete
-	cmd.Wait()
-
+	// Return immediately to let the goroutine handle output
 	c.JSON(200, &gin.H{
 		"success": true,
 	})
