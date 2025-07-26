@@ -9,6 +9,7 @@ import (
 	"github.com/X-Zero-L/als/als/controller/cache"
 	"github.com/X-Zero-L/als/als/controller/iperf3"
 	"github.com/X-Zero-L/als/als/controller/nettools"
+	"github.com/X-Zero-L/als/als/controller/nodes"
 	"github.com/X-Zero-L/als/als/controller/ping"
 	"github.com/X-Zero-L/als/als/controller/session"
 	"github.com/X-Zero-L/als/als/controller/shell"
