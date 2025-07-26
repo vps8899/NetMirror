@@ -62,7 +62,7 @@ func HandleSpeedtestDotNet(c *gin.Context) {
 	if nodeId != "" {
 		args = append(args, "-s", nodeId)
 	}
-	cmd := exec.Command("speedtest", args...)
+	cmd := exec.Command("speedtest-cli", args...)
 
 	go func() {
 		<-ctx.Done()
