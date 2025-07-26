@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -85,7 +86,6 @@ func HandleNetworkTool(toolName string) gin.HandlerFunc {
 		}
 
 		clientSession := v.(*client.ClientSession)
-		channel := clientSession.Channel
 
 		tools := GetNetworkTools()
 		tool, exists := tools[toolName]
@@ -97,10 +97,59 @@ func HandleNetworkTool(toolName string) gin.HandlerFunc {
 			return
 		}
 
-		// Start the tool execution in a goroutine
-		go func() {
-			executeNetworkTool(tool, ip, channel, clientSession.GetContext(c.Request.Context()))
-		}()
+		// Create timeout context
+		timeout := tool.Timeout
+		ctx, cancel := context.WithTimeout(clientSession.GetContext(c.Request.Context()), timeout)
+		defer cancel()
+
+		// Build command
+		args := append(tool.Args, ip)
+		cmd := exec.CommandContext(ctx, tool.Command, args...)
+
+		// Send start message
+		clientSession.Channel <- &client.Message{
+			Name:    "MethodOutput",
+			Content: fmt.Sprintf(`{"output":"Starting %s to %s...\n","finished":false}`, tool.Name, ip),
+		}
+
+		// Writer function (exactly like iperf3)
+		writer := func(pipe io.ReadCloser, err error) {
+			if err != nil {
+				return
+			}
+			for {
+				buf := make([]byte, 1024)
+				n, err := pipe.Read(buf)
+				if err != nil {
+					return
+				}
+				msg := &client.Message{
+					Name:    "MethodOutput",
+					Content: fmt.Sprintf(`{"output":%s,"finished":false}`, strconv.Quote(string(buf[:n]))),
+				}
+				clientSession.Channel <- msg
+			}
+		}
+
+		go writer(cmd.StdoutPipe())
+		go writer(cmd.StderrPipe())
+
+		err := cmd.Start()
+		if err != nil {
+			c.JSON(400, &gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		cmd.Wait()
+
+		// Send completion message
+		clientSession.Channel <- &client.Message{
+			Name:    "MethodOutput",
+			Content: fmt.Sprintf(`{"output":"\n%s completed.\n","finished":true}`, tool.Name),
+		}
 
 		c.JSON(200, &gin.H{
 			"success": true,
