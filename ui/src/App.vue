@@ -1,6 +1,5 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { useMotion } from '@vueuse/motion'
 import { list as langList, setI18nLanguage, loadLocaleMessages, autoLang } from './config/lang.js'
 import { useAppStore } from './stores/app'
 import LoadingCard from '@/components/Loading.vue'
@@ -10,7 +9,6 @@ import UtilitiesCard from '@/components/Utilities.vue'
 import TrafficCard from '@/components/TrafficDisplay.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import LanguageSelector from '@/components/LanguageSelector.vue'
-import { WifiIcon } from 'lucide-vue-next'
 
 const currentLangCode = ref('en-US')
 const isDark = ref(false)
@@ -36,13 +34,6 @@ const toggleTheme = () => {
   document.documentElement.classList.toggle('dark', isDark.value)
 }
 
-// Motion setup
-const headerRef = ref()
-const { apply: applyHeader } = useMotion(headerRef, {
-  initial: { opacity: 0, y: -30 },
-  enter: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 15, delay: 100 } }
-})
-
 onMounted(async () => {
   const langCode = await autoLang()
   currentLangCode.value = langCode
@@ -52,73 +43,106 @@ onMounted(async () => {
     isDark.value = true
     document.documentElement.classList.add('dark')
   }
-  
-  applyHeader()
 })
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
-    <!-- Animated Gradient Background -->
-    <div class="animated-gradient absolute inset-0 -z-10"></div>
-    
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-      <!-- Header -->
-      <header ref="headerRef" class="text-center mb-12 sm:mb-16">
-        <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 dark:bg-black/20 backdrop-blur-lg rounded-3xl mb-6 shadow-lg border border-white/10">
-          <WifiIcon class="w-10 h-10 text-primary-500" />
-        </div>
-        <h1 class="text-4xl sm:text-6xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent mb-4 tracking-tight">
-          Looking Glass Server
-        </h1>
-        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-          An elegant and powerful suite of network diagnostic tools. Real-time insights, at your fingertips.
-        </p>
-      </header>
+  <div class="min-h-screen bg-gradient-to-br from-primary-50 via-slate-50 to-primary-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
+    <!-- Floating decorative elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute -top-40 -right-40 w-96 h-96 bg-primary-200/30 dark:bg-primary-800/10 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-pulse-slow"></div>
+      <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-200/30 dark:bg-blue-800/10 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-pulse-slow" style="animation-delay: 2s;"></div>
+      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-primary-100/20 dark:bg-primary-900/10 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse-slow" style="animation-delay: 4s;"></div>
+    </div>
 
-      <!-- Controls -->
-      <div class="sticky top-4 z-40 mb-8">
-        <div class="max-w-md mx-auto bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 dark:border-gray-700/50 p-2">
-          <div class="flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-              <ThemeToggle :is-dark="isDark" @toggle="toggleTheme" />
-              <LanguageSelector 
-                :current-lang="currentLangCode" 
-                :lang-list="langList"
-                @change="handleLangChange" 
-              />
-            </div>
-            <div v-if="!appStore.connecting" class="text-xs font-medium text-gray-600 dark:text-gray-300 px-3 py-2 rounded-lg bg-white/50 dark:bg-gray-700/50">
-              <span class="opacity-70">{{ $t('memory_usage') }}:</span> {{ appStore.memoryUsage }}
+    <!-- Main container -->
+    <div class="relative z-10 min-h-screen">
+      <!-- Header -->
+      <header class="pt-12 pb-8 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+          <!-- Logo/Icon -->
+          <div class="inline-flex items-center justify-center w-20 h-20 mb-6 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl shadow-lg shadow-primary-500/25 animate-scale-in">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"/>
+            </svg>
+          </div>
+
+          <!-- Title and subtitle -->
+          <div class="space-y-4 animate-fade-in">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary-600 via-primary-500 to-blue-600 bg-clip-text text-transparent tracking-tight">
+              Network Diagnostic Tools
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 font-medium max-w-3xl mx-auto">
+              {{ appStore.config?.location || 'Professional Looking Glass Server' }}
+            </p>
+            
+            <!-- Status indicator -->
+            <div class="inline-flex items-center px-4 py-2 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-full border border-primary-200/50 dark:border-primary-700/50 shadow-lg">
+              <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Server Online</span>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      <!-- Main Content -->
-      <main class="space-y-8 sm:space-y-10">
-        <LoadingCard v-if="appStore.connecting" />
-        <template v-else>
-          <InfoCard />
-          <UtilitiesCard />
-          <SpeedtestCard />
-          <TrafficCard v-if="appStore.config.feature_iface_traffic" />
-        </template>
+      <!-- Main content area -->
+      <main class="pb-16 px-4">
+        <div class="max-w-6xl mx-auto space-y-8">
+          <LoadingCard v-if="appStore.connecting" />
+          <template v-else>
+            <!-- Network Information Card -->
+            <div class="animate-slide-up">
+              <InfoCard />
+            </div>
+            
+            <!-- Looking Glass Card -->
+            <div class="animate-slide-up" style="animation-delay: 0.1s;">
+              <UtilitiesCard />
+            </div>
+            
+            <!-- Speed Test Card -->
+            <div class="animate-slide-up" style="animation-delay: 0.2s;">
+              <SpeedtestCard />
+            </div>
+
+            <!-- Traffic Display (if enabled) -->
+            <div v-if="appStore.config.feature_iface_traffic" class="animate-slide-up" style="animation-delay: 0.3s;">
+              <TrafficCard />
+            </div>
+          </template>
+        </div>
       </main>
 
       <!-- Footer -->
-      <footer class="mt-16 sm:mt-24 text-center">
-        <div class="inline-flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-          <span>Powered by</span>
-          <a 
-            href="https://github.com/wikihost-opensource/als" 
-            target="_blank"
-            class="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors duration-200"
-          >
-            WIKIHOST Opensource - ALS
-          </a>
+      <footer class="pb-8 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+          <div class="inline-flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+            <span>Powered by</span>
+            <a 
+              href="https://github.com/X-Zero-L/als" 
+              target="_blank"
+              class="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors duration-200"
+            >
+              ALS - Another Looking Glass Server
+            </a>
+          </div>
         </div>
       </footer>
+    </div>
+
+    <!-- Controls in fixed position -->
+    <div class="fixed top-6 right-6 z-50">
+      <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl shadow-lg border border-primary-200/50 dark:border-primary-700/50 p-3">
+        <div class="flex items-center space-x-3">
+          <ThemeToggle :is-dark="isDark" @toggle="toggleTheme" />
+          <div class="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+          <LanguageSelector 
+            :current-lang="currentLangCode" 
+            :lang-list="langList"
+            @change="handleLangChange" 
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -130,28 +154,77 @@ onMounted(async () => {
 
 html {
   scroll-behavior: smooth;
-}
-
-body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-@keyframes gradient-animation {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+body {
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.animated-gradient {
-  background: linear-gradient(-45deg, #e0f2fe, #d1fae5, #fef3c7, #fee2e2);
-  background-size: 400% 400%;
-  animation: gradient-animation 15s ease infinite;
+/* Enhanced animations */
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-.dark .animated-gradient {
-  background: linear-gradient(-45deg, #0c4a6e, #064e3b, #78350f, #7f1d1d);
-  background-size: 400% 400%;
-  animation: gradient-animation 15s ease infinite;
-  opacity: 0.3;
+@keyframes slideUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(147, 197, 253, 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(147, 197, 253, 0.5);
 }
 </style>
