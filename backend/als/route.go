@@ -62,6 +62,18 @@ func SetupHttpRoute(e *gin.Engine) {
 		handleStatisFile(filePath, c)
 	})
 
+	e.GET("/css/:filename", func(c *gin.Context) {
+		filePath := c.Request.RequestURI
+		filePath = filePath[1:]
+		handleStatisFile(filePath, c)
+	})
+
+	e.GET("/js/:filename", func(c *gin.Context) {
+		filePath := c.Request.RequestURI
+		filePath = filePath[1:]
+		handleStatisFile(filePath, c)
+	})
+
 	e.GET("/", func(c *gin.Context) {
 		filePath := "/index.html"
 		filePath = filePath[1:]
