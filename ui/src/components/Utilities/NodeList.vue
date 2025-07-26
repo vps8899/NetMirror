@@ -88,7 +88,6 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import axios from 'axios'
 
 const nodes = ref([])
 const latencies = ref({})
@@ -139,15 +138,20 @@ const fetchNodes = async () => {
 // Test latency for a single node
 const testNodeLatency = async (node) => {
   try {
-    const startTime = Date.now()
-    const response = await axios.get('/nodes/latency', {
-      params: { url: node.url },
-      timeout: 5000
-    })
-    const endTime = Date.now()
+    // 对于当前节点，直接请求本地
+    const targetUrl = isCurrentNode(node) ? '/session' : `${node.url}/session`
     
-    if (response.data.success) {
-      const latency = endTime - startTime
+    const startTime = performance.now()
+    const response = await fetch(targetUrl, {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-cache',
+      signal: AbortSignal.timeout(3000) // 3 second timeout
+    })
+    const endTime = performance.now()
+    
+    if (response.ok) {
+      const latency = Math.round(endTime - startTime)
       
       // Determine status based on latency
       let status = 'good'
@@ -161,6 +165,8 @@ const testNodeLatency = async (node) => {
         latency: latency,
         status: status
       }
+    } else {
+      throw new Error('Response not ok')
     }
   } catch (error) {
     console.error('Failed to test latency for', node.name, error)
@@ -192,10 +198,10 @@ const getStatusText = (status) => {
 onMounted(() => {
   fetchNodes()
   
-  // Refresh latencies every 30 seconds
+  // Refresh latencies every 10 seconds (more frequent)
   latencyInterval = setInterval(() => {
     testAllLatencies()
-  }, 30000)
+  }, 10000)
 })
 
 onUnmounted(() => {
