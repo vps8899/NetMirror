@@ -30,6 +30,7 @@ func LoadFromEnv() {
 		"UTILITIES_FAKESHELL":       &Config.FeatureShell,
 		"UTILITIES_IPERF3":          &Config.FeatureIperf3,
 		"UTILITIES_MTR":             &Config.FeatureMTR,
+		"UTILITIES_TRACEROUTE":      &Config.FeatureTraceroute,
 	}
 
 	for envVar, configField := range envVarsString {

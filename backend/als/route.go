@@ -30,7 +30,7 @@ func SetupHttpRoute(e *gin.Engine) {
 			v1.GET("/ping6", nettools.HandleNetworkTool("ping6"))
 		}
 
-		if config.Config.FeatureMtr {
+		if config.Config.FeatureMTR {
 			v1.GET("/mtr", nettools.HandleNetworkTool("mtr"))
 			v1.GET("/mtr6", nettools.HandleNetworkTool("mtr6"))
 		}
