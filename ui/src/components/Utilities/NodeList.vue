@@ -154,7 +154,7 @@ const testNodeLatency = async (node) => {
     if (response.ok) {
       const data = await response.json()
       if (data.success) {
-        latencies.value[node.url] = {
+        latencies.value[node.name] = {
           latency: data.latency,
           status: data.status
         }
@@ -167,7 +167,7 @@ const testNodeLatency = async (node) => {
   } catch (error) {
     // 如果是超时或网络错误，标记为offline
     console.error('Failed to test latency for', node.name, error)
-    latencies.value[node.url] = {
+    latencies.value[node.name] = {
       latency: -1,
       status: 'error'
     }
@@ -198,10 +198,10 @@ const getStatusText = (status) => {
 onMounted(() => {
   fetchNodes()
   
-  // Refresh latencies every 5 seconds (less frequent to avoid UI interruption)
+  // Refresh latencies every 1 second
   latencyInterval = setInterval(() => {
     testAllLatencies()
-  }, 5000)
+  }, 1000)
 })
 
 onUnmounted(() => {

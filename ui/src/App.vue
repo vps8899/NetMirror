@@ -16,6 +16,7 @@ const isDark = ref(false)
 const appStore = useAppStore()
 const activeTab = ref('info')
 const tabContainer = ref(null)
+const tabNavigation = ref(null)
 
 const tabs = [
   { id: 'info', label: 'Network Information', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9' },
