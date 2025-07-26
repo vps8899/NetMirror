@@ -25,19 +25,22 @@ RUN apk add --no-cache git ca-certificates tzdata
 # 设置工作目录
 WORKDIR /app
 
-# 复制 go mod 文件
-COPY backend/go.mod backend/go.sum ./
+# 复制后端源代码
+COPY backend/ /app/backend/
+
+# 复制 .air.toml 文件到构建阶段（开发时需要）
+COPY .air.toml /app/backend/
+
+# 复制前端构建产物
+COPY --from=ui-builder /app/dist /app/backend/embed/ui/
+
+# 设置构建工作目录
+WORKDIR /app/backend
 
 # 下载依赖
 RUN go mod download
 
-# 复制后端源代码
-COPY backend/ ./
-
-# 复制 .air.toml 文件到构建阶段（开发时需要）
-COPY .air.toml ./
-
-# 构建 Go 应用，输出到 /als-bin 以避免与 /app/als 目录冲突
+# 构建 Go 应用
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /als-bin .
 
 # 软件安装阶段
