@@ -26,12 +26,6 @@ onMounted(() => {
     ref="cardRef" 
     class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 overflow-hidden"
   >
-    <div class="px-6 py-4 bg-gradient-to-r from-primary-600 to-primary-700">
-      <h2 class="text-xl font-semibold text-white flex items-center">
-        <RocketLaunchIcon class="w-6 h-6 mr-2" />
-        {{ $t('server_speedtest') }}
-      </h2>
-    </div>
     
     <div class="p-6 space-y-8">
       <Librespeed v-if="appStore.config.feature_librespeed" />
