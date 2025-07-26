@@ -79,7 +79,7 @@ COPY --from=software-installer /usr/bin/ /usr/bin/
 COPY --from=software-installer /bin/ /bin/
 
 # 从构建阶段复制应用程序
-COPY --from=go-builder /als-bin /bin/als
+COPY --from=go-builder /app/backend/als-bin /bin/als
 
 # 创建非 root 用户
 RUN addgroup -g 1001 -S als && \

@@ -2,6 +2,8 @@ module github.com/samlm0/als/v2
 
 go 1.21.4
 
+replace github.com/samlm0/als/v2 => .
+
 require (
 	github.com/creack/pty v1.1.21
 	github.com/gin-gonic/gin v1.9.1
