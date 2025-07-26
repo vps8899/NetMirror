@@ -9,6 +9,29 @@ export const useAppStore = defineStore('app', () => {
   const config = ref()
   const drawerWidth = ref()
   const memoryUsage = ref()
+  
+  // Theme and language settings with persistence
+  const theme = ref(localStorage.getItem('theme') || 'light')
+  const language = ref(localStorage.getItem('language') || 'en-US')
+  
+  // Watch theme changes and persist
+  const setTheme = (newTheme) => {
+    theme.value = newTheme
+    localStorage.setItem('theme', newTheme)
+    document.documentElement.classList.toggle('dark', newTheme === 'dark')
+  }
+  
+  // Watch language changes and persist
+  const setLanguage = (newLang) => {
+    language.value = newLang
+    localStorage.setItem('language', newLang)
+  }
+  
+  // Initialize theme on load
+  if (theme.value === 'dark') {
+    document.documentElement.classList.add('dark')
+  }
+  
   let timer = ''
 
   const handleResize = () => {
