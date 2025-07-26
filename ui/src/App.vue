@@ -135,17 +135,17 @@ onMounted(async () => {
             </div>
             
             <!-- Tab Content -->
-            <div class="relative">
+            <div class="relative mt-6">
               <Transition
                 mode="out-in"
-                enter-active-class="transition-all duration-500 ease-out"
-                enter-from-class="opacity-0 translate-y-4"
+                enter-active-class="transition-all duration-300 ease-out"
+                enter-from-class="opacity-0 translate-y-2"
                 enter-to-class="opacity-100 translate-y-0"
-                leave-active-class="transition-all duration-300 ease-in"
+                leave-active-class="transition-all duration-200 ease-in"
                 leave-from-class="opacity-100 translate-y-0"
-                leave-to-class="opacity-0 -translate-y-4"
+                leave-to-class="opacity-0 -translate-y-2"
               >
-                <div :key="activeTab" class="animate-slide-up">
+                <div :key="activeTab">
                   <InfoCard v-if="activeTab === 'info'" />
                   <UtilitiesCard v-else-if="activeTab === 'tools'" />
                   <SpeedtestCard v-else-if="activeTab === 'speedtest'" />
