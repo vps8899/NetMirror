@@ -46,7 +46,7 @@ func GetDefaultConfig() *ALSConfig {
 		Iperf3StartPort: 30000,
 		Iperf3EndPort:   31000,
 
-		SpeedtestFileList: []string{"1MB", "10MB", "100MB", "1GB", "100GB"},
+		SpeedtestFileList: []string{"100MB", "1GB", "10GB"},
 		PublicIPv4:        "",
 		PublicIPv6:        "",
 
