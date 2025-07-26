@@ -101,7 +101,9 @@ func HandlePing6(c *gin.Context) {
 	// Let the goroutine handle the output and the handler can return
 	go func() {
 		defer func() {
-			cmd.Process.Kill()
+			if cmd.Process != nil {
+				cmd.Process.Kill()
+			}
 		}()
 
 		buf := make([]byte, 1024)
