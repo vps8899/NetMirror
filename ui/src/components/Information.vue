@@ -54,13 +54,13 @@ const copyToClipboard = async (text, button) => {
             <div class="flex">
               <input 
                 type="text" 
-                class="flex-1 bg-gray-50 border border-gray-300 rounded-l-lg px-4 py-3 text-slate-800 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-slate-500" 
+                class="flex-1 bg-primary-50/50 dark:bg-gray-700 border border-primary-200 dark:border-gray-600 rounded-l-lg px-4 py-3 text-slate-800 dark:text-gray-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" 
                 :value="appStore.config.public_ipv4" 
                 @focus="$event.target.select()" 
                 readonly
               >
               <button 
-                class="bg-gray-100 hover:bg-gray-200 border border-l-0 border-gray-300 rounded-r-lg px-4 py-3 text-gray-600 transition-colors duration-200 min-w-[44px] flex items-center justify-center" 
+                class="bg-primary-100 hover:bg-primary-200 dark:bg-gray-600 dark:hover:bg-gray-500 border border-l-0 border-primary-200 dark:border-gray-600 rounded-r-lg px-4 py-3 text-primary-600 dark:text-gray-100 transition-colors duration-200 min-w-[44px] flex items-center justify-center" 
                 @click="copyToClipboard(appStore.config.public_ipv4, $event.target)"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,13 +76,13 @@ const copyToClipboard = async (text, button) => {
             <div class="flex">
               <input 
                 type="text" 
-                class="flex-1 bg-gray-50 border border-gray-300 rounded-l-lg px-4 py-3 text-slate-800 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-slate-500" 
+                class="flex-1 bg-primary-50/50 dark:bg-gray-700 border border-primary-200 dark:border-gray-600 rounded-l-lg px-4 py-3 text-slate-800 dark:text-gray-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" 
                 :value="appStore.config.public_ipv6" 
                 @focus="$event.target.select()" 
                 readonly
               >
               <button 
-                class="bg-gray-100 hover:bg-gray-200 border border-l-0 border-gray-300 rounded-r-lg px-4 py-3 text-gray-600 transition-colors duration-200 min-w-[44px] flex items-center justify-center" 
+                class="bg-primary-100 hover:bg-primary-200 dark:bg-gray-600 dark:hover:bg-gray-500 border border-l-0 border-primary-200 dark:border-gray-600 rounded-r-lg px-4 py-3 text-primary-600 dark:text-gray-100 transition-colors duration-200 min-w-[44px] flex items-center justify-center" 
                 @click="copyToClipboard(appStore.config.public_ipv6, $event.target)"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,13 +96,13 @@ const copyToClipboard = async (text, button) => {
             <div class="flex">
               <input 
                 type="text" 
-                class="flex-1 bg-blue-50 border border-blue-200 rounded-l-lg px-4 py-3 text-slate-800 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                class="flex-1 bg-primary-100/70 dark:bg-gray-600 border border-primary-300 dark:border-gray-500 rounded-l-lg px-4 py-3 text-slate-800 dark:text-gray-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" 
                 :value="appStore.config.my_ip" 
                 @focus="$event.target.select()" 
                 readonly
               >
               <button 
-                class="bg-blue-100 hover:bg-blue-200 border border-l-0 border-blue-200 rounded-r-lg px-4 py-3 text-blue-600 transition-colors duration-200 min-w-[44px] flex items-center justify-center" 
+                class="bg-primary-200 hover:bg-primary-300 dark:bg-gray-500 dark:hover:bg-gray-400 border border-l-0 border-primary-300 dark:border-gray-500 rounded-r-lg px-4 py-3 text-primary-700 dark:text-gray-100 transition-colors duration-200 min-w-[44px] flex items-center justify-center" 
                 @click="copyToClipboard(appStore.config.my_ip, $event.target)"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,7 +117,7 @@ const copyToClipboard = async (text, button) => {
       <!-- Sponsor Message -->
       <div 
         v-if="appStore.config?.sponsor_message?.length > 0"
-        class="mt-6 p-4 bg-amber-50 rounded-lg border border-amber-200"
+        class="mt-6 p-4 bg-primary-50/50 dark:bg-gray-700/50 rounded-lg border border-primary-200 dark:border-gray-600"
       >
         <div class="prose prose-amber max-w-none">
           <Markdown :source="appStore.config.sponsor_message" />
