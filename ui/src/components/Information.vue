@@ -67,14 +67,6 @@ const copyToClipboard = async (text, buttonRef = null) => {
 
 <template>
   <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 overflow-hidden animate-slide-up">
-    <div class="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-4">
-      <h2 class="text-xl font-semibold text-white flex items-center">
-        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
-        </svg>
-        Network Information
-      </h2>
-    </div>
     <div class="p-6">
       <div v-if="appStore.config" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div class="space-y-4">
