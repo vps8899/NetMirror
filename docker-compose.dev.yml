@@ -18,11 +18,12 @@ services:
       - ./backend:/app/backend
       - ./ui:/app/ui
       - ./scripts:/app/scripts
+      - ./.air.toml:/app/.air.toml
       # 排除 node_modules 和构建产物
       - /app/ui/node_modules
       - /app/ui/dist
       - /app/backend/embed/ui
-    command: ["sh", "-c", "cd /app && go run backend/main.go"]
+    command: ["air", "-c", ".air.toml"]
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/"]
       interval: 30s
