@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -30,6 +31,16 @@ func HandlePing6(c *gin.Context) {
 		c.JSON(400, &gin.H{
 			"success": false,
 			"error":   "Invalid IP Address",
+		})
+		return
+	}
+
+	// Validate input to prevent command injection
+	// Allow only valid IPv6 addresses or hostnames
+	if !isValidIPv6OrHostname(ip) {
+		c.JSON(400, &gin.H{
+			"success": false,
+			"error":   "Invalid IPv6 address or hostname",
 		})
 		return
 	}
