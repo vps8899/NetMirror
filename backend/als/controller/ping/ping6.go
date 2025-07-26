@@ -166,9 +166,14 @@ func HandlePing6(c *gin.Context) {
 
 					// Send the response
 					jsonData, _ := json.Marshal(resp)
-					clientSession.Channel <- &client.Message{
+					// Use select to avoid blocking if context is cancelled
+					select {
+					case clientSession.Channel <- &client.Message{
 						Name:    "Ping6",
 						Content: string(jsonData),
+					}:
+					case <-ctx.Done():
+						return
 					}
 				} else if strings.Contains(line, "no answer yet") || strings.Contains(line, "Request timeout") {
 					// Handle timeout
