@@ -47,12 +47,13 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-primary-50 via-slate-50 to-primary-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
-    <!-- Floating decorative elements -->
+  <div class="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-500">
+    <!-- Enhanced floating decorative elements -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute -top-40 -right-40 w-96 h-96 bg-primary-200/30 dark:bg-primary-800/10 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-pulse-slow"></div>
-      <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-200/30 dark:bg-blue-800/10 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-pulse-slow" style="animation-delay: 2s;"></div>
-      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-primary-100/20 dark:bg-primary-900/10 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse-slow" style="animation-delay: 4s;"></div>
+      <div class="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-r from-primary-200/40 to-blue-300/30 dark:from-primary-800/20 dark:to-blue-900/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse-slow"></div>
+      <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-r from-blue-200/40 to-primary-300/30 dark:from-blue-800/20 dark:to-primary-900/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse-slow" style="animation-delay: 2s;"></div>
+      <div class="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-r from-primary-100/30 to-sky-200/20 dark:from-primary-900/10 dark:to-sky-900/5 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-pulse-slow" style="animation-delay: 4s;"></div>
+      <div class="absolute bottom-1/3 left-1/4 w-80 h-80 bg-gradient-to-r from-sky-100/30 to-primary-200/20 dark:from-sky-900/10 dark:to-primary-900/5 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse-slow" style="animation-delay: 6s;"></div>
     </div>
 
     <!-- Main container -->
@@ -86,8 +87,8 @@ onMounted(async () => {
       </header>
 
       <!-- Main content area -->
-      <main class="pb-16 px-4">
-        <div class="max-w-6xl mx-auto space-y-8">
+      <main class="pb-20 px-4">
+        <div class="max-w-7xl mx-auto space-y-10">
           <LoadingCard v-if="appStore.connecting" />
           <template v-else>
             <!-- Network Information Card -->
@@ -114,8 +115,8 @@ onMounted(async () => {
       </main>
 
       <!-- Footer -->
-      <footer class="pb-8 px-4">
-        <div class="max-w-6xl mx-auto text-center">
+      <footer class="pb-12 px-4">
+        <div class="max-w-7xl mx-auto text-center">
           <div class="inline-flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
             <span>Powered by</span>
             <a 
@@ -132,8 +133,8 @@ onMounted(async () => {
 
     <!-- Controls in fixed position -->
     <div class="fixed top-6 right-6 z-50">
-      <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl shadow-lg border border-primary-200/50 dark:border-primary-700/50 p-3">
-        <div class="flex items-center space-x-3">
+      <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-primary-200/50 dark:border-primary-700/50 p-4 ring-1 ring-primary-100/20 dark:ring-primary-800/20">
+        <div class="flex items-center space-x-4">
           <ThemeToggle :is-dark="isDark" @toggle="toggleTheme" />
           <div class="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
           <LanguageSelector 

@@ -238,8 +238,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="cardRef" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-    <div class="px-6 py-4 bg-gradient-to-r from-cyan-500 to-blue-600">
+  <div ref="cardRef" class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 overflow-hidden">
+    <div class="px-6 py-4 bg-gradient-to-r from-primary-600 to-primary-700">
       <h2 class="text-xl font-semibold text-white flex items-center">
         <ChartBarIcon class="w-6 h-6 mr-2" />
         {{ $t('server_bandwidth_graph') }}
