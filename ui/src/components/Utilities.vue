@@ -157,23 +157,42 @@ const executeTest = async () => {
       if (response.data && response.data.output) {
         output.value = response.data.output
       } else {
-        // 监听SSE事件获取实时输出
+        // 根据不同的方法监听不同的事件
+        const eventName = selectedMethod.value === 'ping' ? 'Ping' : 'MethodOutput'
+        
         const handleOutput = (event) => {
-          const data = JSON.parse(event.data)
-          if (data.output) {
-            output.value += data.output
-          }
-          if (data.finished) {
-            appStore.source.removeEventListener('MethodOutput', handleOutput)
-            isExecuting.value = false
+          if (selectedMethod.value === 'ping') {
+            // ping事件返回的是ping包数据，需要解析
+            const data = JSON.parse(event.data)
+            if (data.addr && data.rtt !== undefined) {
+              output.value += `PING ${data.addr}: seq=${data.seq} time=${(data.rtt / 1e6).toFixed(2)}ms\n`
+            }
+            // ping完成10次后自动停止
+            if (data.seq >= 9) { // seq从0开始，所以9表示第10个包
+              setTimeout(() => {
+                appStore.source.removeEventListener(eventName, handleOutput)
+                isExecuting.value = false
+                output.value += '\nPing completed.\n'
+              }, 1000)
+            }
+          } else {
+            // nettools事件返回的是带output字段的数据
+            const data = JSON.parse(event.data)
+            if (data.output) {
+              output.value += data.output
+            }
+            if (data.finished) {
+              appStore.source.removeEventListener(eventName, handleOutput)
+              isExecuting.value = false
+            }
           }
         }
         
-        appStore.source.addEventListener('MethodOutput', handleOutput)
+        appStore.source.addEventListener(eventName, handleOutput)
         
         // 设置超时保护
         setTimeout(() => {
-          appStore.source.removeEventListener('MethodOutput', handleOutput)
+          appStore.source.removeEventListener(eventName, handleOutput)
           if (isExecuting.value) {
             output.value += '\nTest timed out after 60 seconds.\n'
             isExecuting.value = false
