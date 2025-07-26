@@ -153,11 +153,13 @@ const testNodeLatency = async (node) => {
     
     if (response.ok) {
       const data = await response.json()
+      console.log(`Latency response for ${node.name}:`, data) // 调试信息
       if (data.success) {
         latencies.value[node.name] = {
           latency: data.latency,
           status: data.status
         }
+        console.log(`Updated latencies for ${node.name}:`, latencies.value[node.name]) // 调试信息
       } else {
         throw new Error('Server returned error')
       }
