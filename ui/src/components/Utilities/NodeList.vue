@@ -1,18 +1,5 @@
 <template>
   <div class="space-y-4">
-    <!-- Current Node Info -->
-    <div v-if="currentNode" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border-2 border-primary-500">
-      <div class="flex items-center justify-between">
-        <div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ currentNode.name }}</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400">{{ currentNode.location }}</p>
-        </div>
-        <div class="text-sm font-medium text-primary-600 dark:text-primary-400">
-          Current Node
-        </div>
-      </div>
-    </div>
-
     <!-- Node Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div
@@ -20,7 +7,7 @@
         :key="node.url"
         @click="navigateToNode(node)"
         class="relative bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 hover:border-primary-500 overflow-hidden group"
-        :class="{ 'ring-2 ring-primary-500': node.current }"
+        :class="{ 'ring-2 ring-primary-500': isCurrentNode(node) }"
       >
         <!-- Background gradient on hover -->
         <div class="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-primary-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -33,7 +20,7 @@
               </h3>
               <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ node.location }}</p>
             </div>
-            <div v-if="node.current" class="ml-3">
+            <div v-if="isCurrentNode(node)" class="ml-3">
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-300">
                 Current
               </span>
@@ -77,10 +64,12 @@
 
           <!-- Click hint -->
           <div class="mt-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <svg class="w-5 h-5 text-primary-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg v-if="!isCurrentNode(node)" class="w-5 h-5 text-primary-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
             </svg>
-            <span class="text-sm text-primary-600 dark:text-primary-400 font-medium">Visit Node</span>
+            <span class="text-sm text-primary-600 dark:text-primary-400 font-medium">
+              {{ isCurrentNode(node) ? 'Current Node' : 'Visit Node' }}
+            </span>
           </div>
         </div>
       </div>
@@ -101,11 +90,34 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 
 const nodes = ref([])
-const currentNode = ref(null)
 const latencies = ref({})
 const loading = ref(true)
 
 let latencyInterval = null
+
+// Get current page URL
+const getCurrentURL = () => {
+  const protocol = window.location.protocol
+  const host = window.location.host
+  const port = window.location.port
+  
+  // Construct base URL
+  let baseURL = `${protocol}//${window.location.hostname}`
+  
+  // Add port if it's not default for the protocol
+  if (port && ((protocol === 'http:' && port !== '80') || (protocol === 'https:' && port !== '443'))) {
+    baseURL += `:${port}`
+  }
+  
+  return baseURL
+}
+
+// Check if a node is the current node
+const isCurrentNode = (node) => {
+  const currentURL = getCurrentURL()
+  // Compare normalized URLs
+  return node.url.replace(/\/$/, '') === currentURL.replace(/\/$/, '')
+}
 
 // Fetch nodes list
 const fetchNodes = async () => {
@@ -123,21 +135,81 @@ const fetchNodes = async () => {
   }
 }
 
-// Fetch current node info
-const fetchCurrentNode = async () => {
-  try {
-    const response = await axios.get('/nodes/current')
-    if (response.data.success) {
-      currentNode.value = response.data.current
-    }
-  } catch (error) {
-    console.error('Failed to fetch current node:', error)
-  }
-}
-
 // Test latency for a single node
 const testNodeLatency = async (node) => {
   try {
+    const startTime = Date.now()
+    const response = await axios.get('/nodes/latency', {
+      params: { url: node.url },
+      timeout: 5000
+    })
+    const endTime = Date.now()
+    
+    if (response.data.success) {
+      const latency = endTime - startTime
+      
+      // Determine status based on latency
+      let status = 'good'
+      if (latency > 200) {
+        status = 'high'
+      } else if (latency > 100) {
+        status = 'medium'
+      }
+      
+      latencies.value[node.url] = {
+        latency: latency,
+        status: status
+      }
+    }
+  } catch (error) {
+    console.error('Failed to test latency for', node.name, error)
+    latencies.value[node.url] = {
+      latency: -1,
+      status: 'error'
+    }
+  }
+}
+
+// Test all node latencies
+const testAllLatencies = async () => {
+  // Test all nodes in parallel
+  const promises = nodes.value.map(node => testNodeLatency(node))
+  await Promise.all(promises)
+}
+
+// Navigate to selected node
+const navigateToNode = (node) => {
+  if (!isCurrentNode(node)) {
+    window.location.href = node.url
+  }
+}
+
+// Get human-readable status text
+const getStatusText = (status) => {
+  switch (status) {
+    case 'good': return 'Excellent'
+    case 'medium': return 'Good'
+    case 'high': return 'Slow'
+    case 'error': return 'Offline'
+    default: return 'Unknown'
+  }
+}
+
+onMounted(() => {
+  fetchNodes()
+  
+  // Refresh latencies every 30 seconds
+  latencyInterval = setInterval(() => {
+    testAllLatencies()
+  }, 30000)
+})
+
+onUnmounted(() => {
+  if (latencyInterval) {
+    clearInterval(latencyInterval)
+  }
+})
+</script>
     const startTime = Date.now()
     const response = await axios.get('/nodes/latency', {
       params: { url: node.url },
