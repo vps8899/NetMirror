@@ -1,29 +1,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted, toRaw } from 'vue'
-import { useMotion } from '@vueuse/motion'
-import { useAppStore } from '@/stores/app'
-import { CommandLineIcon } from '@heroicons/vue/24/outline'
 import 'xterm/css/xterm.css'
 import { Terminal } from 'xterm'
 import { FitAddon } from '@xterm/addon-fit'
-
-const emit = defineEmits(['closed'])
-
-const appStore = useAppStore()
-const terminalRef = ref()
-const containerRef = ref()
-const fitAddon = new FitAddon()
-const isConnected = ref(false)
-const connectionStatus = ref('Connecting...')
-
-let websocket
-let buffer = []
-let resizeTimer
-
-const { apply } = useMotion(containerRef, {
-  initial: { opacity: 0, scale: 0.95 },
-  enter: { opacity: 1, scale: 1, transition: { duration: 300 } }
-})
+import { useAppStore } from '@/stores/app'
 
 const terminal = new Terminal({
   theme: {
@@ -59,6 +39,11 @@ const terminal = new Terminal({
   scrollback: 1000,
   tabStopWidth: 4
 })
+const terminalRef = ref()
+const fitAddon = new FitAddon()
+const emit = defineEmits(['closed'])
+let websocket
+let buffer = []
 
 const flushToTerminal = () => {
   if (buffer.length > 0) {
@@ -70,11 +55,10 @@ const flushToTerminal = () => {
 
 const updateWindowSize = () => {
   fitAddon.fit()
-  if (websocket && websocket.readyState === WebSocket.OPEN) {
-    websocket.send(new TextEncoder().encode('2' + terminal.rows + ';' + terminal.cols))
-  }
+  websocket.send(new TextEncoder().encode('2' + terminal.rows + ';' + terminal.cols))
 }
 
+let resizeTimer
 const handleResize = () => {
   clearTimeout(resizeTimer)
   resizeTimer = setTimeout(() => {
@@ -83,51 +67,36 @@ const handleResize = () => {
 }
 
 onMounted(() => {
-  apply()
   terminal.loadAddon(fitAddon)
   terminal.open(toRaw(terminalRef.value))
   fitAddon.fit()
-
   const url = new URL(location.href)
   const protocol = url.protocol == 'http:' ? 'ws:' : 'wss:'
-  
-  const wsUrl = `${protocol}//${url.host}${url.pathname}session/${appStore.sessionId}/shell`
-  console.log('Attempting to connect to WebSocket:', wsUrl);
-
-  websocket = new WebSocket(wsUrl)
+  websocket = new WebSocket(
+    protocol + '//' + url.host + url.pathname + 'session/' + useAppStore().sessionId + '/shell'
+  )
   websocket.binaryType = 'arraybuffer'
-
   websocket.addEventListener('message', (event) => {
     buffer.push(event.data)
     flushToTerminal()
   })
 
-  websocket.addEventListener('open', () => {
-    isConnected.value = true
-    connectionStatus.value = 'Connected'
+  websocket.addEventListener('open', (event) => {
     window.addEventListener('resize', handleResize)
+
     handleResize()
     setTimeout(handleResize, 1000)
   })
 
   websocket.addEventListener('close', (event) => {
-    isConnected.value = false
-    connectionStatus.value = 'Disconnected'
     console.log(event)
     emit('closed')
   })
 
-  websocket.addEventListener('error', (error) => {
-    isConnected.value = false
-    connectionStatus.value = 'Connection error'
-    console.error('WebSocket error:', error)
-  });
-
   terminal.onData((data) => {
-    if (websocket && websocket.readyState === WebSocket.OPEN) {
-        websocket.send(new TextEncoder().encode('1' + data))
-    }
+    websocket.send(new TextEncoder().encode('1' + data))
   })
+  fitAddon.fit()
 })
 
 onUnmounted(() => {
@@ -140,49 +109,13 @@ onUnmounted(() => {
   }
 })
 </script>
-</script>
 
 <template>
-  <div ref="containerRef" class="h-full flex flex-col bg-gray-900 rounded-xl overflow-hidden border border-gray-700 shadow-2xl">
-    <!-- Header -->
-    <div class="flex items-center justify-between p-3 bg-gray-800 border-b border-gray-700 flex-shrink-0">
-      <div class="flex items-center space-x-2">
-        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-        <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-      </div>
-      <div class="flex items-center space-x-2 text-sm text-gray-300">
-        <CommandLineIcon class="w-4 h-4" />
-        <span>Interactive Shell</span>
-      </div>
-      <div class="flex items-center space-x-2">
-        <div 
-          class="w-2.5 h-2.5 rounded-full transition-colors"
-          :class="isConnected ? 'bg-green-400' : 'bg-red-400'"
-        ></div>
-        <span class="text-xs text-gray-400">{{ connectionStatus }}</span>
-      </div>
-    </div>
-    
-    <!-- Terminal Container -->
-    <div class="flex-1 bg-gray-900 relative overflow-hidden">
-      <div ref="terminalRef" class="absolute inset-0 p-2"></div>
-      
-      <!-- Loading Overlay -->
-      <div v-if="!isConnected" class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center">
-        <div class="text-center">
-          <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p class="text-white font-medium">{{ connectionStatus }}</p>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Footer -->
-    <div class="px-4 py-1.5 bg-gray-800 border-t border-gray-700 flex-shrink-0">
-      <div class="flex items-center justify-between text-xs text-gray-400">
-        <span>Limited shell environment • Type 'help' for available commands</span>
-        <span v-if="isConnected">{{ terminal.rows }}×{{ terminal.cols }}</span>
-      </div>
-    </div>
-  </div>
+  <div ref="terminalRef" class="terminal" style="flex-grow: 1; height: 100%" />
 </template>
+
+<style>
+div:has(> div.terminal) {
+  padding: 0px !important;
+}
+</style>
