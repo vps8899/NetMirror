@@ -255,16 +255,6 @@ onMounted(() => {
 
 <template>
   <div ref="containerRef" class="space-y-6">
-    <div class="text-center">
-      <ChartBarIcon class="w-12 h-12 text-primary-500 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-        {{ $t('server_speedtest') }}
-      </h3>
-      <p class="text-gray-600 dark:text-gray-300">
-        Real-time bandwidth measurement using LibreSpeed
-      </p>
-    </div>
-
     <!-- Results Display -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Download -->
