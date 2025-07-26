@@ -104,7 +104,7 @@ onMounted(() => {
             :disabled="working"
             type="text"
             placeholder="Enter IP address or domain name"
-            class="w-full pl-10 pr-4 py-3 bg-transparent border-0 rounded-xl focus:ring-0 transition-all duration-200 disabled:opacity-50"
+            class="w-full pl-10 pr-4 py-3 bg-transparent border-0 rounded-xl focus:ring-0 transition-all duration-200 disabled:opacity-50 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             @keyup.enter="ping"
           />
         </div>
