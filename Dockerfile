@@ -25,8 +25,8 @@ RUN apk add --no-cache git ca-certificates tzdata
 # 设置工作目录
 WORKDIR /app
 
-# 复制 go mod 文件
-COPY backend/go.mod backend/go.sum ./
+# 复制 go mod 文件和 air 配置
+COPY backend/go.mod backend/go.sum ./.air.toml ./
 
 # 下载依赖
 RUN go mod download
@@ -111,11 +111,7 @@ RUN apk add --no-cache \
 # 安装 air 用于热重载
 RUN go install github.com/air-verse/air@latest
 
-# 设置工作目录
-WORKDIR /app
-
-# 复制 .air.toml 配置文件
-COPY .air.toml ./
+# .air.toml 已经在 go-builder 阶段复制了，这里直接继承
 
 # 暴露端口
 EXPOSE 8080
