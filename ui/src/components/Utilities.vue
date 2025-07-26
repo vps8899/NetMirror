@@ -146,7 +146,7 @@ const executeTest = async () => {
     
     // 调用后端API
     const response = await appStore.requestMethod(selectedMethod.value, {
-      host: targetHost.value.trim()
+      ip: targetHost.value.trim()
     }, controller.signal)
     
     if (response.success) {
