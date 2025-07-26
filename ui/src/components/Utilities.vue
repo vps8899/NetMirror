@@ -388,18 +388,31 @@ const closeTool = () => {
           leave-to-class="translate-x-full"
         >
           <div v-if="toolComponentShow" class="absolute right-0 top-0 h-full w-full max-w-3xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-2xl flex flex-col border-l border-primary-200/50 dark:border-primary-700/50">
-            <!-- Close Button -->
-            <button
+            <!-- Header -->
+            <div class="flex items-center justify-between p-4 border-b border-primary-200/30 dark:border-primary-700/30 flex-shrink-0 bg-primary-50/50 dark:bg-gray-800/50">
+              <div class="flex items-center space-x-4">
+                <div v-if="currentTool" class="flex items-center justify-center w-10 h-10 rounded-xl" :class="`bg-gradient-to-br ${currentTool.color}`">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ currentTool?.label }}</h2>
+                  <p class="text-sm text-gray-600 dark:text-gray-300">{{ currentTool?.description }}</p>
+                </div>
+              </div>
+              <button
                 @click="closeTool"
-                class="absolute top-4 right-4 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-primary-100 hover:bg-primary-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200"
+                class="flex items-center justify-center w-10 h-10 rounded-full bg-primary-100 hover:bg-primary-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200"
               >
                 <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </button>
+            </div>
             
             <!-- Content -->
-            <div class="flex-1 overflow-y-auto p-6 pt-12 bg-primary-25 dark:bg-gray-850">
+            <div class="flex-1 overflow-y-auto p-6 bg-primary-25 dark:bg-gray-850">
               <component :is="toolComponent" @closed="closeTool" />
             </div>
           </div>
