@@ -2,7 +2,7 @@
 import { ref, onMounted, toRaw, computed } from 'vue'
 import { useMotion } from '@vueuse/motion'
 import { useAppStore } from '@/stores/app'
-import { PlayIcon, StopIcon, ArrowDownIcon, ArrowUpIcon, GaugeIcon } from '@heroicons/vue/24/outline'
+import { PlayIcon, StopIcon, ArrowDownIcon, ArrowUpIcon, ChartBarIcon } from '@heroicons/vue/24/outline'
 import VueApexCharts from 'vue3-apexcharts'
 
 const appStore = useAppStore()
@@ -144,9 +144,11 @@ const charts = ref({
 })
 
 // Generate unique chart IDs
-for (const chartId in charts.value) {
-  charts.value[chartId].options.chart.id = 
-    'chart-librespeed-' + chartId + '-' + (Math.random() + 1).toString(36).substring(2)
+const generateChartIds = () => {
+  for (const chartId in charts.value) {
+    charts.value[chartId].options.chart.id = 
+      'chart-librespeed-' + chartId + '-' + (Math.random() + 1).toString(36).substring(2)
+  }
 }
 
 const startOrStopSpeedtest = (force = false) => {
@@ -247,13 +249,14 @@ const startOrStopSpeedtest = (force = false) => {
 
 onMounted(() => {
   apply()
+  generateChartIds()
 })
 </script>
 
 <template>
   <div ref="containerRef" class="space-y-6">
     <div class="text-center">
-      <GaugeIcon class="w-12 h-12 text-emerald-500 mx-auto mb-4" />
+      <ChartBarIcon class="w-12 h-12 text-emerald-500 mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
         {{ $t('server_speedtest') }}
       </h3>
