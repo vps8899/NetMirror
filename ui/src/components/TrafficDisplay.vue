@@ -269,7 +269,7 @@ onUnmounted(() => {
           </div>
           
           <!-- Stats -->
-          <div class="grid grid-cols-2 gap-4 mb-6">
+          <div :class="Object.keys(interfaces).length === 1 ? 'flex justify-center gap-16 mb-6' : 'grid grid-cols-2 gap-4 mb-6'">
             <div class="text-center">
               <div class="flex items-center justify-center space-x-2 mb-2">
                 <ArrowDownIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
