@@ -10,6 +10,7 @@ import { toRaw } from 'vue'
 
 const emit = defineEmits(['closed'])
 
+const appStore = useAppStore()
 const terminalRef = ref()
 const containerRef = ref()
 const fitAddon = new FitAddon()
@@ -50,9 +51,10 @@ const handleResize = () => {
 const connectWebSocket = () => {
   const url = new URL(location.href)
   const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
-  const wsUrl = `${protocol}//${url.host}/session/${useAppStore().sessionId}/shell`
+  const wsUrl = `${protocol}//${url.host}/session/${appStore.sessionId}/shell`
   
   console.log('Connecting to WebSocket:', wsUrl)
+  console.log('Session ID:', appStore.sessionId)
   
   websocket = new WebSocket(wsUrl)
   websocket.binaryType = 'arraybuffer'
