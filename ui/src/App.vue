@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { list as langList, setI18nLanguage, loadLocaleMessages, autoLang } from './config/lang.js'
+import { list as langList, setI18nLanguage, loadLocaleMessages } from './config/lang.js'
 import { useAppStore } from './stores/app'
 import NodeListCard from '@/components/Utilities/NodeList.vue'
 import LoadingCard from '@/components/Loading.vue'
@@ -11,12 +11,14 @@ import TrafficCard from '@/components/TrafficDisplay.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import LanguageSelector from '@/components/LanguageSelector.vue'
 
-const currentLangCode = ref('en-US')
-const isDark = ref(false)
 const appStore = useAppStore()
 const activeTab = ref('info')
 const tabContainer = ref(null)
 const tabNavigation = ref(null)
+
+// Use store theme and language
+const isDark = computed(() => appStore.theme === 'dark')
+const currentLangCode = computed(() => appStore.language)
 
 const tabs = [
   { id: 'info', label: 'Network Information', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9' },

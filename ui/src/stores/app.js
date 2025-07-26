@@ -123,8 +123,12 @@ export const useAppStore = defineStore('app', () => {
     config,
     drawerWidth,
     memoryUsage,
+    theme,
+    language,
 
     //methods
-    requestMethod
+    requestMethod,
+    setTheme,
+    setLanguage
   }
 })
