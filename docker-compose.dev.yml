@@ -1,31 +1,30 @@
 version: '3.3'
 
 services:
-  als-dev:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: development
-    container_name: looking-glass-dev
-    restart: unless-stopped
-    network_mode: host
-    environment:
-      - NODE_ENV=development
-      - HTTP_PORT=8080
-      - LISTEN_IP=0.0.0.0
-    volumes:
-      # 挂载源代码以支持热重载
-      - ./backend:/app/backend
-      - ./ui:/app/ui
-      - ./scripts:/app/scripts
-      # 排除 node_modules 和构建产物
-      - /app/ui/node_modules
-      - /app/ui/dist
-      - /app/backend/embed/ui
-    command: ["sh", "-c", "cd /app && go run backend/main.go"]
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+als-dev:
+  build:
+    context: .
+    dockerfile: Dockerfile
+    target: development
+  container_name: looking-glass-dev
+  restart: unless-stopped
+  network_mode: host
+  environment:
+    - NODE_ENV=development
+    - HTTP_PORT=8080
+    - LISTEN_IP=0.0.0.0
+  volumes:
+    # 挂载源代码以支持热重载
+    - ./backend:/app/backend
+    - ./ui:/app/ui
+    - ./scripts:/app/scripts
+    # 排除 node_modules 和构建产物
+    - /app/ui/node_modules
+    - /app/ui/dist
+    - /app/backend/embed/ui
+  command: ["sh", "-c", "cd /app && go run backend/main.go"]
+  healthcheck:
+    test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
