@@ -186,3 +186,39 @@ func HandlePing6(c *gin.Context) {
 		"success": true,
 	})
 }
+
+// isValidIPv6OrHostname validates if the input is a valid IPv6 address or hostname
+func isValidIPv6OrHostname(input string) bool {
+	// Check if it's a valid IPv6 address
+	if net.ParseIP(input) != nil {
+		return true
+	}
+	
+	// Check if it's a valid hostname (DNS name)
+	// Allow only alphanumeric, dots, hyphens, and underscores
+	// Must not contain shell special characters
+	hostnameRegex := regexp.MustCompile(`^[a-zA-Z0-9.-]+$`)
+	if !hostnameRegex.MatchString(input) {
+		return false
+	}
+	
+	// Additional checks for shell injection attempts
+	dangerousPatterns := []string{
+		";", "&", "|", "`", "$", "(", ")", "{", "}", "[", "]",
+		"<", ">", "\\", "'", "\"", "\n", "\r", "\t",
+		"*", "?", "~", "!", "#", "%", "^", "=", "+",
+	}
+	
+	for _, pattern := range dangerousPatterns {
+		if strings.Contains(input, pattern) {
+			return false
+		}
+	}
+	
+	// Check length limits
+	if len(input) > 255 {
+		return false
+	}
+	
+	return true
+}
