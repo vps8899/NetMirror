@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 
-	"github.com/samlm0/als/v2/als"
-	"github.com/samlm0/als/v2/config"
-	"github.com/samlm0/als/v2/fakeshell"
+	"github.com/X-Zero-L/als/als"
+	"github.com/X-Zero-L/als/config"
+	"github.com/X-Zero-L/als/fakeshell"
 )
 
 var shell = flag.Bool("shell", false, "Start as fake shell")

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/gin-gonic/gin"
-	"github.com/samlm0/als/v2/als/client"
-	"github.com/samlm0/als/v2/als/timer"
+	"github.com/X-Zero-L/als/als/client"
+	"github.com/X-Zero-L/als/als/timer"
 )
 
 func UpdateInterfaceCache(c *gin.Context) {

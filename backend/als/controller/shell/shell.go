@@ -12,7 +12,7 @@ import (
 	"github.com/creack/pty"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/samlm0/als/v2/als/client"
+	"github.com/X-Zero-L/als/als/client"
 )
 
 var upgrader = websocket.Upgrader{

@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/samlm0/als/v2/als/client"
-	"github.com/samlm0/als/v2/als/timer"
-	"github.com/samlm0/als/v2/config"
+	"github.com/X-Zero-L/als/als/client"
+	"github.com/X-Zero-L/als/als/timer"
+	"github.com/X-Zero-L/als/config"
 )
 
 type sessionConfig struct {

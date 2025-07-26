@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/samlm0/als/v2/als/client"
+	"github.com/X-Zero-L/als/als/client"
 	"github.com/vishvananda/netlink"
 )
 

@@ -7,8 +7,8 @@ import (
 	"regexp"
 
 	"github.com/reeflective/console"
-	"github.com/samlm0/als/v2/config"
-	"github.com/samlm0/als/v2/fakeshell/commands"
+	"github.com/X-Zero-L/als/config"
+	"github.com/X-Zero-L/als/fakeshell/commands"
 	"github.com/spf13/cobra"
 )
 

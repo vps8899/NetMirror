@@ -1,8 +1,8 @@
-module github.com/samlm0/als/v2
+module github.com/X-Zero-L/als
 
 go 1.21.4
 
-replace github.com/samlm0/als/v2 => ./
+replace github.com/X-Zero-L/als => ./
 
 require (
 	github.com/creack/pty v1.1.21

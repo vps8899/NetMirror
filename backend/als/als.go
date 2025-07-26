@@ -3,10 +3,10 @@ package als
 import (
 	"log"
 
-	"github.com/samlm0/als/v2/als/client"
-	"github.com/samlm0/als/v2/als/timer"
-	"github.com/samlm0/als/v2/config"
-	alsHttp "github.com/samlm0/als/v2/http"
+	"github.com/X-Zero-L/als/als/client"
+	"github.com/X-Zero-L/als/als/timer"
+	"github.com/X-Zero-L/als/config"
+	alsHttp "github.com/X-Zero-L/als/http"
 )
 
 func Init() {

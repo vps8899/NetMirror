@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/samlm0/als/v2/als/client"
+	"github.com/X-Zero-L/als/als/client"
 )
 
 func UpdateSystemResource() {

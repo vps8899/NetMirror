@@ -5,15 +5,15 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/samlm0/als/v2/als/controller"
-	"github.com/samlm0/als/v2/als/controller/cache"
-	"github.com/samlm0/als/v2/als/controller/iperf3"
-	"github.com/samlm0/als/v2/als/controller/ping"
-	"github.com/samlm0/als/v2/als/controller/session"
-	"github.com/samlm0/als/v2/als/controller/shell"
-	"github.com/samlm0/als/v2/als/controller/speedtest"
-	"github.com/samlm0/als/v2/config"
-	iEmbed "github.com/samlm0/als/v2/embed"
+	"github.com/X-Zero-L/als/als/controller"
+	"github.com/X-Zero-L/als/als/controller/cache"
+	"github.com/X-Zero-L/als/als/controller/iperf3"
+	"github.com/X-Zero-L/als/als/controller/ping"
+	"github.com/X-Zero-L/als/als/controller/session"
+	"github.com/X-Zero-L/als/als/controller/shell"
+	"github.com/X-Zero-L/als/als/controller/speedtest"
+	"github.com/X-Zero-L/als/config"
+	iEmbed "github.com/X-Zero-L/als/embed"
 )
 
 func SetupHttpRoute(e *gin.Engine) {

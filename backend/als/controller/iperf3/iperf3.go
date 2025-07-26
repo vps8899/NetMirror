@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/samlm0/als/v2/als/client"
-	"github.com/samlm0/als/v2/config"
+	"github.com/X-Zero-L/als/als/client"
+	"github.com/X-Zero-L/als/config"
 )
 
 func random(min, max int) int {
