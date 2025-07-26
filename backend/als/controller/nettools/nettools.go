@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 	"time"
@@ -175,6 +176,16 @@ func executeNetworkTool(tool NetworkTool, target string, channel chan *client.Me
 		for {
 			n, err := stdout.Read(buf)
 			if err != nil {
+				if err != io.EOF {
+					finalMsg := &client.Message{
+						Name:    "MethodOutput",
+						Content: fmt.Sprintf(`{"output":"\n%s completed.\n","finished":true}`, tool.Name),
+					}
+					select {
+					case channel <- finalMsg:
+					case <-ctx.Done():
+					}
+				}
 				return
 			}
 			if n > 0 {
@@ -223,31 +234,33 @@ func executeNetworkTool(tool NetworkTool, target string, channel chan *client.Me
 		}
 	}()
 
-	// Wait for command to finish
-	err = cmd.Wait()
-	
-	// Send completion message
-	var finishMsg string
-	if err != nil {
-		if strings.Contains(err.Error(), "context deadline exceeded") {
-			finishMsg = fmt.Sprintf("\n%s operation timed out after %v\n", tool.Name, tool.Timeout)
+	// Handle command completion in goroutine
+	go func() {
+		err := cmd.Wait()
+		var finishMsg string
+		if err != nil {
+			if strings.Contains(err.Error(), "context deadline exceeded") {
+				finishMsg = fmt.Sprintf("\n%s operation timed out after %v\n", tool.Name, tool.Timeout)
+			} else if !strings.Contains(err.Error(), "signal: killed") {
+				finishMsg = fmt.Sprintf("\n%s completed with error: %s\n", tool.Name, err.Error())
+			}
 		} else {
-			finishMsg = fmt.Sprintf("\n%s completed with error: %s\n", tool.Name, err.Error())
+			finishMsg = fmt.Sprintf("\n%s completed successfully.\n", tool.Name)
 		}
-	} else {
-		finishMsg = fmt.Sprintf("\n%s completed successfully.\n", tool.Name)
-	}
 
-	content, _ := json.Marshal(map[string]interface{}{
-		"output":   finishMsg,
-		"finished": true,
-	})
-	finalMsg := &client.Message{
-		Name:    "MethodOutput",
-		Content: string(content),
-	}
-	select {
-	case channel <- finalMsg:
-	case <-ctx.Done():
-	}
+		if finishMsg != "" {
+			content, _ := json.Marshal(map[string]interface{}{
+				"output":   finishMsg,
+				"finished": true,
+			})
+			finalMsg := &client.Message{
+				Name:    "MethodOutput",
+				Content: string(content),
+			}
+			select {
+			case channel <- finalMsg:
+			case <-ctx.Done():
+			}
+		}
+	}()
 }
