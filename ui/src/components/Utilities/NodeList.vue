@@ -139,26 +139,26 @@ const fetchNodes = async () => {
 // Test latency for a single node
 const testNodeLatency = async (node) => {
   try {
-    // 对于当前节点，直接请求本地
-    const targetUrl = isCurrentNode(node) ? '/session' : `${node.url}/session`
+    // 使用轻量的favicon.ico来测试延迟
+    const targetUrl = isCurrentNode(node) ? '/favicon.ico' : `${node.url}/favicon.ico`
     
     const startTime = performance.now()
     const response = await fetch(targetUrl, {
       method: 'GET',
       mode: 'cors',
       cache: 'no-cache',
-      signal: AbortSignal.timeout(3000) // 3 second timeout
+      signal: AbortSignal.timeout(5000) // 5 second timeout
     })
     const endTime = performance.now()
     
-    if (response.ok) {
+    if (response.ok || response.status === 404) { // favicon might not exist but server responds
       const latency = Math.round(endTime - startTime)
       
       // Determine status based on latency
       let status = 'good'
-      if (latency > 200) {
+      if (latency > 300) {
         status = 'high'
-      } else if (latency > 100) {
+      } else if (latency > 150) {
         status = 'medium'
       }
       
@@ -167,9 +167,10 @@ const testNodeLatency = async (node) => {
         status: status
       }
     } else {
-      throw new Error('Response not ok')
+      throw new Error('Server not responding properly')
     }
   } catch (error) {
+    // 如果是超时或网络错误，标记为offline
     console.error('Failed to test latency for', node.name, error)
     latencies.value[node.url] = {
       latency: -1,
@@ -199,10 +200,10 @@ const getStatusText = (status) => {
 onMounted(() => {
   fetchNodes()
   
-  // Refresh latencies every 1 second
+  // Refresh latencies every 5 seconds (less frequent to avoid UI interruption)
   latencyInterval = setInterval(() => {
     testAllLatencies()
-  }, 1000)
+  }, 5000)
 })
 
 onUnmounted(() => {
