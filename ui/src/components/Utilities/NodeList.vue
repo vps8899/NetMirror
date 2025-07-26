@@ -127,6 +127,7 @@ const fetchNodes = async () => {
     const data = await response.json()
     if (data.success) {
       nodes.value = data.nodes || []
+      console.log('Fetched nodes:', nodes.value) // 调试信息
       // Start testing latencies immediately
       testAllLatencies()
     }
