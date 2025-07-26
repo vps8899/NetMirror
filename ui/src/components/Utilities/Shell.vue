@@ -56,54 +56,69 @@ const connectWebSocket = () => {
   console.log('Connecting to WebSocket:', wsUrl)
   console.log('Session ID:', appStore.sessionId)
   
-  websocket = new WebSocket(wsUrl)
-  websocket.binaryType = 'arraybuffer'
-  
-  websocket.addEventListener('open', () => {
-    console.log('WebSocket connected successfully')
-    isConnected.value = true
-    connectionStatus.value = 'Connected'
-    terminal.clear()
-    terminal.writeln('\x1b[1;32m╭─────────────────────────────────────────────────────────────╮\x1b[0m')
-    terminal.writeln('\x1b[1;32m│\x1b[0m \x1b[1;36mWelcome to ALS Interactive Shell\x1b[0m                        \x1b[1;32m│\x1b[0m')
-    terminal.writeln('\x1b[1;32m│\x1b[0m \x1b[90mLimited command set available for security\x1b[0m               \x1b[1;32m│\x1b[0m')
-    terminal.writeln('\x1b[1;32m╰─────────────────────────────────────────────────────────────╯\x1b[0m')
-    terminal.writeln('')
+  try {
+    websocket = new WebSocket(wsUrl)
+    websocket.binaryType = 'arraybuffer'
     
-    window.addEventListener('resize', handleResize)
-    handleResize()
-    setTimeout(handleResize, 1000)
-  })
-  
-  websocket.addEventListener('message', (event) => {
-    buffer.push(event.data)
-    flushToTerminal()
-  })
-  
-  websocket.addEventListener('close', (event) => {
-    console.log('WebSocket closed:', event.code, event.reason)
-    isConnected.value = false
-    if (event.code === 1000) {
-      connectionStatus.value = 'Disconnected'
-      terminal.writeln('\r\n\x1b[1;33mConnection closed normally\x1b[0m')
-    } else {
-      connectionStatus.value = 'Connection lost'
-      terminal.writeln('\r\n\x1b[1;31mConnection lost unexpectedly\x1b[0m')
-    }
-    emit('closed')
-  })
-  
-  websocket.addEventListener('error', (error) => {
-    console.error('WebSocket error:', error)
-    connectionStatus.value = 'Connection error'
-    terminal.writeln('\r\n\x1b[1;31mWebSocket connection error\x1b[0m')
-  })
-  
-  terminal.onData((data) => {
-    if (websocket && websocket.readyState === WebSocket.OPEN) {
-      websocket.send(new TextEncoder().encode('1' + data))
-    }
-  })
+    console.log('[Shell] WebSocket object created:', websocket)
+    
+    websocket.addEventListener('open', () => {
+      console.log('WebSocket connected successfully')
+      isConnected.value = true
+      connectionStatus.value = 'Connected'
+      terminal.clear()
+      terminal.writeln('\x1b[1;32m╭─────────────────────────────────────────────────────────────╮\x1b[0m')
+      terminal.writeln('\x1b[1;32m│\x1b[0m \x1b[1;36mWelcome to ALS Interactive Shell\x1b[0m                        \x1b[1;32m│\x1b[0m')
+      terminal.writeln('\x1b[1;32m│\x1b[0m \x1b[90mLimited command set available for security\x1b[0m               \x1b[1;32m│\x1b[0m')
+      terminal.writeln('\x1b[1;32m╰─────────────────────────────────────────────────────────────╯\x1b[0m')
+      terminal.writeln('')
+      
+      window.addEventListener('resize', handleResize)
+      handleResize()
+      setTimeout(handleResize, 1000)
+    })
+    
+    websocket.addEventListener('message', (event) => {
+      console.log('[Shell] Message received, size:', event.data.byteLength)
+      buffer.push(event.data)
+      flushToTerminal()
+    })
+    
+    websocket.addEventListener('close', (event) => {
+      console.log('WebSocket closed:', event.code, event.reason)
+      isConnected.value = false
+      if (event.code === 1000) {
+        connectionStatus.value = 'Disconnected'
+        terminal.writeln('\r\n\x1b[1;33mConnection closed normally\x1b[0m')
+      } else {
+        connectionStatus.value = 'Connection lost'
+        terminal.writeln('\r\n\x1b[1;31mConnection lost unexpectedly\x1b[0m')
+      }
+      emit('closed')
+    })
+    
+    websocket.addEventListener('error', (error) => {
+      console.error('WebSocket error:', error)
+      connectionStatus.value = 'Connection error'
+      terminal.writeln('\r\n\x1b[1;31mWebSocket connection error\x1b[0m')
+    })
+    
+    terminal.onData((data) => {
+      console.log('[Shell] Sending data to WebSocket, length:', data.length)
+      if (websocket && websocket.readyState === WebSocket.OPEN) {
+        const encoded = new TextEncoder().encode('1' + data)
+        console.log('[Shell] Encoded data:', encoded)
+        websocket.send(encoded)
+      } else {
+        console.log('[Shell] WebSocket not ready, state:', websocket?.readyState)
+      }
+    })
+    
+  } catch (error) {
+    console.error('[Shell] Error creating WebSocket:', error)
+    connectionStatus.value = 'Connection failed'
+    terminal.writeln('\r\n\x1b[1;31mFailed to create WebSocket connection\x1b[0m')
+  }
 }
 
 const terminal = new Terminal({
@@ -142,6 +157,7 @@ const terminal = new Terminal({
 })
 
 onMounted(() => {
+  console.log('[Shell] Component mounted')
   terminal.loadAddon(fitAddon)
   terminal.open(toRaw(terminalRef.value))
   fitAddon.fit()
@@ -149,9 +165,15 @@ onMounted(() => {
   
   // Wait for sessionId to be available
   const checkSessionAndConnect = () => {
+    console.log('[Shell] Checking session ID...')
+    console.log('[Shell] Current appStore:', appStore)
+    console.log('[Shell] Current sessionId:', appStore.sessionId)
+    
     if (appStore.sessionId) {
+      console.log('[Shell] Session ID found, connecting WebSocket')
       connectWebSocket()
     } else {
+      console.log('[Shell] No session ID yet, retrying in 100ms')
       setTimeout(checkSessionAndConnect, 100)
     }
   }
