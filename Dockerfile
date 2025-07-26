@@ -8,7 +8,7 @@ ADD ui /app
 WORKDIR /app
 COPY --from=builderNodeJSCache /app/node_modules /app/node_modules
 RUN npm run build \
-    && chmod -R 650 /app/dist
+    && chmod -R 644 /app/dist
 
 FROM alpine:3 as builderGolang
 ADD backend /app
@@ -16,8 +16,8 @@ WORKDIR /app
 COPY --from=builderNodeJS /app/dist /app/embed/ui
 RUN apk add --no-cache go 
 
-RUN go build -o als && \
-    chmod +x als
+RUN go build -o /usr/local/bin/als && \
+    chmod +x /usr/local/bin/als
 
 FROM alpine:3 as builderEnv
 WORKDIR /app
@@ -33,6 +33,6 @@ RUN rm -rf /app
 FROM alpine:3
 LABEL maintainer="X-Zero-L <x-zero-l@users.noreply.github.com>"
 COPY --from=builderEnv / /
-COPY --from=builderGolang --chmod=777 /app/als /bin/als
+COPY --from=builderGolang /usr/local/bin/als /bin/als
 
 CMD /bin/als
