@@ -49,8 +49,14 @@ func HandlePing6(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(clientSession.GetContext(c.Request.Context()), timeout)
 	defer cancel()
 
-	// Build ping6 command
-	cmd := exec.CommandContext(ctx, "ping6", "-c", "10", ip)
+	// Build ping6 command - Alpine uses ping -6 instead of ping6
+	var cmd *exec.Cmd
+	if _, err := exec.LookPath("ping6"); err == nil {
+		cmd = exec.CommandContext(ctx, "ping6", "-c", "10", ip)
+	} else {
+		// Alpine Linux uses ping with -6 flag
+		cmd = exec.CommandContext(ctx, "ping", "-6", "-c", "10", ip)
+	}
 
 	// Start the command
 	output, err := cmd.StdoutPipe()
