@@ -1,12 +1,11 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, toRaw } from 'vue'
 import { useMotion } from '@vueuse/motion'
 import { useAppStore } from '@/stores/app'
 import { CommandLineIcon } from '@heroicons/vue/24/outline'
 import 'xterm/css/xterm.css'
 import { Terminal } from 'xterm'
 import { FitAddon } from '@xterm/addon-fit'
-import { toRaw } from 'vue'
 
 const emit = defineEmits(['closed'])
 
@@ -25,102 +24,6 @@ const { apply } = useMotion(containerRef, {
   initial: { opacity: 0, scale: 0.95 },
   enter: { opacity: 1, scale: 1, transition: { duration: 300 } }
 })
-
-const flushToTerminal = () => {
-  if (buffer.length > 0) {
-    terminal.write(new Uint8Array(buffer.shift()), () => {
-      flushToTerminal()
-    })
-  }
-}
-
-const updateWindowSize = () => {
-  fitAddon.fit()
-  if (websocket && websocket.readyState === WebSocket.OPEN) {
-    websocket.send(new TextEncoder().encode('2' + terminal.rows + ';' + terminal.cols))
-  }
-}
-
-const handleResize = () => {
-  clearTimeout(resizeTimer)
-  resizeTimer = setTimeout(() => {
-    updateWindowSize()
-  }, 100)
-}
-
-const connectWebSocket = () => {
-  const url = new URL(location.href)
-  const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
-  // Revert to the original, working URL format that places the session ID in the path.
-  const wsUrl = `${protocol}//${url.host}${url.pathname}session/${appStore.sessionId}/shell`
-  
-  console.log('Connecting to WebSocket:', wsUrl)
-  console.log('Session ID:', appStore.sessionId)
-  
-  try {
-    websocket = new WebSocket(wsUrl)
-    websocket.binaryType = 'arraybuffer'
-    
-    console.log('[Shell] WebSocket object created:', websocket)
-    
-    websocket.addEventListener('open', () => {
-      console.log('WebSocket connected successfully')
-      isConnected.value = true
-      connectionStatus.value = 'Connected'
-      terminal.clear()
-      terminal.writeln('\x1b[1;32m╭─────────────────────────────────────────────────────────────╮\x1b[0m')
-      terminal.writeln('\x1b[1;32m│\x1b[0m \x1b[1;36mWelcome to ALS Interactive Shell\x1b[0m                        \x1b[1;32m│\x1b[0m')
-      terminal.writeln('\x1b[1;32m│\x1b[0m \x1b[90mLimited command set available for security\x1b[0m               \x1b[1;32m│\x1b[0m')
-      terminal.writeln('\x1b[1;32m╰─────────────────────────────────────────────────────────────╯\x1b[0m')
-      terminal.writeln('')
-      
-      window.addEventListener('resize', handleResize)
-      handleResize()
-      setTimeout(handleResize, 1000)
-    })
-    
-    websocket.addEventListener('message', (event) => {
-      console.log('[Shell] Message received, size:', event.data.byteLength)
-      buffer.push(event.data)
-      flushToTerminal()
-    })
-    
-    websocket.addEventListener('close', (event) => {
-      console.log('WebSocket closed:', event.code, event.reason)
-      isConnected.value = false
-      if (event.code === 1000) {
-        connectionStatus.value = 'Disconnected'
-        terminal.writeln('\r\n\x1b[1;33mConnection closed normally\x1b[0m')
-      } else {
-        connectionStatus.value = 'Connection lost'
-        terminal.writeln('\r\n\x1b[1;31mConnection lost unexpectedly\x1b[0m')
-      }
-      emit('closed')
-    })
-    
-    websocket.addEventListener('error', (error) => {
-      console.error('WebSocket error:', error)
-      connectionStatus.value = 'Connection error'
-      terminal.writeln('\r\n\x1b[1;31mWebSocket connection error\x1b[0m')
-    })
-    
-    terminal.onData((data) => {
-      console.log('[Shell] Sending data to WebSocket, length:', data.length)
-      if (websocket && websocket.readyState === WebSocket.OPEN) {
-        const encoded = new TextEncoder().encode('1' + data)
-        console.log('[Shell] Encoded data:', encoded)
-        websocket.send(encoded)
-      } else {
-        console.log('[Shell] WebSocket not ready, state:', websocket?.readyState)
-      }
-    })
-    
-  } catch (error) {
-    console.error('[Shell] Error creating WebSocket:', error)
-    connectionStatus.value = 'Connection failed'
-    terminal.writeln('\r\n\x1b[1;31mFailed to create WebSocket connection\x1b[0m')
-  }
-}
 
 const terminal = new Terminal({
   theme: {
@@ -157,28 +60,74 @@ const terminal = new Terminal({
   tabStopWidth: 4
 })
 
+const flushToTerminal = () => {
+  if (buffer.length > 0) {
+    terminal.write(new Uint8Array(buffer.shift()), () => {
+      flushToTerminal()
+    })
+  }
+}
+
+const updateWindowSize = () => {
+  fitAddon.fit()
+  if (websocket && websocket.readyState === WebSocket.OPEN) {
+    websocket.send(new TextEncoder().encode('2' + terminal.rows + ';' + terminal.cols))
+  }
+}
+
+const handleResize = () => {
+  clearTimeout(resizeTimer)
+  resizeTimer = setTimeout(() => {
+    updateWindowSize()
+  }, 100)
+}
+
 onMounted(() => {
-  console.log('[Shell] Component mounted')
+  apply()
   terminal.loadAddon(fitAddon)
   terminal.open(toRaw(terminalRef.value))
   fitAddon.fit()
-  apply()
+
+  const url = new URL(location.href)
+  const protocol = url.protocol == 'http:' ? 'ws:' : 'wss:'
   
-  // Wait for sessionId to be available
-  const checkSessionAndConnect = () => {
-    console.log('[Shell] Checking session ID...')
-    console.log('[Shell] Current appStore:', appStore)
-    console.log('[Shell] Current sessionId:', appStore.sessionId)
-    
-    if (appStore.sessionId) {
-      console.log('[Shell] Session ID found, connecting WebSocket')
-      connectWebSocket()
-    } else {
-      console.log('[Shell] No session ID yet, retrying in 100ms')
-      setTimeout(checkSessionAndConnect, 100)
+  const wsUrl = `${protocol}//${url.host}${url.pathname}session/${appStore.sessionId}/shell`
+  console.log('Attempting to connect to WebSocket:', wsUrl);
+
+  websocket = new WebSocket(wsUrl)
+  websocket.binaryType = 'arraybuffer'
+
+  websocket.addEventListener('message', (event) => {
+    buffer.push(event.data)
+    flushToTerminal()
+  })
+
+  websocket.addEventListener('open', () => {
+    isConnected.value = true
+    connectionStatus.value = 'Connected'
+    window.addEventListener('resize', handleResize)
+    handleResize()
+    setTimeout(handleResize, 1000)
+  })
+
+  websocket.addEventListener('close', (event) => {
+    isConnected.value = false
+    connectionStatus.value = 'Disconnected'
+    console.log(event)
+    emit('closed')
+  })
+
+  websocket.addEventListener('error', (error) => {
+    isConnected.value = false
+    connectionStatus.value = 'Connection error'
+    console.error('WebSocket error:', error)
+  });
+
+  terminal.onData((data) => {
+    if (websocket && websocket.readyState === WebSocket.OPEN) {
+        websocket.send(new TextEncoder().encode('1' + data))
     }
-  }
-  checkSessionAndConnect()
+  })
 })
 
 onUnmounted(() => {
@@ -186,7 +135,11 @@ onUnmounted(() => {
   if (websocket) {
     websocket.close()
   }
+  if (terminal) {
+    terminal.dispose()
+  }
 })
+</script>
 </script>
 
 <template>
