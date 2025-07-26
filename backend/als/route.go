@@ -8,6 +8,7 @@ import (
 	"github.com/X-Zero-L/als/als/controller"
 	"github.com/X-Zero-L/als/als/controller/cache"
 	"github.com/X-Zero-L/als/als/controller/iperf3"
+	"github.com/X-Zero-L/als/als/controller/nettools"
 	"github.com/X-Zero-L/als/als/controller/ping"
 	"github.com/X-Zero-L/als/als/controller/session"
 	"github.com/X-Zero-L/als/als/controller/shell"
@@ -26,6 +27,17 @@ func SetupHttpRoute(e *gin.Engine) {
 
 		if config.Config.FeaturePing {
 			v1.GET("/ping", ping.Handle)
+			v1.GET("/ping6", nettools.HandleNetworkTool("ping6"))
+		}
+
+		if config.Config.FeatureMtr {
+			v1.GET("/mtr", nettools.HandleNetworkTool("mtr"))
+			v1.GET("/mtr6", nettools.HandleNetworkTool("mtr6"))
+		}
+
+		if config.Config.FeatureTraceroute {
+			v1.GET("/traceroute", nettools.HandleNetworkTool("traceroute"))
+			v1.GET("/traceroute6", nettools.HandleNetworkTool("traceroute6"))
 		}
 
 		if config.Config.FeatureSpeedtestDotNet {
