@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"strings"
 	"sync"
 	"time"
 
@@ -76,16 +77,44 @@ func HandleSpeedtestDotNet(c *gin.Context) {
 			fmt.Println("Pipe closed", err)
 			return
 		}
+		
+		remainingData := ""
 		for {
 			buf := make([]byte, 1024)
 			n, err := pipe.Read(buf)
 			if err != nil {
 				return
 			}
-			if !closed {
-				clientSession.Channel <- &client.Message{
-					Name:    "SpeedtestStream",
-					Content: string(buf[:n]),
+			
+			// Process the data line by line
+			data := remainingData + string(buf[:n])
+			lines := strings.Split(data, "\n")
+			
+			// Keep the last incomplete line for next iteration
+			if !strings.HasSuffix(data, "\n") && len(lines) > 1 {
+				remainingData = lines[len(lines)-1]
+				lines = lines[:len(lines)-1]
+			} else {
+				remainingData = ""
+			}
+			
+			for _, line := range lines {
+				line = strings.TrimSpace(line)
+				if line == "" {
+					continue
+				}
+				
+				// Parse JSON line and forward it
+				var jsonData map[string]interface{}
+				if err := json.Unmarshal([]byte(line), &jsonData); err == nil {
+					if !closed {
+						// Forward the parsed JSON as a string
+						msg, _ := json.Marshal(jsonData)
+						clientSession.Channel <- &client.Message{
+							Name:    "SpeedtestStream",
+							Content: string(msg),
+						}
+					}
 				}
 			}
 		}

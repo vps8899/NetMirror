@@ -14,8 +14,15 @@ const outputRef = ref()
 let abortController = markRaw(new AbortController())
 
 const handleTraceroute6Message = (e) => {
-  const data = JSON.parse(e.data)
-  output.value += data.output
+  try {
+    const data = JSON.parse(e.data)
+    if (data.output) {
+      output.value += data.output
+    }
+  } catch (error) {
+    // If not JSON, treat as plain text
+    output.value += e.data
+  }
   
   // Auto scroll to bottom
   setTimeout(() => {

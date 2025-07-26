@@ -3,7 +3,6 @@ package ping
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os/exec"
 	"regexp"
 	"strconv"
