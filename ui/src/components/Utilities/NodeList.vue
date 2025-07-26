@@ -138,11 +138,28 @@ const fetchCurrentNode = async () => {
 // Test latency for a single node
 const testNodeLatency = async (node) => {
   try {
+    const startTime = Date.now()
     const response = await axios.get('/nodes/latency', {
-      params: { url: node.url }
+      params: { url: node.url },
+      timeout: 5000
     })
+    const endTime = Date.now()
+    
     if (response.data.success) {
-      latencies.value[node.url] = response.data.latency
+      const latency = endTime - startTime
+      
+      // Determine status based on latency
+      let status = 'good'
+      if (latency > 200) {
+        status = 'high'
+      } else if (latency > 100) {
+        status = 'medium'
+      }
+      
+      latencies.value[node.url] = {
+        latency: latency,
+        status: status
+      }
     }
   } catch (error) {
     console.error('Failed to test latency for', node.name, error)
