@@ -154,11 +154,12 @@ const testNodeLatency = async (node) => {
     
     if (response.ok) {
       const data = await response.json()
+      const latency = Date.now() - timestamp
       console.log(`Latency response for ${node.name}:`, data) // 调试信息
       if (data.success) {
         latencies.value[node.name] = {
-          latency: data.latency,
-          status: data.status
+          latency: latency,
+          status: getStatusByLatency(latency)
         }
         console.log(`Updated latencies for ${node.name}:`, latencies.value[node.name]) // 调试信息
       } else {
@@ -196,6 +197,12 @@ const getStatusText = (status) => {
     case 'error': return 'Offline'
     default: return 'Unknown'
   }
+}
+
+const getStatusByLatency = (latency) => {
+  if (latency < 200) return 'good'
+  if (latency < 500) return 'medium'
+  return 'high'
 }
 
 onMounted(() => {
