@@ -17,7 +17,7 @@ COPY ui/ ./
 RUN npm run build
 
 # Go 构建阶段
-FROM golang:1.24-alpine as go-builder
+FROM golang:1.21-alpine as go-builder
 
 # 安装构建依赖
 RUN apk add --no-cache git ca-certificates tzdata
@@ -25,14 +25,17 @@ RUN apk add --no-cache git ca-certificates tzdata
 # 设置工作目录
 WORKDIR /app
 
-# 复制 go mod 文件和 air 配置
-COPY backend/go.mod backend/go.sum ./.air.toml ./
+# 复制 go mod 文件
+COPY backend/go.mod backend/go.sum ./
 
 # 下载依赖
 RUN go mod download
 
 # 复制后端源代码
 COPY backend/ ./
+
+# 复制 .air.toml 文件到构建阶段（开发时需要）
+COPY .air.toml ./
 
 # 复制前端构建产物
 COPY --from=ui-builder /app/dist ./embed/ui/
@@ -45,11 +48,11 @@ FROM alpine:3.18 as software-installer
 
 # 安装基础工具
 RUN apk add --no-cache \
-   bash \
-   wget \
-   curl \
-   ca-certificates \
-   tzdata
+    bash \
+    wget \
+    curl \
+    ca-certificates \
+    tzdata
 
 # 复制安装脚本
 COPY scripts/ /tmp/scripts/
@@ -66,9 +69,9 @@ LABEL version="2.0.0"
 
 # 安装运行时依赖
 RUN apk add --no-cache \
-   ca-certificates \
-   tzdata \
-   bash
+    ca-certificates \
+    tzdata \
+    bash
 
 # 从软件安装阶段复制已安装的工具
 COPY --from=software-installer /usr/local/bin/ /usr/local/bin/
@@ -80,7 +83,7 @@ COPY --from=go-builder /app/als /bin/als
 
 # 创建非 root 用户
 RUN addgroup -g 1001 -S als && \
-   adduser -u 1001 -S als -G als
+    adduser -u 1001 -S als -G als
 
 # 创建数据目录
 RUN mkdir -p /data && chown als:als /data
@@ -93,28 +96,7 @@ EXPOSE 80
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-   CMD wget --quiet --tries=1 --spider http://localhost:${HTTP_PORT:-80}/ || exit 1
+    CMD wget --quiet --tries=1 --spider http://localhost:${HTTP_PORT:-80}/ || exit 1
 
 # 启动命令
 CMD ["/bin/als"]
-
-# 开发阶段（可选）
-FROM go-builder as development
-
-# 安装开发工具
-RUN apk add --no-cache \
-   git \
-   make \
-   gcc \
-   musl-dev
-
-# 安装 air 用于热重载
-RUN go install github.com/air-verse/air@latest
-
-# .air.toml 已经在 go-builder 阶段复制了，这里直接继承
-
-# 暴露端口
-EXPOSE 8080
-
-# 开发模式启动命令
-CMD ["air", "-c", ".air.toml"]

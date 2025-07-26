@@ -1,4 +1,4 @@
-.PHONY: help build dev clean test lint docker-build docker-run docker-dev version check-deps
+.PHONY: help build dev clean test lint docker-build docker-run version check-deps
 
 # 检查 Docker 和 Docker Compose
 check-deps:
@@ -13,7 +13,7 @@ help: ## 显示帮助信息
 
 # 开发相关
 dev: check-deps ## 启动开发环境
-	docker-compose -f docker-compose.dev.yml up --build
+	docker-compose up --build
 
 dev-backend: ## 仅启动后端开发服务器
 	cd backend && go run main.go
@@ -22,11 +22,8 @@ dev-frontend: ## 仅启动前端开发服务器
 	cd ui && npm run dev
 
 # 构建相关
-build: check-deps ## 构建生产版本
+build: check-deps ## 构建版本
 	docker-compose build
-
-build-prod: check-deps ## 构建生产版本
-	docker-compose -f docker-compose.prod.yml build
 
 build-frontend: ## 构建前端
 	cd ui && npm run build
@@ -41,23 +38,11 @@ docker-build: check-deps ## 构建 Docker 镜像
 docker-run: check-deps ## 运行 Docker 容器
 	docker-compose up -d
 
-docker-run-prod: check-deps ## 运行生产 Docker 环境
-	docker-compose -f docker-compose.prod.yml up -d
-
-docker-dev: check-deps ## 运行开发 Docker 环境
-	docker-compose -f docker-compose.dev.yml up --build
-
 docker-logs: ## 查看 Docker 日志
 	docker-compose logs -f
 
-docker-logs-prod: ## 查看生产环境日志
-	docker-compose -f docker-compose.prod.yml logs -f
-
 docker-stop: ## 停止 Docker 容器
 	docker-compose down
-
-docker-stop-prod: ## 停止生产环境容器
-	docker-compose -f docker-compose.prod.yml down
 
 # 测试和质量检查
 test: ## 运行测试
@@ -91,11 +76,8 @@ clean-all: clean ## 清理所有文件包括依赖
 	docker system prune -af
 
 # 部署相关
-deploy: check-deps ## 部署到生产环境
-	docker-compose -f docker-compose.prod.yml up -d --build
-
-deploy-dev: check-deps ## 部署到开发环境
-	docker-compose -f docker-compose.dev.yml up -d --build
+deploy: check-deps ## 部署
+	docker-compose up -d --build
 
 # 初始化
 init: ## 初始化项目
@@ -126,10 +108,6 @@ version: ## 显示版本信息
 status: ## 检查服务状态
 	@echo "=== Service Status ==="
 	docker-compose ps 2>/dev/null || echo "No services running"
-
-status-prod: ## 检查生产环境状态
-	@echo "=== Production Service Status ==="
-	docker-compose -f docker-compose.prod.yml ps 2>/dev/null || echo "No production services running"
 
 # 快速启动
 quick-start: init build docker-run ## 快速启动（初始化+构建+运行）
