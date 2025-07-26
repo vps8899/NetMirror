@@ -2,12 +2,13 @@
   <div class="space-y-4">
     <!-- Node Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div
+      <a
         v-for="node in nodes"
         :key="node.url"
-        @click="navigateToNode(node)"
-        class="relative bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 hover:border-primary-500 overflow-hidden group"
-        :class="{ 'ring-2 ring-primary-500': isCurrentNode(node) }"
+        :href="isCurrentNode(node) ? '#' : node.url"
+        @click="isCurrentNode(node) && $event.preventDefault()"
+        class="relative bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-primary-500 overflow-hidden group block no-underline"
+        :class="{ 'ring-2 ring-primary-500 cursor-default': isCurrentNode(node), 'cursor-pointer': !isCurrentNode(node) }"
       >
         <!-- Background gradient on hover -->
         <div class="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-primary-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -72,7 +73,7 @@
             </span>
           </div>
         </div>
-      </div>
+      </a>
     </div>
 
     <!-- Empty State -->
@@ -175,13 +176,6 @@ const testAllLatencies = async () => {
   // Test all nodes in parallel
   const promises = nodes.value.map(node => testNodeLatency(node))
   await Promise.all(promises)
-}
-
-// Navigate to selected node
-const navigateToNode = (node) => {
-  if (!isCurrentNode(node)) {
-    window.location.href = node.url
-  }
 }
 
 // Get human-readable status text
