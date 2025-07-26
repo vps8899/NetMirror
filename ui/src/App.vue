@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { list as langList, setI18nLanguage, loadLocaleMessages, autoLang } from './config/lang.js'
 import { useAppStore } from './stores/app'
+import NodeListCard from '@/components/Utilities/NodeList.vue'
 import LoadingCard from '@/components/Loading.vue'
 import InfoCard from '@/components/Information.vue'
 import SpeedtestCard from '@/components/Speedtest.vue'
@@ -91,23 +92,28 @@ onMounted(async () => {
         <div class="max-w-7xl mx-auto space-y-10">
           <LoadingCard v-if="appStore.connecting" />
           <template v-else>
-            <!-- Network Information Card -->
+            <!-- Node List Card - Display at the top -->
             <div class="animate-slide-up">
+              <NodeListCard />
+            </div>
+            
+            <!-- Network Information Card -->
+            <div class="animate-slide-up" style="animation-delay: 0.1s;">
               <InfoCard />
             </div>
             
             <!-- Looking Glass Card -->
-            <div class="animate-slide-up" style="animation-delay: 0.1s;">
+            <div class="animate-slide-up" style="animation-delay: 0.2s;">
               <UtilitiesCard />
             </div>
             
             <!-- Speed Test Card -->
-            <div class="animate-slide-up" style="animation-delay: 0.2s;">
+            <div class="animate-slide-up" style="animation-delay: 0.3s;">
               <SpeedtestCard />
             </div>
 
             <!-- Traffic Display (if enabled) -->
-            <div v-if="appStore.config.feature_iface_traffic" class="animate-slide-up" style="animation-delay: 0.3s;">
+            <div v-if="appStore.config.feature_iface_traffic" class="animate-slide-up" style="animation-delay: 0.4s;">
               <TrafficCard />
             </div>
           </template>
