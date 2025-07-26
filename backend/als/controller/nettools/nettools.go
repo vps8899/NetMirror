@@ -14,50 +14,56 @@ import (
 
 // NetworkTool represents a network diagnostic tool
 type NetworkTool struct {
-	Name     string
-	Command  string
-	Args     []string
-	IPv6     bool
-	Timeout  time.Duration
+	Name      string
+	Command   string
+	Args      []string
+	IPv6      bool
+	Timeout   time.Duration
+	EventName string
 }
 
 // GetNetworkTools returns available network tools
 func GetNetworkTools() map[string]NetworkTool {
 	return map[string]NetworkTool{
 		"ping6": {
-			Name:    "ping6",
-			Command: "ping6",
-			Args:    []string{"-c", "10"},
-			IPv6:    true,
-			Timeout: 30 * time.Second,
+			Name:      "ping6",
+			Command:   "ping6",
+			Args:      []string{"-c", "10"},
+			IPv6:      true,
+			Timeout:   30 * time.Second,
+			EventName: "Ping6",
 		},
 		"mtr": {
-			Name:    "mtr",
-			Command: "mtr",
-			Args:    []string{"--raw", "-c", "10"},
-			IPv6:    false,
-			Timeout: 60 * time.Second,
+			Name:      "mtr",
+			Command:   "mtr",
+			Args:      []string{"--raw", "-c", "10"},
+			IPv6:      false,
+			Timeout:   60 * time.Second,
+			EventName: "MTROutput",
 		},
 		"mtr6": {
-			Name:    "mtr6",
-			Command: "mtr",
-			Args:    []string{"--raw", "-c", "10", "-6"},
-			IPv6:    true,
-			Timeout: 60 * time.Second,
+			Name:      "mtr6",
+			Command:   "mtr",
+			Args:      []string{"--raw", "-c", "10", "-6"},
+			IPv6:      true,
+			Timeout:   60 * time.Second,
+			EventName: "MTR6Output",
 		},
 		"traceroute": {
-			Name:    "traceroute",
-			Command: "traceroute",
-			Args:    []string{},
-			IPv6:    false,
-			Timeout: 60 * time.Second,
+			Name:      "traceroute",
+			Command:   "traceroute",
+			Args:      []string{},
+			IPv6:      false,
+			Timeout:   60 * time.Second,
+			EventName: "TracerouteOutput",
 		},
 		"traceroute6": {
-			Name:    "traceroute6",
-			Command: "traceroute6",
-			Args:    []string{},
-			IPv6:    true,
-			Timeout: 60 * time.Second,
+			Name:      "traceroute6",
+			Command:   "traceroute6",
+			Args:      []string{},
+			IPv6:      true,
+			Timeout:   60 * time.Second,
+			EventName: "Traceroute6Output",
 		},
 	}
 }
