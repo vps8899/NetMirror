@@ -187,13 +187,18 @@ const executeTest = async () => {
             }
           } else {
             // nettools事件返回的是带output字段的数据
-            const data = JSON.parse(event.data)
-            if (data.output) {
-              output.value += data.output
-            }
-            if (data.finished) {
-              appStore.source.removeEventListener(eventName, handleOutput)
-              isExecuting.value = false
+            try {
+              const data = JSON.parse(event.data)
+              console.log('Nettools event data:', data) // 调试日志
+              if (data.output) {
+                output.value += data.output
+              }
+              if (data.finished) {
+                appStore.source.removeEventListener(eventName, handleOutput)
+                isExecuting.value = false
+              }
+            } catch (error) {
+              console.error('Error parsing nettools data:', error, event.data)
             }
           }
         }
