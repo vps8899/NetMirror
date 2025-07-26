@@ -21,7 +21,10 @@ var upgrader = websocket.Upgrader{
 }
 
 func HandleNewShell(c *gin.Context) {
-	fmt.Println("[Shell] WebSocket connection request received")
+	fmt.Printf("[Shell] WebSocket connection request received from %s\n", c.Request.RemoteAddr)
+	fmt.Printf("[Shell] Request URL: %s\n", c.Request.URL.String())
+	fmt.Printf("[Shell] Session param: %s\n", c.Param("session"))
+	
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
