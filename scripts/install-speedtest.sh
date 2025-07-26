@@ -134,28 +134,45 @@ install_speedtest_alternative() {
     log_warning "Trying alternative installation methods..."
     
     # Method 1: Try different version
-    local versions=("1.1.1" "1.0.0")
     local arch=$(get_arch)
     
-    for version in "${versions[@]}"; do
-        log_info "Trying version $version..."
-        local url="https://install.speedtest.net/app/cli/ookla-speedtest-${version}-linux-${arch}.tgz"
-        local temp_dir=$(mktemp -d)
-        
-        if wget -O "$temp_dir/speedtest.tgz" "$url" 2>/dev/null; then
-            if tar -xzf "$temp_dir/speedtest.tgz" -C "$temp_dir" 2>/dev/null; then
-                local binary=$(find "$temp_dir" -name "speedtest" -type f -executable | head -1)
-                if [ -n "$binary" ]; then
-                    if cp "$binary" "/usr/local/bin/speedtest" && chmod +x "/usr/local/bin/speedtest"; then
-                        log_success "Speedtest CLI installed successfully (version $version)"
-                        rm -rf "$temp_dir"
-                        return 0
-                    fi
+    # Try version 1.1.1
+    log_info "Trying version 1.1.1..."
+    local url="https://install.speedtest.net/app/cli/ookla-speedtest-1.1.1-linux-${arch}.tgz"
+    local temp_dir=$(mktemp -d)
+    
+    if wget -O "$temp_dir/speedtest.tgz" "$url" 2>/dev/null; then
+        if tar -xzf "$temp_dir/speedtest.tgz" -C "$temp_dir" 2>/dev/null; then
+            local binary=$(find "$temp_dir" -name "speedtest" -type f -executable | head -1)
+            if [ -n "$binary" ]; then
+                if cp "$binary" "/usr/local/bin/speedtest" && chmod +x "/usr/local/bin/speedtest"; then
+                    log_success "Speedtest CLI installed successfully (version 1.1.1)"
+                    rm -rf "$temp_dir"
+                    return 0
                 fi
             fi
         fi
-        rm -rf "$temp_dir"
-    done
+    fi
+    rm -rf "$temp_dir"
+    
+    # Try version 1.0.0
+    log_info "Trying version 1.0.0..."
+    url="https://install.speedtest.net/app/cli/ookla-speedtest-1.0.0-linux-${arch}.tgz"
+    temp_dir=$(mktemp -d)
+    
+    if wget -O "$temp_dir/speedtest.tgz" "$url" 2>/dev/null; then
+        if tar -xzf "$temp_dir/speedtest.tgz" -C "$temp_dir" 2>/dev/null; then
+            local binary=$(find "$temp_dir" -name "speedtest" -type f -executable | head -1)
+            if [ -n "$binary" ]; then
+                if cp "$binary" "/usr/local/bin/speedtest" && chmod +x "/usr/local/bin/speedtest"; then
+                    log_success "Speedtest CLI installed successfully (version 1.0.0)"
+                    rm -rf "$temp_dir"
+                    return 0
+                fi
+            fi
+        fi
+    fi
+    rm -rf "$temp_dir"
     
     # Method 2: Try package manager installation
     log_info "Trying package manager installation..."
