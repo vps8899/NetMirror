@@ -45,10 +45,14 @@ export const useAppStore = defineStore('app', () => {
   window.addEventListener('resize', handleResize)
   handleResize()
 
+  let initializePromise = null
+
   const reconnectEventSource = () => {
     clearTimeout(timer)
     setTimeout(() => {
-      setupEventSource()
+      // Reset promise to allow re-initialization on reconnect
+      initializePromise = null
+      initialize()
     }, 1000)
   }
 
@@ -60,7 +64,6 @@ export const useAppStore = defineStore('app', () => {
       eventSource.addEventListener('SessionId', (e) => {
         sessionId.value = e.data
         console.log('session', e.data)
-        // Resolve the promise once sessionId is received
         resolve()
       })
 
@@ -84,15 +87,12 @@ export const useAppStore = defineStore('app', () => {
     })
   }
 
-  const initialize = async () => {
-    try {
-      await setupEventSource()
-    } catch (error) {
-      console.error('Failed to initialize app session:', error)
+  const initialize = () => {
+    if (!initializePromise) {
+      initializePromise = setupEventSource()
     }
+    return initializePromise
   }
-
-  initialize()
 
   const requestMethod = (method, data = {}, signal = null) => {
     let axiosConfig = {

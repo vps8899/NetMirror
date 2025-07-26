@@ -94,7 +94,7 @@ onMounted(async () => {
   
   // Load stored language
   await loadLocaleMessages(appStore.language)
-  setI18nLanguage(appStore.language)
+  setI1-nLanguage(appStore.language)
 
   window.addEventListener('scroll', handleScroll)
 })
