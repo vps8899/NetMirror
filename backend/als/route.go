@@ -19,7 +19,28 @@ import (
 )
 
 func SetupHttpRoute(e *gin.Engine) {
+	// Add CORS middleware to allow cross-origin requests
+	e.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, session")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	})
+
 	e.GET("/session", session.Handle)
+	
+	// Node management endpoints (no session required for cross-node functionality)
+	e.GET("/nodes", nodes.GetNodes)
+	e.GET("/nodes/current", nodes.GetNodeConfig)
+	e.GET("/nodes/latency", nodes.TestLatency)
+	
 	v1 := e.Group("/method", controller.MiddlewareSessionOnHeader())
 	{
 		if config.Config.FeatureIperf3 {
