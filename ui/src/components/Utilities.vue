@@ -136,100 +136,45 @@ const closeTool = () => {
 const executeTest = async () => {
   if (!targetHost.value.trim()) return
   
-  isExecuting.value = true
-  showOutput.value = true
-  output.value = `Executing ${selectedMethod.value} to ${targetHost.value}...\n`
-  
-  try {
-    // 创建一个 AbortController 来控制请求取消
-    const controller = new AbortController()
-    
-    // 调用后端API
-    const response = await appStore.requestMethod(selectedMethod.value, {
-      ip: targetHost.value.trim()
-    }, controller.signal)
-    
-    if (response.success) {
-      // 不要清空输出，保留开始消息
-      // output.value = ''  // 移除这行
-      
-      // 如果有实时输出，通过SSE接收
-      if (response.data && response.data.output) {
-        output.value += response.data.output
-      } else {
-        // 根据不同的方法监听不同的事件
-        const eventName = selectedMethod.value === 'ping' ? 'Ping' : 'MethodOutput'
-        
-        console.log('Adding event listener for:', eventName) // 调试日志
-        
-        const handleOutput = (event) => {
-          console.log('Received event:', eventName, event) // 调试日志
-          if (selectedMethod.value === 'ping') {
-            // ping事件返回的是ping包数据，需要解析
-            const data = JSON.parse(event.data)
-            console.log('Ping event data:', data) // 调试日志
-            
-            if (data.from && data.latency !== undefined) {
-              const latencyMs = (data.latency / 1e6).toFixed(2) // 纳秒转毫秒
-              output.value += `64 bytes from ${data.from}: icmp_seq=${data.seq} ttl=${data.ttl} time=${latencyMs} ms\n`
-            }
-            
-            // 检查是否超时
-            if (data.is_timeout) {
-              output.value += `Request timeout for icmp_seq ${data.seq}\n`
-            }
-            
-            // ping完成10次后自动停止
-            if (data.seq >= 9) { // seq从0开始，所以9表示第10个包
-              setTimeout(() => {
-                appStore.source.removeEventListener(eventName, handleOutput)
-                isExecuting.value = false
-                output.value += '\n--- ping statistics ---\n'
-                output.value += 'Ping completed.\n'
-              }, 1000)
-            }
-          } else {
-            // nettools事件返回的是带output字段的数据
-            try {
-              const data = JSON.parse(event.data)
-              console.log('Nettools event data:', data) // 调试日志
-              if (data.output) {
-                output.value += data.output
-              }
-              if (data.finished) {
-                appStore.source.removeEventListener(eventName, handleOutput)
-                isExecuting.value = false
-              }
-            } catch (error) {
-              console.error('Error parsing nettools data:', error, event.data)
-            }
-          }
-        }
-        
-        appStore.source.addEventListener(eventName, handleOutput)
-        
-        // 设置超时保护
-        setTimeout(() => {
-          appStore.source.removeEventListener(eventName, handleOutput)
-          if (isExecuting.value) {
-            output.value += '\nTest timed out after 60 seconds.\n'
-            isExecuting.value = false
-          }
-        }, 60000)
-      }
-    } else {
-      output.value += `Error: ${response.message || 'Unknown error occurred'}\n`
-      isExecuting.value = false
-    }
-    
-  } catch (error) {
-    if (error.name === 'AbortError') {
-      output.value += '\nTest was cancelled.\n'
-    } else {
-      output.value += `Error: ${error.message || 'Network error occurred'}\n`
-    }
-    isExecuting.value = false
+  // 根据选择的方法找到对应的工具
+  const toolMap = {
+    'ping': 'Ping',
+    'ping6': 'Ping',
+    'mtr': 'Ping',  // 暂时使用Ping工具，后续可以创建专门的MTR工具
+    'mtr6': 'Ping',
+    'traceroute': 'Ping',
+    'traceroute6': 'Ping'
   }
+  
+  const toolName = toolMap[selectedMethod.value]
+  if (!toolName) {
+    console.error('Tool not found for method:', selectedMethod.value)
+    return
+  }
+  
+  // 找到对应的工具配置
+  const tool = tools.value.find(t => t.label === toolName)
+  if (!tool) {
+    console.error('Tool configuration not found:', toolName)
+    return
+  }
+  
+  // 打开工具抽屉
+  openTool(tool)
+  
+  // 如果是Ping工具，自动填充IP地址并执行
+  setTimeout(() => {
+    if (toolComponent.value && toolComponent.value.exposed) {
+      // 设置目标地址
+      if (toolComponent.value.exposed.setTarget) {
+        toolComponent.value.exposed.setTarget(targetHost.value)
+      }
+      // 自动执行
+      if (toolComponent.value.exposed.execute) {
+        toolComponent.value.exposed.execute()
+      }
+    }
+  }, 300)
 }
 </script>
 
@@ -298,27 +243,6 @@ const executeTest = async () => {
             </svg>
             {{ isExecuting ? 'Executing...' : 'Execute Test' }}
           </button>
-        </div>
-
-        <!-- Output Terminal -->
-        <div v-if="showOutput" class="bg-gray-900 dark:bg-gray-950 rounded-xl overflow-hidden shadow-2xl border border-primary-200/20 dark:border-primary-700/20">
-          <div class="bg-gray-800 dark:bg-gray-900 px-4 py-3 border-b border-gray-700 dark:border-gray-800">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2">
-                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span class="ml-4 text-gray-300 dark:text-gray-400 text-sm font-medium">Terminal Output</span>
-              </div>
-              <div v-if="isExecuting" class="flex items-center space-x-2">
-                <div class="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></div>
-                <span class="text-primary-400 text-xs">LIVE</span>
-              </div>
-            </div>
-          </div>
-          <div class="p-4 max-h-96 overflow-auto">
-            <pre class="text-primary-300 font-mono text-sm whitespace-pre-wrap">{{ output }}</pre>
-          </div>
         </div>
 
         <!-- Network Tools Grid (if tools are enabled) -->
