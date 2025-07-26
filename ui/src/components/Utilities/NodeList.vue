@@ -122,10 +122,11 @@ const isCurrentNode = (node) => {
 // Fetch nodes list
 const fetchNodes = async () => {
   try {
-    const response = await axios.get('/nodes')
-    if (response.data.success) {
-      nodes.value = response.data.nodes || []
-      // Start testing latencies
+    const response = await fetch('/nodes')
+    const data = await response.json()
+    if (data.success) {
+      nodes.value = data.nodes || []
+      // Start testing latencies immediately
       testAllLatencies()
     }
   } catch (error) {
@@ -198,10 +199,10 @@ const getStatusText = (status) => {
 onMounted(() => {
   fetchNodes()
   
-  // Refresh latencies every 10 seconds (more frequent)
+  // Refresh latencies every 1 second
   latencyInterval = setInterval(() => {
     testAllLatencies()
-  }, 10000)
+  }, 1000)
 })
 
 onUnmounted(() => {
