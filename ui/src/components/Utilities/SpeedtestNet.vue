@@ -180,7 +180,7 @@ onUnmounted(() => {
             :disabled="working"
             type="text"
             placeholder="Server ID (Optional)"
-            class="w-full pl-10 pr-4 py-3 bg-transparent border-0 rounded-xl focus:ring-0 transition-all duration-200 disabled:opacity-50"
+            class="w-full pl-10 pr-4 py-3 bg-transparent border-0 rounded-xl focus:ring-0 transition-all duration-200 disabled:opacity-50 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             @keyup.enter="speedtest"
           />
         </div>
@@ -189,7 +189,7 @@ onUnmounted(() => {
           class="inline-flex items-center justify-center px-6 py-3 rounded-xl font-medium transition-all duration-200"
           :class="working 
             ? 'bg-red-500 hover:bg-red-600 text-white' 
-            : 'bg-purple-500 hover:bg-purple-600 text-white hover:shadow-lg'"
+            : 'bg-primary-500 hover:bg-primary-600 text-white hover:shadow-lg'"
         >
           <component :is="working ? StopIcon : PlayIcon" class="w-5 h-5 mr-2" />
           {{ working ? 'Stop Test' : 'Start Test' }}

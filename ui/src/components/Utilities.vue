@@ -221,7 +221,7 @@ const executeTest = async () => {
               <input 
                 v-model="targetHost"
                 type="text" 
-                class="w-full pl-10 pr-4 py-3 bg-primary-50/50 dark:bg-gray-700 border border-primary-200 dark:border-gray-600 rounded-lg text-slate-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200" 
+                class="w-full pl-10 pr-4 py-3 bg-primary-50/50 dark:bg-gray-700 border border-primary-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200" 
                 placeholder="Enter IP address or hostname..." 
                 required
               >

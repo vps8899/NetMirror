@@ -114,7 +114,7 @@ onMounted(() => {
           class="inline-flex items-center justify-center px-6 py-3 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           :class="working 
             ? 'bg-red-500 hover:bg-red-600 text-white' 
-            : 'bg-blue-500 hover:bg-blue-600 text-white hover:shadow-lg'"
+            : 'bg-primary-500 hover:bg-primary-600 text-white hover:shadow-lg'"
         >
           <component :is="working ? StopIcon : PlayIcon" class="w-5 h-5 mr-2" />
           {{ working ? 'Stop' : 'Start Ping' }}
