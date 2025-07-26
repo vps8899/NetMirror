@@ -138,20 +138,59 @@ const executeTest = async () => {
   
   isExecuting.value = true
   showOutput.value = true
-  output.value = ''
+  output.value = `Executing ${selectedMethod.value} to ${targetHost.value}...\n`
   
   try {
-    // Here you would implement the actual API call to your backend
-    // This is a placeholder for the Looking Glass functionality
-    output.value = `Executing ${selectedMethod.value} to ${targetHost.value}...\n`
+    // 创建一个 AbortController 来控制请求取消
+    const controller = new AbortController()
     
-    // Simulate the test execution
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    output.value += `Test completed successfully.\n`
+    // 调用后端API
+    const response = await appStore.requestMethod(selectedMethod.value, {
+      host: targetHost.value.trim()
+    }, controller.signal)
+    
+    if (response.success) {
+      // 清空之前的占位符输出
+      output.value = ''
+      
+      // 如果有实时输出，通过SSE接收
+      if (response.data && response.data.output) {
+        output.value = response.data.output
+      } else {
+        // 监听SSE事件获取实时输出
+        const handleOutput = (event) => {
+          const data = JSON.parse(event.data)
+          if (data.output) {
+            output.value += data.output
+          }
+          if (data.finished) {
+            appStore.source.removeEventListener('MethodOutput', handleOutput)
+            isExecuting.value = false
+          }
+        }
+        
+        appStore.source.addEventListener('MethodOutput', handleOutput)
+        
+        // 设置超时保护
+        setTimeout(() => {
+          appStore.source.removeEventListener('MethodOutput', handleOutput)
+          if (isExecuting.value) {
+            output.value += '\nTest timed out after 60 seconds.\n'
+            isExecuting.value = false
+          }
+        }, 60000)
+      }
+    } else {
+      output.value += `Error: ${response.message || 'Unknown error occurred'}\n`
+      isExecuting.value = false
+    }
     
   } catch (error) {
-    output.value += `Error: ${error.message}\n`
-  } finally {
+    if (error.name === 'AbortError') {
+      output.value += '\nTest was cancelled.\n'
+    } else {
+      output.value += `Error: ${error.message || 'Network error occurred'}\n`
+    }
     isExecuting.value = false
   }
 }
