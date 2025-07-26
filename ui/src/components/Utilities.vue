@@ -160,7 +160,10 @@ const executeTest = async () => {
         // 根据不同的方法监听不同的事件
         const eventName = selectedMethod.value === 'ping' ? 'Ping' : 'MethodOutput'
         
+        console.log('Adding event listener for:', eventName) // 调试日志
+        
         const handleOutput = (event) => {
+          console.log('Received event:', eventName, event) // 调试日志
           if (selectedMethod.value === 'ping') {
             // ping事件返回的是ping包数据，需要解析
             const data = JSON.parse(event.data)
