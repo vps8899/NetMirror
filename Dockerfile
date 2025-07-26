@@ -37,11 +37,8 @@ COPY backend/ ./
 # 复制 .air.toml 文件到构建阶段（开发时需要）
 COPY .air.toml ./
 
-# 复制前端构建产物
-COPY --from=ui-builder /app/dist ./embed/ui/
-
-# 构建 Go 应用
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o als .
+# 构建 Go 应用，输出到 /als-bin 以避免与 /app/als 目录冲突
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /als-bin .
 
 # 软件安装阶段
 FROM alpine:3.18 as software-installer
@@ -79,7 +76,7 @@ COPY --from=software-installer /usr/bin/ /usr/bin/
 COPY --from=software-installer /bin/ /bin/
 
 # 从构建阶段复制应用程序
-COPY --from=go-builder /app/als /bin/als
+COPY --from=go-builder /als-bin /bin/als
 
 # 创建非 root 用户
 RUN addgroup -g 1001 -S als && \
