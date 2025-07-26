@@ -3,6 +3,7 @@ package nodes
 import (
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -65,61 +66,43 @@ func GetNodes(c *gin.Context) {
 
 // TestLatency tests the latency to a specific node
 func TestLatency(c *gin.Context) {
-	nodeURL, ok := c.GetQuery("url")
-	if !ok || nodeURL == "" {
+	// Get timestamp from client
+	timestampStr, ok := c.GetQuery("timestamp")
+	if !ok || timestampStr == "" {
 		c.JSON(400, gin.H{
 			"success": false,
-			"error":   "URL parameter required",
+			"error":   "timestamp parameter required",
 		})
 		return
 	}
 	
-	// Validate URL to prevent abuse
-	if !strings.HasPrefix(nodeURL, "http://") && !strings.HasPrefix(nodeURL, "https://") {
-		c.JSON(400, gin.H{
-			"success": false,
-			"error":   "Invalid URL format",
-		})
-		return
-	}
-	
-	// Test latency by making HTTP request
-	client := &http.Client{
-		Timeout: 5 * time.Second,
-	}
-	
-	start := time.Now()
-	resp, err := client.Head(nodeURL)
-	latency := int(time.Since(start).Milliseconds())
-	
+	// Parse timestamp
+	clientTimestamp, err := strconv.ParseInt(timestampStr, 10, 64)
 	if err != nil {
-		c.JSON(200, gin.H{
-			"success": true,
-			"latency": LatencyResponse{
-				Node:    nodeURL,
-				Latency: -1,
-				Status:  "error",
-			},
+		c.JSON(400, gin.H{
+			"success": false,
+			"error":   "Invalid timestamp format",
 		})
 		return
 	}
-	defer resp.Body.Close()
+	
+	// Calculate latency (current time - client timestamp)
+	currentTime := time.Now().UnixMilli()
+	latency := int(currentTime - clientTimestamp)
 	
 	// Determine status based on latency
 	status := "good"
-	if latency > 200 {
+	if latency > 300 {
 		status = "high"
-	} else if latency > 100 {
+	} else if latency > 150 {
 		status = "medium"
 	}
 	
 	c.JSON(200, gin.H{
 		"success": true,
-		"latency": LatencyResponse{
-			Node:    nodeURL,
-			Latency: latency,
-			Status:  status,
-		},
+		"latency": latency,
+		"status":  status,
+		"timestamp": currentTime,
 	})
 }
 

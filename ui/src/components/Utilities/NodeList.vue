@@ -140,32 +140,26 @@ const fetchNodes = async () => {
 // Test latency for a single node
 const testNodeLatency = async (node) => {
   try {
-    // 使用轻量的favicon.ico来测试延迟
-    const targetUrl = isCurrentNode(node) ? '/favicon.ico' : `${node.url}/favicon.ico`
+    // Send timestamp with request
+    const timestamp = Date.now()
+    const targetUrl = isCurrentNode(node) ? '/nodes/latency' : `${node.url}/nodes/latency`
     
-    const startTime = performance.now()
-    const response = await fetch(targetUrl, {
+    const response = await fetch(`${targetUrl}?timestamp=${timestamp}`, {
       method: 'GET',
       mode: 'cors',
       cache: 'no-cache',
       signal: AbortSignal.timeout(5000) // 5 second timeout
     })
-    const endTime = performance.now()
     
-    if (response.ok || response.status === 404) { // favicon might not exist but server responds
-      const latency = Math.round(endTime - startTime)
-      
-      // Determine status based on latency
-      let status = 'good'
-      if (latency > 300) {
-        status = 'high'
-      } else if (latency > 150) {
-        status = 'medium'
-      }
-      
-      latencies.value[node.url] = {
-        latency: latency,
-        status: status
+    if (response.ok) {
+      const data = await response.json()
+      if (data.success) {
+        latencies.value[node.url] = {
+          latency: data.latency,
+          status: data.status
+        }
+      } else {
+        throw new Error('Server returned error')
       }
     } else {
       throw new Error('Server not responding properly')
