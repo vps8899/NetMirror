@@ -71,7 +71,7 @@ const copyToClipboard = async (text, buttonRef = null) => {
       <div v-if="appStore.config" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-2">Location</label>
+            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Location</label>
             <div class="flex">
               <input 
                 type="text" 
@@ -83,7 +83,7 @@ const copyToClipboard = async (text, buttonRef = null) => {
             </div>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-2">Server IPv4</label>
+            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Server IPv4</label>
             <div class="flex">
               <input 
                 type="text" 
@@ -105,7 +105,7 @@ const copyToClipboard = async (text, buttonRef = null) => {
         </div>
         <div class="space-y-4">
           <div v-if="appStore.config.public_ipv6">
-            <label class="block text-sm font-medium text-gray-600 mb-2">Server IPv6</label>
+            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Server IPv6</label>
             <div class="flex">
               <input 
                 type="text" 
@@ -125,7 +125,7 @@ const copyToClipboard = async (text, buttonRef = null) => {
             </div>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-2">Your IP Address</label>
+            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Your IP Address</label>
             <div class="flex">
               <input 
                 type="text" 
@@ -152,7 +152,7 @@ const copyToClipboard = async (text, buttonRef = null) => {
         v-if="appStore.config?.sponsor_message?.length > 0"
         class="mt-6 p-4 bg-primary-50/50 dark:bg-gray-700/50 rounded-lg border border-primary-200 dark:border-gray-600"
       >
-        <div class="prose prose-amber max-w-none">
+        <div class="prose prose-amber max-w-none dark:prose-invert">
           <Markdown :source="appStore.config.sponsor_message" />
         </div>
       </div>

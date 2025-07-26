@@ -241,9 +241,9 @@ onUnmounted(() => {
   <div ref="cardRef" class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 overflow-hidden">
     <div class="p-6">
       <div v-if="Object.keys(interfaces).length === 0" class="text-center py-12">
-        <ChartBarIcon class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No Traffic Data</h3>
-        <p class="text-gray-600 dark:text-gray-400">Waiting for network interface data...</p>
+        <ChartBarIcon class="w-16 h-16 text-gray-400/50 dark:text-gray-500/50 mx-auto mb-4" />
+        <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">No Traffic Data</h3>
+        <p class="text-gray-500 dark:text-gray-400">Waiting for network interface data...</p>
       </div>
       
       <div v-else :class="Object.keys(interfaces).length === 1 ? 'block' : 'grid grid-cols-1 xl:grid-cols-2 gap-6'">
