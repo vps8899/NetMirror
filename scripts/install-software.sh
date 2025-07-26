@@ -195,11 +195,13 @@ install_nexttrace() {
     local INSTALL_PATH="/usr/local/bin/nexttrace"
     
     # Try different repository names as the project might have moved
-    local REPOS=("nxtrace/Ntrace-V1" "nxtrace/NTrace-core" "sjlleo/nexttrace")
+    local REPOS="nxtrace/Ntrace-V1 nxtrace/NTrace-core sjlleo/nexttrace"
     
-    for repo in "${REPOS[@]}"; do
+    for repo in $REPOS; do
+        local OWNER=$(echo "$repo" | cut -d'/' -f1)
+        local PROJECT=$(echo "$repo" | cut -d'/' -f2)
         log_info "Trying repository: $repo"
-        if install_from_github "${repo%/*}" "${repo#*/}" "$INSTALL_PATH" "$ARCH" "linux.*$ARCH"; then
+        if install_from_github "$OWNER" "$PROJECT" "$INSTALL_PATH" "$ARCH" "linux.*$ARCH"; then
             log_success "NextTrace installed successfully from $repo"
             return 0
         fi
@@ -241,10 +243,10 @@ install_network_tools() {
 verify_installations() {
     log_info "Verifying installations..."
     
-    local tools=("iperf3" "mtr" "traceroute" "ping" "nexttrace")
+    local tools="iperf3 mtr traceroute ping nexttrace"
     local failed=0
     
-    for tool in "${tools[@]}"; do
+    for tool in $tools; do
         if command -v "$tool" >/dev/null 2>&1; then
             log_success "$tool is available"
         else
@@ -254,8 +256,8 @@ verify_installations() {
     done
     
     # Check optional tools
-    local optional_tools=("gping" "bandwhich" "dog")
-    for tool in "${optional_tools[@]}"; do
+    local optional_tools="gping bandwhich dog"
+    for tool in $optional_tools; do
         if command -v "$tool" >/dev/null 2>&1; then
             log_success "$tool is available (optional)"
         else
@@ -291,9 +293,9 @@ main() {
     install_network_tools
     
     # Install Speedtest CLI
-    if [ -f "install-speedtest.sh" ]; then
+    if [ -f "scripts/install-speedtest.sh" ]; then
         log_info "Installing Speedtest CLI..."
-        if bash install-speedtest.sh; then
+        if bash scripts/install-speedtest.sh; then
             log_success "Speedtest CLI installed successfully"
         else
             log_warning "Failed to install Speedtest CLI"

@@ -2,18 +2,65 @@ version: '3.8'
 
 services:
   als:
-    # 使用官方的 Docker 镜像
-    image: wikihostinc/looking-glass-server:latest
+    # 使用本地 Dockerfile 构建镜像
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
     container_name: looking-glass
     restart: always
-    # 使用主机网络模式，以便 iperf3 正常工作并简化端口映射。
-    # 这意味着容器将共享主机的网络堆栈。
+    # 使用主机网络模式，以便 iperf3 正常工作并简化端口映射
     network_mode: host
-    # 从同一目录下的 .env 文件加载环境变量。
+    # 从同一目录下的 .env 文件加载环境变量
     env_file:
       - .env
-    # 可选：为赞助商信息挂载本地文件。
+    # 可选：为赞助商信息挂载本地文件
     # 如果您想使用本地文件作为赞助商信息，请取消下面的注释，
-    # 并在 .env 文件中设置 SPONSOR_MESSAGE=/path/in/container/sponsor.md。
-    # volumes:
-    #   - ./sponsor.md:/path/in/container/sponsor.md
+    # 并在 .env 文件中设置 SPONSOR_MESSAGE=/data/sponsor.md
+    volumes:
+      - ./data:/data
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:${HTTP_PORT:-80}/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 可选：添加一个 nginx 反向代理服务
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: looking-glass-nginx
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - als
+  #   networks:
+  #     - als-network
+
+# 如果不使用 host 网络模式，可以使用自定义网络
+# networks:
+#   als-network:
+#     driver: bridge
+#     ipam:
+#       config:
+#         - subnet: 172.20.0.0/16
