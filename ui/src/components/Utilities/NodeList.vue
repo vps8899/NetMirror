@@ -182,9 +182,12 @@ const testNodeLatency = async (node) => {
 
 // Test all node latencies
 const testAllLatencies = async () => {
-  // Test all nodes in parallel
-  const promises = nodes.value.map(node => testNodeLatency(node))
-  await Promise.all(promises)
+  // Test nodes sequentially to avoid congestion
+  for (const node of nodes.value) {
+    await testNodeLatency(node)
+    // Small delay between tests to avoid overwhelming the network
+    await new Promise(resolve => setTimeout(resolve, 100))
+  }
 }
 
 // Get human-readable status text

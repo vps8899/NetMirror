@@ -15,6 +15,7 @@ const currentLangCode = ref('en-US')
 const isDark = ref(false)
 const appStore = useAppStore()
 const activeTab = ref('info')
+const tabContainer = ref(null)
 
 const tabs = [
   { id: 'info', label: 'Network Information', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9' },
@@ -28,6 +29,10 @@ const filteredTabs = computed(() => {
     return tabs.filter(tab => tab.id !== 'traffic')
   }
   return tabs
+})
+
+const tabIndex = computed(() => {
+  return filteredTabs.value.findIndex(tab => tab.id === activeTab.value)
 })
 
 const currentLang = computed(() => {
@@ -135,23 +140,23 @@ onMounted(async () => {
             </div>
             
             <!-- Tab Content -->
-            <div class="relative mt-6">
-              <Transition
-                mode="out-in"
-                enter-active-class="transition-all duration-300 ease-out"
-                enter-from-class="opacity-0 translate-y-2"
-                enter-to-class="opacity-100 translate-y-0"
-                leave-active-class="transition-all duration-200 ease-in"
-                leave-from-class="opacity-100 translate-y-0"
-                leave-to-class="opacity-0 -translate-y-2"
+            <div class="relative mt-6 overflow-hidden">
+              <div 
+                class="flex transition-transform duration-300 ease-out"
+                :style="{ transform: `translateX(-${tabIndex * 100}%)` }"
               >
-                <div :key="activeTab">
-                  <InfoCard v-if="activeTab === 'info'" />
-                  <UtilitiesCard v-else-if="activeTab === 'tools'" />
-                  <SpeedtestCard v-else-if="activeTab === 'speedtest'" />
-                  <TrafficCard v-else-if="activeTab === 'traffic'" />
+                <div 
+                  v-for="(tab, index) in filteredTabs" 
+                  :key="tab.id"
+                  class="w-full flex-shrink-0"
+                  :style="{ order: index }"
+                >
+                  <InfoCard v-if="tab.id === 'info'" />
+                  <UtilitiesCard v-else-if="tab.id === 'tools'" />
+                  <SpeedtestCard v-else-if="tab.id === 'speedtest'" />
+                  <TrafficCard v-else-if="tab.id === 'traffic'" />
                 </div>
-              </Transition>
+              </div>
             </div>
           </template>
         </div>
