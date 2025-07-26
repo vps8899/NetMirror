@@ -253,11 +253,12 @@ onUnmounted(() => {
         <p class="text-gray-600 dark:text-gray-400">Waiting for network interface data...</p>
       </div>
       
-      <div v-else class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div v-else :class="Object.keys(interfaces).length === 1 ? 'block' : 'grid grid-cols-1 xl:grid-cols-2 gap-6'">
         <div 
           v-for="(interfaceData, interfaceName) in interfaces" 
           :key="interfaceName"
           class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 border border-gray-200 dark:border-gray-600"
+          :class="Object.keys(interfaces).length === 1 ? 'mx-auto max-w-4xl' : ''"
         >
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ interfaceName }}</h3>

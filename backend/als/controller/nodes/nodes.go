@@ -1,7 +1,6 @@
 package nodes
 
 import (
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
