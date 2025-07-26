@@ -114,9 +114,6 @@ RUN go install github.com/air-verse/air@latest
 # 设置工作目录
 WORKDIR /app
 
-# 复制 air 配置文件
-COPY .air.toml .
-
 # 暴露端口
 EXPOSE 8080
 
