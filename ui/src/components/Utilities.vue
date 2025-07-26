@@ -164,15 +164,25 @@ const executeTest = async () => {
           if (selectedMethod.value === 'ping') {
             // ping事件返回的是ping包数据，需要解析
             const data = JSON.parse(event.data)
-            if (data.addr && data.rtt !== undefined) {
-              output.value += `PING ${data.addr}: seq=${data.seq} time=${(data.rtt / 1e6).toFixed(2)}ms\n`
+            console.log('Ping event data:', data) // 调试日志
+            
+            if (data.from && data.latency !== undefined) {
+              const latencyMs = (data.latency / 1e6).toFixed(2) // 纳秒转毫秒
+              output.value += `64 bytes from ${data.from}: icmp_seq=${data.seq} ttl=${data.ttl} time=${latencyMs} ms\n`
             }
+            
+            // 检查是否超时
+            if (data.is_timeout) {
+              output.value += `Request timeout for icmp_seq ${data.seq}\n`
+            }
+            
             // ping完成10次后自动停止
             if (data.seq >= 9) { // seq从0开始，所以9表示第10个包
               setTimeout(() => {
                 appStore.source.removeEventListener(eventName, handleOutput)
                 isExecuting.value = false
-                output.value += '\nPing completed.\n'
+                output.value += '\n--- ping statistics ---\n'
+                output.value += 'Ping completed.\n'
               }, 1000)
             }
           } else {
