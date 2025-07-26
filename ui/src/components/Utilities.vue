@@ -184,11 +184,11 @@ const closeTool = () => {
         <button
           v-if="config.feature_ping"
           @click="openTool(tools.find(t => t.label === 'Ping'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300"
+          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
         >
           <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-primary-500 to-primary-600"></div>
           <div class="relative z-10 flex items-center space-x-4">
-            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300">
+            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300 group-hover:rotate-12">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
               </svg>
@@ -198,13 +198,14 @@ const closeTool = () => {
               <p class="text-sm text-gray-600 dark:text-gray-300 group-hover:text-white/80 transition-colors duration-300">IPv4 connectivity test</p>
             </div>
           </div>
+          <div class="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-primary-500 to-primary-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
         </button>
 
         <!-- Ping IPv6 -->
         <button
           v-if="config.feature_ping"
           @click="openTool(tools.find(t => t.label === 'Ping6'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300"
+          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
         >
           <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-primary-600 to-blue-600"></div>
           <div class="relative z-10 flex items-center space-x-4">
@@ -224,7 +225,7 @@ const closeTool = () => {
         <button
           v-if="config.feature_mtr"
           @click="openTool(tools.find(t => t.label === 'MTR'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300"
+          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
         >
           <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-blue-500 to-sky-500"></div>
           <div class="relative z-10 flex items-center space-x-4">
@@ -244,7 +245,7 @@ const closeTool = () => {
         <button
           v-if="config.feature_mtr"
           @click="openTool(tools.find(t => t.label === 'MTR6'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300"
+          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
         >
           <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-sky-500 to-cyan-500"></div>
           <div class="relative z-10 flex items-center space-x-4">
@@ -264,7 +265,7 @@ const closeTool = () => {
         <button
           v-if="config.feature_traceroute"
           @click="openTool(tools.find(t => t.label === 'Traceroute'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300"
+          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
         >
           <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-purple-500 to-pink-500"></div>
           <div class="relative z-10 flex items-center space-x-4">
@@ -284,7 +285,7 @@ const closeTool = () => {
         <button
           v-if="config.feature_traceroute"
           @click="openTool(tools.find(t => t.label === 'Traceroute6'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300"
+          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
         >
           <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-pink-500 to-rose-500"></div>
           <div class="relative z-10 flex items-center space-x-4">
@@ -304,7 +305,7 @@ const closeTool = () => {
         <button
           v-if="config.feature_iperf3"
           @click="openTool(tools.find(t => t.label === 'IPerf3'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300"
+          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
         >
           <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-green-500 to-emerald-500"></div>
           <div class="relative z-10 flex items-center space-x-4">
@@ -324,7 +325,7 @@ const closeTool = () => {
         <button
           v-if="config.feature_speedtest_dot_net"
           @click="openTool(tools.find(t => t.label === 'Speedtest.net'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300"
+          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
         >
           <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-orange-500 to-amber-500"></div>
           <div class="relative z-10 flex items-center space-x-4">
@@ -344,7 +345,7 @@ const closeTool = () => {
         <button
           v-if="config.feature_shell"
           @click="openTool(tools.find(t => t.label === 'Shell'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300"
+          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
         >
           <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-gray-600 to-gray-700"></div>
           <div class="relative z-10 flex items-center space-x-4">

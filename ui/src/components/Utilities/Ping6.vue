@@ -144,7 +144,7 @@ onMounted(() => {
               <td class="px-6 py-3 whitespace-nowrap font-mono text-gray-700 dark:text-gray-300">
                 {{ record.seq }}
               </td>
-              <td class="px-6 py-3 whitespace-nowrap font-mono text-gray-700 dark:text-gray-300">
+              <td class="px-6 py-3 whitespace-nowrap font-mono text-gray-700 dark:text-gray-300" :class="{ 'text-red-600 dark:text-red-400': record.host && record.host.startsWith('Error') }">
                 {{ record.host }}
               </td>
               <td class="px-6 py-3 whitespace-nowrap font-mono text-gray-700 dark:text-gray-300">
