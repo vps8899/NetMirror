@@ -15,6 +15,7 @@ const appStore = useAppStore()
 const activeTab = ref('info')
 const tabContainer = ref(null)
 const tabNavigation = ref(null)
+const showFab = ref(false)
 
 // Use store theme and language
 const isDark = computed(() => appStore.theme === 'dark')
@@ -72,6 +73,21 @@ const changeTab = (tabId) => {
   }, 50)
 }
 
+const handleScroll = () => {
+  if (window.scrollY > 200) {
+    showFab.value = true
+  } else {
+    showFab.value = false
+  }
+}
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+}
+
 onMounted(async () => {
   // Initialize the app store and wait for session ID
   await appStore.initialize()
@@ -79,6 +95,12 @@ onMounted(async () => {
   // Load stored language
   await loadLocaleMessages(appStore.language)
   setI18nLanguage(appStore.language)
+
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
@@ -194,19 +216,44 @@ onMounted(async () => {
       </footer>
     </div>
 
-    <!-- Controls in fixed position -->
-    <div class="fixed top-6 right-6 z-50">
-      <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-primary-200/50 dark:border-primary-700/50 p-4 ring-1 ring-primary-100/20 dark:ring-primary-800/20">
-        <div class="flex items-center space-x-4">
-          <ThemeToggle :is-dark="isDark" @toggle="toggleTheme" />
-          <div class="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
-          <LanguageSelector 
-            :current-lang="currentLangCode" 
-            :lang-list="langList"
-            @change="handleLangChange" 
-          />
+    <!-- Floating Action Button Group -->
+    <div class="fixed bottom-8 right-8 z-50">
+      <transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0 translate-y-4"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 translate-y-4"
+      >
+        <div v-if="showFab" class="relative group flex flex-col items-center space-y-2">
+          <!-- Action Buttons (hidden by default, shown on hover) -->
+          <div class="absolute bottom-14 space-y-2 transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:-translate-y-2">
+            <!-- Scroll to Top -->
+            <button @click="scrollToTop" class="w-14 h-14 flex items-center justify-center bg-white dark:bg-gray-700 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 transform hover:scale-110">
+              <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+            </button>
+            <!-- Language Selector -->
+            <div class="w-14 h-14 flex items-center justify-center bg-white dark:bg-gray-700 rounded-full shadow-lg">
+              <LanguageSelector 
+                :current-lang="currentLangCode" 
+                :lang-list="langList"
+                @change="handleLangChange" 
+                :show-label="false"
+              />
+            </div>
+            <!-- Theme Toggle -->
+            <div class="w-14 h-14 flex items-center justify-center bg-white dark:bg-gray-700 rounded-full shadow-lg">
+              <ThemeToggle :is-dark="isDark" @toggle="toggleTheme" />
+            </div>
+          </div>
+          
+          <!-- Main FAB -->
+          <button class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 text-white rounded-full shadow-2xl shadow-primary-500/30 flex items-center justify-center transform group-hover:rotate-90 transition-transform duration-300 focus:outline-none">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+          </button>
         </div>
-      </div>
+      </transition>
     </div>
   </div>
 </template>

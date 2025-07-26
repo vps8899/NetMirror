@@ -7,7 +7,11 @@ const { apply } = useMotion()
 
 const props = defineProps({
   currentLang: String,
-  langList: Array
+  langList: Array,
+  showLabel: {
+    type: Boolean,
+    default: true
+  }
 })
 
 const emit = defineEmits(['change'])
@@ -30,11 +34,13 @@ const selectLanguage = (langValue) => {
   <div class="relative">
     <button
       @click="isOpen = !isOpen"
-      class="inline-flex items-center space-x-2 px-3 py-2 bg-white/50 dark:bg-gray-700/50 hover:bg-white/80 dark:hover:bg-gray-700/80 rounded-xl transition-all duration-200"
+      class="inline-flex items-center justify-center transition-all duration-200"
+      :class="showLabel ? 'space-x-2 px-3 py-2 bg-white/50 dark:bg-gray-700/50 hover:bg-white/80 dark:hover:bg-gray-700/80 rounded-xl' : 'w-full h-full'"
     >
-      <GlobeAltIcon class="w-4 h-4 text-gray-600 dark:text-gray-400" />
-      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ currentLangLabel }}</span>
+      <GlobeAltIcon class="w-6 h-6 text-gray-600 dark:text-gray-300" />
+      <span v-if="showLabel" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ currentLangLabel }}</span>
       <ChevronDownIcon 
+        v-if="showLabel"
         class="w-4 h-4 text-gray-500 transition-transform duration-200"
         :class="{ 'rotate-180': isOpen }"
       />
@@ -51,7 +57,8 @@ const selectLanguage = (langValue) => {
       <div
         v-if="isOpen"
         ref="dropdownRef"
-        class="absolute left-0 mt-2 w-48 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 dark:border-gray-700/50 py-2 z-50"
+        class="absolute bottom-full mb-2 w-48 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 dark:border-gray-700/50 py-2 z-50"
+        :class="showLabel ? 'left-0' : 'right-0'"
       >
         <button
           v-for="lang in langList"
