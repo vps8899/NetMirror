@@ -56,6 +56,21 @@ const toggleTheme = () => {
   document.documentElement.classList.toggle('dark', isDark.value)
 }
 
+const changeTab = (tabId) => {
+  activeTab.value = tabId
+  // 延迟一下让动画开始，然后滚动到tab导航位置
+  setTimeout(() => {
+    if (tabNavigation.value) {
+      const rect = tabNavigation.value.getBoundingClientRect()
+      const scrollTop = window.pageYOffset + rect.top - 100 // 留100px的顶部空间
+      window.scrollTo({
+        top: scrollTop,
+        behavior: 'smooth'
+      })
+    }
+  }, 50)
+}
+
 onMounted(async () => {
   const langCode = await autoLang()
   currentLangCode.value = langCode
