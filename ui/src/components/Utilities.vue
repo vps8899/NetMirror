@@ -150,12 +150,12 @@ const executeTest = async () => {
     }, controller.signal)
     
     if (response.success) {
-      // 清空之前的占位符输出
-      output.value = ''
+      // 不要清空输出，保留开始消息
+      // output.value = ''  // 移除这行
       
       // 如果有实时输出，通过SSE接收
       if (response.data && response.data.output) {
-        output.value = response.data.output
+        output.value += response.data.output
       } else {
         // 根据不同的方法监听不同的事件
         const eventName = selectedMethod.value === 'ping' ? 'Ping' : 'MethodOutput'
