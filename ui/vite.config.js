@@ -119,7 +119,15 @@ export default defineConfig(({ command, mode }) => {
 
       // Auto import composables and utilities
       AutoImport({
-        imports: ["vue", "@vueuse/core", "@vueuse/motion", "pinia", "vue-i18n"],
+        imports: [
+          "vue",
+          "@vueuse/core",
+          {
+            "@vueuse/motion": ["useMotion"],
+          },
+          "pinia",
+          "vue-i18n",
+        ],
         dts: true,
         eslintrc: {
           enabled: true,
