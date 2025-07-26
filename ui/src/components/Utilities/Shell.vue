@@ -147,7 +147,15 @@ onMounted(() => {
   fitAddon.fit()
   apply()
   
-  connectWebSocket()
+  // Wait for sessionId to be available
+  const checkSessionAndConnect = () => {
+    if (appStore.sessionId) {
+      connectWebSocket()
+    } else {
+      setTimeout(checkSessionAndConnect, 100)
+    }
+  }
+  checkSessionAndConnect()
 })
 
 onUnmounted(() => {
