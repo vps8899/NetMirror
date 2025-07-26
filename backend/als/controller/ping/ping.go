@@ -16,10 +16,19 @@ func Handle(c *gin.Context) {
 	v, _ := c.Get("clientSession")
 	clientSession := v.(*client.ClientSession)
 	channel := clientSession.Channel
-	if !ok {
+	if !ok || ip == "" {
 		c.JSON(400, &gin.H{
 			"success": false,
-			"error":   "Invaild IP Address",
+			"error":   "Invalid IP Address",
+		})
+		return
+	}
+
+	// Validate input to prevent any potential issues
+	if !isValidIPOrHostname(ip) {
+		c.JSON(400, &gin.H{
+			"success": false,
+			"error":   "Invalid IP address or hostname format",
 		})
 		return
 	}
