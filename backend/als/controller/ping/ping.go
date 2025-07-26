@@ -2,6 +2,9 @@ package ping
 
 import (
 	"encoding/json"
+	"net"
+	"regexp"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/X-Zero-L/als/als/client"
