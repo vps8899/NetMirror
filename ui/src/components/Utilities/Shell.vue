@@ -111,11 +111,32 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="terminalRef" class="terminal" style="flex-grow: 1; height: 100%" />
+  <div class="h-full flex flex-col bg-gray-900/80 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 shadow-2xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-3 bg-gray-800/90 border-b border-gray-700 flex-shrink-0">
+      <div class="flex items-center space-x-2">
+        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+        <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+      </div>
+      <div class="text-sm text-gray-300">
+        <span>Interactive Shell</span>
+      </div>
+      <div class="w-12"></div> <!-- Placeholder for balance -->
+    </div>
+    
+    <!-- Terminal Container -->
+    <div class="flex-1 p-2 overflow-hidden">
+      <div ref="terminalRef" class="h-full w-full" />
+    </div>
+  </div>
 </template>
 
 <style>
-div:has(> div.terminal) {
-  padding: 0px !important;
+.terminal .xterm-viewport {
+  background-color: transparent !important;
+}
+.terminal .xterm-screen {
+  background-color: transparent !important;
 }
 </style>
