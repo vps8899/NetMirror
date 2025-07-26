@@ -48,14 +48,13 @@ const currentLang = computed(() => {
 })
 
 const handleLangChange = async (newLang) => {
-  currentLangCode.value = newLang
-  await loadLocaleMessages(currentLangCode.value)
-  setI18nLanguage(currentLangCode.value)
+  appStore.setLanguage(newLang)
+  await loadLocaleMessages(newLang)
+  setI18nLanguage(newLang)
 }
 
 const toggleTheme = () => {
-  isDark.value = !isDark.value
-  document.documentElement.classList.toggle('dark', isDark.value)
+  appStore.setTheme(appStore.theme === 'dark' ? 'light' : 'dark')
 }
 
 const changeTab = (tabId) => {
