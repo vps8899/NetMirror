@@ -28,6 +28,25 @@ type Ping6Response struct {
 func HandlePing6(c *gin.Context) {
 	ip, ok := c.GetQuery("ip")
 	if !ok || ip == "" {
+		// Get client session first to send error message
+		v, exists := c.Get("clientSession")
+		if exists {
+			clientSession := v.(*client.ClientSession)
+			// Send error message through WebSocket
+			errorResp := Ping6Response{
+				From:      "Error: No IP provided",
+				Seq:       1,
+				TTL:       0,
+				Latency:   0,
+				IsTimeout: true,
+			}
+			jsonData, _ := json.Marshal(errorResp)
+			clientSession.Channel <- &client.Message{
+				Name:    "Ping6",
+				Content: string(jsonData),
+			}
+		}
+		
 		c.JSON(400, &gin.H{
 			"success": false,
 			"error":   "Invalid IP Address",
@@ -38,6 +57,25 @@ func HandlePing6(c *gin.Context) {
 	// Validate input to prevent command injection
 	// Allow only valid IPv6 addresses or hostnames
 	if !isValidIPv6OrHostname(ip) {
+		// Get client session first to send error message
+		v, exists := c.Get("clientSession")
+		if exists {
+			clientSession := v.(*client.ClientSession)
+			// Send error message through WebSocket
+			errorResp := Ping6Response{
+				From:      "Error: Invalid input",
+				Seq:       1,
+				TTL:       0,
+				Latency:   0,
+				IsTimeout: true,
+			}
+			jsonData, _ := json.Marshal(errorResp)
+			clientSession.Channel <- &client.Message{
+				Name:    "Ping6",
+				Content: string(jsonData),
+			}
+		}
+		
 		c.JSON(400, &gin.H{
 			"success": false,
 			"error":   "Invalid IPv6 address or hostname",
