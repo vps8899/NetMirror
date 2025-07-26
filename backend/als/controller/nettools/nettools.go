@@ -112,7 +112,7 @@ func HandleNetworkTool(toolName string) gin.HandlerFunc {
 
 		// Send start message
 		clientSession.Channel <- &client.Message{
-			Name:    "MethodOutput",
+			Name:    tool.EventName,
 			Content: fmt.Sprintf(`{"output":"Starting %s to %s...\n","finished":false}`, tool.Name, ip),
 		}
 
@@ -128,7 +128,7 @@ func HandleNetworkTool(toolName string) gin.HandlerFunc {
 					return
 				}
 				msg := &client.Message{
-					Name:    "MethodOutput",
+					Name:    tool.EventName,
 					Content: fmt.Sprintf(`{"output":%s,"finished":false}`, strconv.Quote(string(buf[:n]))),
 				}
 				clientSession.Channel <- msg
@@ -151,7 +151,7 @@ func HandleNetworkTool(toolName string) gin.HandlerFunc {
 
 		// Send completion message
 		clientSession.Channel <- &client.Message{
-			Name:    "MethodOutput",
+			Name:    tool.EventName,
 			Content: fmt.Sprintf(`{"output":"\n%s completed.\n","finished":true}`, tool.Name),
 		}
 
