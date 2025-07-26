@@ -32,6 +32,7 @@
           <div class="mt-4 flex items-center justify-between">
             <div class="flex items-center space-x-2">
               <div
+                :key="`indicator-${node.url}`"
                 class="w-2 h-2 rounded-full animate-pulse"
                 :class="{
                   'bg-green-500': latencies[node.url]?.status === 'good',
@@ -40,7 +41,7 @@
                   'bg-gray-400': !latencies[node.url]
                 }"
               ></div>
-              <span class="text-sm font-medium" :class="{
+              <span :key="`latency-${node.url}`" class="text-sm font-medium" :class="{
                 'text-green-600 dark:text-green-400': latencies[node.url]?.status === 'good',
                 'text-yellow-600 dark:text-yellow-400': latencies[node.url]?.status === 'medium',
                 'text-red-600 dark:text-red-400': latencies[node.url]?.status === 'high' || latencies[node.url]?.status === 'error',
@@ -53,7 +54,7 @@
             </div>
             
             <!-- Status Badge -->
-            <div v-if="latencies[node.url]" class="text-xs font-medium px-2 py-1 rounded-full" :class="{
+            <div v-if="latencies[node.url]" :key="`status-${node.url}`" class="text-xs font-medium px-2 py-1 rounded-full" :class="{
               'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': latencies[node.url].status === 'good',
               'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300': latencies[node.url].status === 'medium',
               'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': latencies[node.url].status === 'high',

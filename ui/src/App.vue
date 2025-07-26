@@ -114,18 +114,18 @@ onMounted(async () => {
             
             <!-- Tab Navigation -->
             <div class="animate-slide-up" style="animation-delay: 0.1s;">
-              <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 p-2 mb-6">
-                <div class="flex flex-wrap gap-2">
+              <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 p-2 inline-block">
+                <div class="flex gap-2">
                   <button
                     v-for="tab in filteredTabs"
                     :key="tab.id"
                     @click="activeTab = tab.id"
-                    class="flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 group"
+                    class="flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 group"
                     :class="activeTab === tab.id 
-                      ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg scale-105' 
-                      : 'bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 hover:scale-[1.02]'"
+                      ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg' 
+                      : 'bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80'"
                   >
-                    <svg class="w-5 h-5 transition-transform duration-300" :class="activeTab === tab.id ? 'rotate-12' : 'group-hover:rotate-6'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 transition-transform duration-200" :class="activeTab === tab.id ? 'rotate-12' : 'group-hover:rotate-6'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tab.icon"></path>
                     </svg>
                     <span>{{ tab.label }}</span>
