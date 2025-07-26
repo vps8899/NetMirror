@@ -21,15 +21,6 @@ func Handle(c *gin.Context) {
 		return
 	}
 
-	// Validate input to prevent any potential issues
-	if !isValidIPOrHostname(ip) {
-		c.JSON(400, &gin.H{
-			"success": false,
-			"error":   "Invalid IP address or hostname format",
-		})
-		return
-	}
-
 	p, err := ping.New(ip)
 	if err != nil {
 		c.JSON(400, &gin.H{
