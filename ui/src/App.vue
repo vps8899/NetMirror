@@ -112,24 +112,46 @@ onMounted(async () => {
               <NodeListCard />
             </div>
             
-            <!-- Network Information Card -->
+            <!-- Tab Navigation -->
             <div class="animate-slide-up" style="animation-delay: 0.1s;">
-              <InfoCard />
+              <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 p-2 mb-6">
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    v-for="tab in filteredTabs"
+                    :key="tab.id"
+                    @click="activeTab = tab.id"
+                    class="flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 group"
+                    :class="activeTab === tab.id 
+                      ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg scale-105' 
+                      : 'bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 hover:scale-[1.02]'"
+                  >
+                    <svg class="w-5 h-5 transition-transform duration-300" :class="activeTab === tab.id ? 'rotate-12' : 'group-hover:rotate-6'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tab.icon"></path>
+                    </svg>
+                    <span>{{ tab.label }}</span>
+                  </button>
+                </div>
+              </div>
             </div>
             
-            <!-- Looking Glass Card -->
-            <div class="animate-slide-up" style="animation-delay: 0.2s;">
-              <UtilitiesCard />
-            </div>
-            
-            <!-- Speed Test Card -->
-            <div class="animate-slide-up" style="animation-delay: 0.3s;">
-              <SpeedtestCard />
-            </div>
-
-            <!-- Traffic Display (if enabled) -->
-            <div v-if="appStore.config.feature_iface_traffic" class="animate-slide-up" style="animation-delay: 0.4s;">
-              <TrafficCard />
+            <!-- Tab Content -->
+            <div class="relative">
+              <Transition
+                mode="out-in"
+                enter-active-class="transition-all duration-500 ease-out"
+                enter-from-class="opacity-0 translate-y-4"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition-all duration-300 ease-in"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 -translate-y-4"
+              >
+                <div :key="activeTab" class="animate-slide-up">
+                  <InfoCard v-if="activeTab === 'info'" />
+                  <UtilitiesCard v-else-if="activeTab === 'tools'" />
+                  <SpeedtestCard v-else-if="activeTab === 'speedtest'" />
+                  <TrafficCard v-else-if="activeTab === 'traffic'" />
+                </div>
+              </Transition>
             </div>
           </template>
         </div>
@@ -248,5 +270,35 @@ body {
 
 .dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(147, 197, 253, 0.5);
+}
+
+/* Enhanced glassmorphism/acrylic effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+}
+
+.dark .glass-effect {
+  background: rgba(31, 41, 55, 0.6);
+}
+
+/* Tab transitions */
+.tab-enter-active {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tab-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.tab-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.tab-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
 }
 </style>
