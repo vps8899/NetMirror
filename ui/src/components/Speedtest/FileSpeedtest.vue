@@ -32,10 +32,26 @@ const getFullUrl = (fileSize, ipVersion = null) => {
   return relativePath
 }
 
-const copyToClipboard = async (text) => {
+const copyToClipboard = async (text, buttonRef = null) => {
   try {
     await navigator.clipboard.writeText(text)
-    // Could add toast notification here
+    
+    // 显示复制成功的反馈
+    if (buttonRef) {
+      const originalText = buttonRef.textContent
+      const originalClass = buttonRef.className
+      
+      buttonRef.textContent = '✓ Copied!'
+      buttonRef.className = buttonRef.className.replace(/bg-gray-\d+/g, 'bg-green-500').replace(/hover:bg-gray-\d+/g, 'hover:bg-green-600').replace(/text-gray-\d+/g, 'text-white')
+      
+      setTimeout(() => {
+        buttonRef.textContent = originalText
+        buttonRef.className = originalClass
+      }, 2000)
+    } else {
+      // 如果没有按钮引用，显示简单的提示
+      console.log('Copied to clipboard:', text)
+    }
   } catch (err) {
     // Fallback for older browsers
     const textArea = document.createElement('textarea')
@@ -44,6 +60,14 @@ const copyToClipboard = async (text) => {
     textArea.select()
     document.execCommand('copy')
     document.body.removeChild(textArea)
+    
+    if (buttonRef) {
+      const originalText = buttonRef.textContent
+      buttonRef.textContent = '✓ Copied!'
+      setTimeout(() => {
+        buttonRef.textContent = originalText
+      }, 2000)
+    }
   }
 }
 
@@ -102,7 +126,7 @@ const getWgetCommand = (fileSize, ipVersion = null) => {
             <!-- Command line options -->
             <div class="grid grid-cols-2 gap-2">
               <button
-                @click="copyToClipboard(getCurlCommand(fileSize))"
+                @click="copyToClipboard(getCurlCommand(fileSize), $event.target)"
                 class="inline-flex items-center justify-center px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                 title="Copy curl command"
               >
@@ -110,7 +134,7 @@ const getWgetCommand = (fileSize, ipVersion = null) => {
                 curl
               </button>
               <button
-                @click="copyToClipboard(getWgetCommand(fileSize))"
+                @click="copyToClipboard(getWgetCommand(fileSize), $event.target)"
                 class="inline-flex items-center justify-center px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                 title="Copy wget command"
               >
@@ -161,7 +185,7 @@ const getWgetCommand = (fileSize, ipVersion = null) => {
               <!-- Command line options -->
               <div class="grid grid-cols-2 gap-2">
                 <button
-                  @click="copyToClipboard(getCurlCommand(fileSize, 'ipv4'))"
+                  @click="copyToClipboard(getCurlCommand(fileSize, 'ipv4'), $event.target)"
                   class="inline-flex items-center justify-center px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                   title="Copy curl command"
                 >
@@ -169,7 +193,7 @@ const getWgetCommand = (fileSize, ipVersion = null) => {
                   curl
                 </button>
                 <button
-                  @click="copyToClipboard(getWgetCommand(fileSize, 'ipv4'))"
+                  @click="copyToClipboard(getWgetCommand(fileSize, 'ipv4'), $event.target)"
                   class="inline-flex items-center justify-center px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                   title="Copy wget command"
                 >
@@ -218,7 +242,7 @@ const getWgetCommand = (fileSize, ipVersion = null) => {
               <!-- Command line options -->
               <div class="grid grid-cols-2 gap-2">
                 <button
-                  @click="copyToClipboard(getCurlCommand(fileSize, 'ipv6'))"
+                  @click="copyToClipboard(getCurlCommand(fileSize, 'ipv6'), $event.target)"
                   class="inline-flex items-center justify-center px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                   title="Copy curl command"
                 >
@@ -226,7 +250,7 @@ const getWgetCommand = (fileSize, ipVersion = null) => {
                   curl
                 </button>
                 <button
-                  @click="copyToClipboard(getWgetCommand(fileSize, 'ipv6'))"
+                  @click="copyToClipboard(getWgetCommand(fileSize, 'ipv6'), $event.target)"
                   class="inline-flex items-center justify-center px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                   title="Copy wget command"
                 >

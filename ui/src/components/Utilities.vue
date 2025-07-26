@@ -57,7 +57,7 @@ const tools = ref([
   {
     label: 'Ping',
     description: 'Test network connectivity',
-    color: 'from-blue-500 to-sky-500',
+    color: 'from-primary-500 to-primary-600',
     show: false,
     enable: false,
     componentNode: defineAsyncComponent({
@@ -71,7 +71,7 @@ const tools = ref([
   {
     label: 'IPerf3',
     description: 'Measure network bandwidth',
-    color: 'from-green-500 to-emerald-500',
+    color: 'from-primary-600 to-blue-600',
     show: false,
     enable: false,
     componentNode: defineAsyncComponent({
@@ -85,7 +85,7 @@ const tools = ref([
   {
     label: 'Speedtest.net',
     description: 'Official Speedtest CLI',
-    color: 'from-purple-500 to-violet-500',
+    color: 'from-blue-500 to-sky-500',
     show: false,
     enable: false,
     componentNode: defineAsyncComponent({

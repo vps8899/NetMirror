@@ -8,10 +8,23 @@ import Markdown from 'vue3-markdown-it'
 const appStore = useAppStore()
 const { t } = useI18n({ useScope: 'global' })
 
-const copyToClipboard = async (text, button) => {
+const copyToClipboard = async (text, buttonRef = null) => {
   try {
     await navigator.clipboard.writeText(text)
-    // Visual feedback could be added here
+    
+    // 显示复制成功的反馈
+    if (buttonRef) {
+      const originalHTML = buttonRef.innerHTML
+      const originalClass = buttonRef.className
+      
+      buttonRef.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+      buttonRef.className = buttonRef.className.replace(/bg-primary-\d+/g, 'bg-green-500').replace(/hover:bg-primary-\d+/g, 'hover:bg-green-600').replace(/text-primary-\d+/g, 'text-white')
+      
+      setTimeout(() => {
+        buttonRef.innerHTML = originalHTML
+        buttonRef.className = originalClass
+      }, 2000)
+    }
   } catch (err) {
     // Fallback for older browsers
     const textArea = document.createElement('textarea')
@@ -20,6 +33,14 @@ const copyToClipboard = async (text, button) => {
     textArea.select()
     document.execCommand('copy')
     document.body.removeChild(textArea)
+    
+    if (buttonRef) {
+      const originalHTML = buttonRef.innerHTML
+      buttonRef.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+      setTimeout(() => {
+        buttonRef.innerHTML = originalHTML
+      }, 2000)
+    }
   }
 }
 </script>
