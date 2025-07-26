@@ -2,30 +2,34 @@ version: '3.3'
 
 services:
   als:
-    # 使用本地 Dockerfile 构建镜像
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: looking-glass
+    container_name: looking-glass-prod
     restart: always
-    # 使用主机网络模式，以便 iperf3 正常工作并简化端口映射
     network_mode: host
-    # 从同一目录下的 .env 文件加载环境变量
     env_file:
-      - .env
-    # 可选：为赞助商信息挂载本地文件
+      - .env.prod
     volumes:
       - ./data:/data
-    # 健康检查 - 使用简化语法
+      - ./logs:/var/log/als
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    # 日志配置
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "50m"
+        max-file: "5"
+    # 生产环境资源限制
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
