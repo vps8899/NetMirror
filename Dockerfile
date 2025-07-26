@@ -109,7 +109,7 @@ RUN apk add --no-cache \
    musl-dev
 
 # 安装 air 用于热重载
-RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/air-verse/air@latest
 
 # 设置工作目录
 WORKDIR /app
