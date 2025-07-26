@@ -8,11 +8,6 @@ const { config } = storeToRefs(appStore)
 
 const toolComponent = shallowRef(null)
 const currentTool = ref(null)
-const targetHost = ref('')
-const selectedMethod = ref('ping')
-const isExecuting = ref(false)
-const output = ref('')
-const showOutput = ref(false)
 
 const toolComponentShow = computed({
   get() {
@@ -26,37 +21,10 @@ const toolComponentShow = computed({
   }
 })
 
-const hasToolEnable = computed(() => {
-  return tools.value.some(tool => tool.enable)
-})
-
-const availableMethods = computed(() => {
-  const methods = []
-  if (config.value.feature_ping) {
-    methods.push(
-      { value: 'ping', label: 'ping' },
-      { value: 'ping6', label: 'ping6' }
-    )
-  }
-  if (config.value.feature_mtr) {
-    methods.push(
-      { value: 'mtr', label: 'mtr' },
-      { value: 'mtr6', label: 'mtr6' }
-    )
-  }
-  if (config.value.feature_traceroute) {
-    methods.push(
-      { value: 'traceroute', label: 'traceroute' },
-      { value: 'traceroute6', label: 'traceroute6' }
-    )
-  }
-  return methods
-})
-
 const tools = ref([
   {
     label: 'Ping',
-    description: 'Test network connectivity',
+    description: 'IPv4 connectivity test',
     color: 'from-primary-500 to-primary-600',
     show: false,
     enable: false,
@@ -69,9 +37,79 @@ const tools = ref([
     })
   },
   {
-    label: 'IPerf3',
-    description: 'Measure network bandwidth',
+    label: 'Ping6',
+    description: 'IPv6 connectivity test',
     color: 'from-primary-600 to-blue-600',
+    show: false,
+    enable: false,
+    componentNode: defineAsyncComponent({
+      loader: () => import('./Utilities/Ping6.vue'),
+      delay: 200,
+      loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
+        h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
+      ])
+    })
+  },
+  {
+    label: 'MTR',
+    description: 'Network path analysis',
+    color: 'from-blue-500 to-sky-500',
+    show: false,
+    enable: false,
+    componentNode: defineAsyncComponent({
+      loader: () => import('./Utilities/MTR.vue'),
+      delay: 200,
+      loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
+        h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
+      ])
+    })
+  },
+  {
+    label: 'MTR6',
+    description: 'IPv6 path analysis',
+    color: 'from-sky-500 to-cyan-500',
+    show: false,
+    enable: false,
+    componentNode: defineAsyncComponent({
+      loader: () => import('./Utilities/MTR6.vue'),
+      delay: 200,
+      loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
+        h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
+      ])
+    })
+  },
+  {
+    label: 'Traceroute',
+    description: 'Route path discovery',
+    color: 'from-purple-500 to-pink-500',
+    show: false,
+    enable: false,
+    componentNode: defineAsyncComponent({
+      loader: () => import('./Utilities/Traceroute.vue'),
+      delay: 200,
+      loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
+        h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
+      ])
+    })
+  },
+  {
+    label: 'Traceroute6',
+    description: 'IPv6 route discovery',
+    color: 'from-pink-500 to-rose-500',
+    show: false,
+    enable: false,
+    componentNode: defineAsyncComponent({
+      loader: () => import('./Utilities/Traceroute6.vue'),
+      delay: 200,
+      loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
+        h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
+      ])
+    })
+  },
+  {
+    label: 'IPerf3',
+    description: 'Bandwidth measurement',
+    color: 'from-green-500 to-emerald-500',
     show: false,
     enable: false,
     componentNode: defineAsyncComponent({
@@ -85,7 +123,7 @@ const tools = ref([
   {
     label: 'Speedtest.net',
     description: 'Official Speedtest CLI',
-    color: 'from-blue-500 to-sky-500',
+    color: 'from-orange-500 to-amber-500',
     show: false,
     enable: false,
     componentNode: defineAsyncComponent({
@@ -114,13 +152,8 @@ const tools = ref([
 
 onMounted(() => {
   for (const tool of tools.value) {
-    const configKey = 'feature_' + tool.label.toLowerCase().replace('.', '_dot_')
+    const configKey = 'feature_' + tool.label.toLowerCase().replace('.', '_dot_').replace('6', '')
     tool.enable = config.value[configKey] ?? false
-  }
-  
-  // Set default method
-  if (availableMethods.value.length > 0) {
-    selectedMethod.value = availableMethods.value[0].value
   }
 })
 
@@ -131,50 +164,6 @@ const openTool = (tool) => {
 
 const closeTool = () => {
   toolComponentShow.value = false
-}
-
-const executeTest = async () => {
-  if (!targetHost.value.trim()) return
-  
-  // 根据选择的方法找到对应的工具
-  const toolMap = {
-    'ping': 'Ping',
-    'ping6': 'Ping',
-    'mtr': 'Ping',  // 暂时使用Ping工具，后续可以创建专门的MTR工具
-    'mtr6': 'Ping',
-    'traceroute': 'Ping',
-    'traceroute6': 'Ping'
-  }
-  
-  const toolName = toolMap[selectedMethod.value]
-  if (!toolName) {
-    console.error('Tool not found for method:', selectedMethod.value)
-    return
-  }
-  
-  // 找到对应的工具配置
-  const tool = tools.value.find(t => t.label === toolName)
-  if (!tool) {
-    console.error('Tool configuration not found:', toolName)
-    return
-  }
-  
-  // 打开工具抽屉
-  openTool(tool)
-  
-  // 如果是Ping工具，自动填充IP地址并执行
-  setTimeout(() => {
-    if (toolComponent.value && toolComponent.value.exposed) {
-      // 设置目标地址
-      if (toolComponent.value.exposed.setTarget) {
-        toolComponent.value.exposed.setTarget(targetHost.value)
-      }
-      // 自动执行
-      if (toolComponent.value.exposed.execute) {
-        toolComponent.value.exposed.execute()
-      }
-    }
-  }, 300)
 }
 </script>
 
