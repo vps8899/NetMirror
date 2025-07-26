@@ -115,6 +115,20 @@ func HandlePing6(c *gin.Context) {
 	// Start the command
 	output, err := cmd.StdoutPipe()
 	if err != nil {
+		// Send error message through WebSocket
+		errorResp := Ping6Response{
+			From:      fmt.Sprintf("Error: %s", err.Error()),
+			Seq:       1,
+			TTL:       0,
+			Latency:   0,
+			IsTimeout: true,
+		}
+		jsonData, _ := json.Marshal(errorResp)
+		clientSession.Channel <- &client.Message{
+			Name:    "Ping6",
+			Content: string(jsonData),
+		}
+		
 		c.JSON(400, &gin.H{
 			"success": false,
 			"error":   err.Error(),
