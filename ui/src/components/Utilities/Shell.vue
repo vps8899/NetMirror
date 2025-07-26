@@ -49,13 +49,16 @@ const handleResize = () => {
 
 const connectWebSocket = () => {
   const url = new URL(location.href)
-  const protocol = url.protocol === 'http:' ? 'ws:' : 'wss:'
-  const wsUrl = `${protocol}//${url.host}${url.pathname}session/${useAppStore().sessionId}/shell`
+  const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+  const wsUrl = `${protocol}//${url.host}/session/${useAppStore().sessionId}/shell`
+  
+  console.log('Connecting to WebSocket:', wsUrl)
   
   websocket = new WebSocket(wsUrl)
   websocket.binaryType = 'arraybuffer'
   
   websocket.addEventListener('open', () => {
+    console.log('WebSocket connected successfully')
     isConnected.value = true
     connectionStatus.value = 'Connected'
     terminal.clear()
@@ -76,6 +79,7 @@ const connectWebSocket = () => {
   })
   
   websocket.addEventListener('close', (event) => {
+    console.log('WebSocket closed:', event.code, event.reason)
     isConnected.value = false
     if (event.code === 1000) {
       connectionStatus.value = 'Disconnected'
@@ -87,7 +91,8 @@ const connectWebSocket = () => {
     emit('closed')
   })
   
-  websocket.addEventListener('error', () => {
+  websocket.addEventListener('error', (error) => {
+    console.error('WebSocket error:', error)
     connectionStatus.value = 'Connection error'
     terminal.writeln('\r\n\x1b[1;31mWebSocket connection error\x1b[0m')
   })

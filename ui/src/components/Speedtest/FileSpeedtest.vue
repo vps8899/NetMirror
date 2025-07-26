@@ -38,19 +38,31 @@ const copyToClipboard = async (text, buttonRef = null) => {
     
     // 显示复制成功的反馈
     if (buttonRef) {
+      // 添加点击动画
+      buttonRef.style.transform = 'scale(0.95)'
+      buttonRef.style.transition = 'all 0.15s ease'
+      
+      setTimeout(() => {
+        buttonRef.style.transform = 'scale(1)'
+        buttonRef.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+      }, 150)
+
       const originalText = buttonRef.textContent
       const originalClass = buttonRef.className
       
+      // 成功状态样式
       buttonRef.textContent = '✓ Copied!'
-      buttonRef.className = buttonRef.className.replace(/bg-gray-\d+/g, 'bg-green-500').replace(/hover:bg-gray-\d+/g, 'hover:bg-green-600').replace(/text-gray-\d+/g, 'text-white')
+      buttonRef.className = originalClass.replace(/bg-gray-\d+/g, 'bg-green-500').replace(/hover:bg-gray-\d+/g, 'hover:bg-green-600').replace(/text-gray-\d+/g, 'text-white')
+      buttonRef.style.transform = 'scale(1.05)'
+      buttonRef.style.boxShadow = '0 4px 12px rgba(34, 197, 94, 0.4)'
       
       setTimeout(() => {
+        buttonRef.style.transform = 'scale(1)'
+        buttonRef.style.boxShadow = ''
         buttonRef.textContent = originalText
         buttonRef.className = originalClass
+        buttonRef.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       }, 2000)
-    } else {
-      // 如果没有按钮引用，显示简单的提示
-      console.log('Copied to clipboard:', text)
     }
   } catch (err) {
     // Fallback for older browsers
@@ -63,10 +75,15 @@ const copyToClipboard = async (text, buttonRef = null) => {
     
     if (buttonRef) {
       const originalText = buttonRef.textContent
-      buttonRef.textContent = '✓ Copied!'
+      buttonRef.style.transform = 'scale(0.95)'
       setTimeout(() => {
-        buttonRef.textContent = originalText
-      }, 2000)
+        buttonRef.style.transform = 'scale(1.05)'
+        buttonRef.textContent = '✓ Copied!'
+        setTimeout(() => {
+          buttonRef.style.transform = 'scale(1)'
+          buttonRef.textContent = originalText
+        }, 2000)
+      }, 100)
     }
   }
 }

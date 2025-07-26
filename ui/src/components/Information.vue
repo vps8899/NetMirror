@@ -14,15 +14,30 @@ const copyToClipboard = async (text, buttonRef = null) => {
     
     // 显示复制成功的反馈
     if (buttonRef) {
+      // 添加点击动画
+      buttonRef.style.transform = 'scale(0.9)'
+      buttonRef.style.transition = 'all 0.15s ease'
+      
+      setTimeout(() => {
+        buttonRef.style.transform = 'scale(1)'
+        buttonRef.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+      }, 150)
+
       const originalHTML = buttonRef.innerHTML
       const originalClass = buttonRef.className
       
+      // 成功状态样式和图标
       buttonRef.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
-      buttonRef.className = buttonRef.className.replace(/bg-primary-\d+/g, 'bg-green-500').replace(/hover:bg-primary-\d+/g, 'hover:bg-green-600').replace(/text-primary-\d+/g, 'text-white')
+      buttonRef.className = originalClass.replace(/bg-primary-\d+/g, 'bg-green-500').replace(/hover:bg-primary-\d+/g, 'hover:bg-green-600').replace(/text-primary-\d+/g, 'text-white')
+      buttonRef.style.transform = 'scale(1.1)'
+      buttonRef.style.boxShadow = '0 4px 12px rgba(34, 197, 94, 0.4)'
       
       setTimeout(() => {
+        buttonRef.style.transform = 'scale(1)'
+        buttonRef.style.boxShadow = ''
         buttonRef.innerHTML = originalHTML
         buttonRef.className = originalClass
+        buttonRef.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       }, 2000)
     }
   } catch (err) {
@@ -36,10 +51,15 @@ const copyToClipboard = async (text, buttonRef = null) => {
     
     if (buttonRef) {
       const originalHTML = buttonRef.innerHTML
-      buttonRef.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+      buttonRef.style.transform = 'scale(0.9)'
       setTimeout(() => {
-        buttonRef.innerHTML = originalHTML
-      }, 2000)
+        buttonRef.style.transform = 'scale(1.1)'
+        buttonRef.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+        setTimeout(() => {
+          buttonRef.style.transform = 'scale(1)'
+          buttonRef.innerHTML = originalHTML
+        }, 2000)
+      }, 100)
     }
   }
 }
