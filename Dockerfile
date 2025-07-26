@@ -1,102 +1,38 @@
-# 多阶段构建 Dockerfile
-FROM node:lts-alpine as ui-builder
-
-# 设置工作目录
+FROM node:lts-alpine as builderNodeJSCache
+ADD ui/package.json /app/package.json
 WORKDIR /app
+RUN npm i
 
-# 复制 package.json 和 package-lock.json
-COPY ui/package*.json ./
-
-# 安装依赖
-RUN npm install --no-audit --no-fund
-
-# 复制源代码
-COPY ui/ ./
-
-# 构建前端
-RUN npm run build
-
-# Go 构建阶段
-FROM golang:1.21-alpine as go-builder
-
-# 安装构建依赖
-RUN apk add --no-cache git ca-certificates tzdata
-
-# 设置工作目录
+FROM node:lts-alpine as builderNodeJS
+ADD ui /app
 WORKDIR /app
+COPY --from=builderNodeJSCache /app/node_modules /app/node_modules
+RUN npm run build \
+    && chmod -R 650 /app/dist
 
-# 复制后端源代码
-COPY backend/ /app/backend/
+FROM alpine:3 as builderGolang
+ADD backend /app
+WORKDIR /app
+COPY --from=builderNodeJS /app/dist /app/embed/ui
+RUN apk add --no-cache go 
 
-# 复制 .air.toml 文件到构建阶段（开发时需要）
-COPY .air.toml /app/backend/
+RUN go build -o als && \
+    chmod +x als
 
-# 复制前端构建产物
-COPY --from=ui-builder /app/dist /app/backend/embed/ui/
-
-# 设置构建工作目录
-WORKDIR /app/backend
-
-# 下载依赖
-RUN go mod download
-
-# 构建 Go 应用
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /als-bin .
-
-# 软件安装阶段
-FROM alpine:3.18 as software-installer
-
-# 安装基础工具
+FROM alpine:3 as builderEnv
+WORKDIR /app
+ADD scripts /app
+RUN sh /app/install-software.sh
 RUN apk add --no-cache \
-    bash \
-    wget \
-    curl \
-    ca-certificates \
-    tzdata
+    iperf iperf3 \
+    mtr \
+    traceroute \
+    iputils
+RUN rm -rf /app
 
-# 复制安装脚本
-COPY scripts/ /tmp/scripts/
+FROM alpine:3
+LABEL maintainer="X-Zero-L <x-zero-l@users.noreply.github.com>"
+COPY --from=builderEnv / /
+COPY --from=builderGolang --chmod=777 /app/als /bin/als
 
-# 运行软件安装脚本
-RUN cd /tmp && bash scripts/install-software.sh
-
-# 最终运行阶段
-FROM alpine:3.18
-
-LABEL maintainer="ALS Team <als@example.com>"
-LABEL description="Another Looking-glass Server - Network diagnostic tools"
-LABEL version="2.0.0"
-
-# 安装运行时依赖
-RUN apk add --no-cache \
-    ca-certificates \
-    tzdata \
-    bash
-
-# 从软件安装阶段复制已安装的工具
-COPY --from=software-installer /usr/local/bin/ /usr/local/bin/
-COPY --from=software-installer /usr/bin/ /usr/bin/
-COPY --from=software-installer /bin/ /bin/
-
-# 从构建阶段复制应用程序
-COPY --from=go-builder /app/backend/als-bin /bin/als
-
-# 创建非 root 用户
-RUN addgroup -g 1001 -S als && \
-    adduser -u 1001 -S als -G als
-
-# 创建数据目录
-RUN mkdir -p /data && chown als:als /data
-
-# 设置用户
-USER als
-
-# 暴露端口
-EXPOSE 80
-
-# 健康检查
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost:${HTTP_PORT:-80}/ || exit 1
-
-# 启动命令
-CMD ["/bin/als"]
+CMD /bin/als
