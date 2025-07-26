@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -38,6 +39,16 @@ func HandleSpeedtestDotNet(c *gin.Context) {
 		nodeId = ""
 	}
 	fmt.Printf("[SpeedtestDotNet] Request received, node_id: %s\n", nodeId)
+	
+	// Validate node_id if provided to prevent injection
+	if nodeId != "" && !isValidNodeId(nodeId) {
+		fmt.Printf("[SpeedtestDotNet] ERROR: Invalid node_id format: %s\n", nodeId)
+		c.JSON(400, &gin.H{
+			"success": false,
+			"error":   "Invalid server ID format",
+		})
+		return
+	}
 	
 	// Check if speedtest binary exists
 	if _, err := exec.LookPath("speedtest"); err != nil {
@@ -145,4 +156,21 @@ func HandleSpeedtestDotNet(c *gin.Context) {
 	c.JSON(200, &gin.H{
 		"success": true,
 	})
+}
+
+// isValidNodeId validates if the server ID is in a safe format
+func isValidNodeId(nodeId string) bool {
+	// Speedtest server IDs should be numeric
+	// Allow only digits
+	nodeIdRegex := regexp.MustCompile(`^[0-9]+$`)
+	if !nodeIdRegex.MatchString(nodeId) {
+		return false
+	}
+	
+	// Check length limits (server IDs are typically 4-6 digits)
+	if len(nodeId) > 10 {
+		return false
+	}
+	
+	return true
 }
