@@ -53,32 +53,46 @@ export const useAppStore = defineStore('app', () => {
   }
 
   const setupEventSource = () => {
-    connecting.value = true
-    const eventSource = new EventSource('./session')
-    eventSource.addEventListener('SessionId', (e) => {
-      sessionId.value = e.data
-      console.log('session', e.data)
-    })
-
-    eventSource.addEventListener('Config', (e) => {
-      config.value = JSON.parse(e.data)
-
-      connecting.value = false
-    })
-    eventSource.addEventListener('MemoryUsage', (e) => {
-      memoryUsage.value = formatBytes(e.data)
-    })
-
-    eventSource.onerror = function (e) {
-      eventSource.close()
+    return new Promise((resolve, reject) => {
       connecting.value = true
-      console.log('SSE disconnected')
-      reconnectEventSource()
-    }
-    source.value = eventSource
+      const eventSource = new EventSource('./session')
+
+      eventSource.addEventListener('SessionId', (e) => {
+        sessionId.value = e.data
+        console.log('session', e.data)
+        // Resolve the promise once sessionId is received
+        resolve()
+      })
+
+      eventSource.addEventListener('Config', (e) => {
+        config.value = JSON.parse(e.data)
+        connecting.value = false
+      })
+
+      eventSource.addEventListener('MemoryUsage', (e) => {
+        memoryUsage.value = formatBytes(e.data)
+      })
+
+      eventSource.onerror = function (e) {
+        eventSource.close()
+        connecting.value = true
+        console.log('SSE disconnected')
+        reconnectEventSource()
+        reject(new Error('SSE connection failed'))
+      }
+      source.value = eventSource
+    })
   }
 
-  setupEventSource()
+  const initialize = async () => {
+    try {
+      await setupEventSource()
+    } catch (error) {
+      console.error('Failed to initialize app session:', error)
+    }
+  }
+
+  initialize()
 
   const requestMethod = (method, data = {}, signal = null) => {
     let axiosConfig = {
@@ -127,6 +141,7 @@ export const useAppStore = defineStore('app', () => {
     language,
 
     //methods
+    initialize,
     requestMethod,
     setTheme,
     setLanguage

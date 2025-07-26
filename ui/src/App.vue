@@ -73,6 +73,9 @@ const changeTab = (tabId) => {
 }
 
 onMounted(async () => {
+  // Initialize the app store and wait for session ID
+  await appStore.initialize()
+  
   // Load stored language
   await loadLocaleMessages(appStore.language)
   setI18nLanguage(appStore.language)
