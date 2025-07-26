@@ -164,3 +164,44 @@ func HandleNetworkTool(toolName string) gin.HandlerFunc {
 		})
 	}
 }
+
+// isValidIPOrHostname validates if the input is a valid IP address or hostname
+func isValidIPOrHostname(input string) bool {
+	// Check if it's a valid IP address (v4 or v6)
+	if net.ParseIP(input) != nil {
+		return true
+	}
+	
+	// Check if it's a valid hostname
+	// Allow only alphanumeric, dots, hyphens
+	hostnameRegex := regexp.MustCompile(`^[a-zA-Z0-9.-]+$`)
+	if !hostnameRegex.MatchString(input) {
+		return false
+	}
+	
+	// Additional checks for shell injection attempts
+	dangerousPatterns := []string{
+		";", "&", "|", "`", "$", "(", ")", "{", "}", "[", "]",
+		"<", ">", "\\", "'", "\"", "\n", "\r", "\t", "\x00",
+		"*", "?", "~", "!", "#", "%", "^", "=", "+", " ",
+	}
+	
+	for _, pattern := range dangerousPatterns {
+		if strings.Contains(input, pattern) {
+			return false
+		}
+	}
+	
+	// Check length limits
+	if len(input) > 255 {
+		return false
+	}
+	
+	// Check that hostname doesn't start or end with special chars
+	if strings.HasPrefix(input, "-") || strings.HasSuffix(input, "-") ||
+		strings.HasPrefix(input, ".") || strings.HasSuffix(input, ".") {
+		return false
+	}
+	
+	return true
+}
