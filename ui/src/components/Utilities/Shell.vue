@@ -51,7 +51,8 @@ const handleResize = () => {
 const connectWebSocket = () => {
   const url = new URL(location.href)
   const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
-  const wsUrl = `${protocol}//${url.host}${url.pathname}session/${appStore.sessionId}/shell`
+  // Use query parameter for session ID, which is compatible with WebSocket and proxies
+  const wsUrl = `${protocol}//${url.host}${url.pathname}method/shell?session=${appStore.sessionId}`
   
   console.log('Connecting to WebSocket:', wsUrl)
   console.log('Session ID:', appStore.sessionId)

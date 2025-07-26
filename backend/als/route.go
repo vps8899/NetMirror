@@ -69,13 +69,14 @@ func SetupHttpRoute(e *gin.Engine) {
 		if config.Config.FeatureIfaceTraffic {
 			v1.GET("/cache/interfaces", cache.UpdateInterfaceCache)
 		}
+
+		if config.Config.FeatureShell {
+			v1.GET("/shell", shell.HandleNewShell)
+		}
 	}
 
 	session := e.Group("/session/:session", controller.MiddlewareSessionOnUrl())
 	{
-		if config.Config.FeatureShell {
-			session.GET("/shell", shell.HandleNewShell)
-		}
 	}
 
 	speedtestRoute := session.Group("/speedtest", controller.MiddlewareSessionOnUrl())

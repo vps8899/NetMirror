@@ -9,6 +9,9 @@ import (
 func MiddlewareSessionOnHeader() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionId := c.GetHeader("session")
+		if sessionId == "" {
+			sessionId = c.Query("session")
+		}
 		client, ok := client.Clients[sessionId]
 		if !ok {
 			c.JSON(400, &gin.H{
