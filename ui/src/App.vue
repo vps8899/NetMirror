@@ -73,14 +73,9 @@ const changeTab = (tabId) => {
 }
 
 onMounted(async () => {
-  const langCode = await autoLang()
-  currentLangCode.value = langCode
-  
-  // Check system theme preference
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    isDark.value = true
-    document.documentElement.classList.add('dark')
-  }
+  // Load stored language
+  await loadLocaleMessages(appStore.language)
+  setI18nLanguage(appStore.language)
 })
 </script>
 
@@ -135,13 +130,13 @@ onMounted(async () => {
             </div>
             
             <!-- Tab Navigation -->
-            <div class="animate-slide-up" style="animation-delay: 0.1s;">
+            <div ref="tabNavigation" class="animate-slide-up" style="animation-delay: 0.1s;">
               <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 p-2 inline-block">
                 <div class="flex gap-2">
                   <button
                     v-for="tab in filteredTabs"
                     :key="tab.id"
-                    @click="activeTab = tab.id"
+                    @click="changeTab(tab.id)"
                     class="flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 group"
                     :class="activeTab === tab.id 
                       ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg' 
