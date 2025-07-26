@@ -25,14 +25,6 @@ type NetworkTool struct {
 // GetNetworkTools returns available network tools
 func GetNetworkTools() map[string]NetworkTool {
 	return map[string]NetworkTool{
-		"ping6": {
-			Name:      "ping6",
-			Command:   "ping6",
-			Args:      []string{"-c", "10"},
-			IPv6:      true,
-			Timeout:   30 * time.Second,
-			EventName: "Ping6",
-		},
 		"mtr": {
 			Name:      "mtr",
 			Command:   "mtr",

@@ -27,7 +27,7 @@ func SetupHttpRoute(e *gin.Engine) {
 
 		if config.Config.FeaturePing {
 			v1.GET("/ping", ping.Handle)
-			v1.GET("/ping6", nettools.HandleNetworkTool("ping6"))
+			v1.GET("/ping6", ping.HandlePing6)
 		}
 
 		if config.Config.FeatureMTR {
