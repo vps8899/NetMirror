@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net"
 	"os/exec"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -68,6 +71,15 @@ func HandleNetworkTool(toolName string) gin.HandlerFunc {
 			c.JSON(400, &gin.H{
 				"success": false,
 				"error":   "Invalid IP Address",
+			})
+			return
+		}
+
+		// Validate input to prevent command injection
+		if !isValidIPOrHostname(ip) {
+			c.JSON(400, &gin.H{
+				"success": false,
+				"error":   "Invalid IP address or hostname format",
 			})
 			return
 		}
