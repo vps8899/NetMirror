@@ -1,7 +1,6 @@
 package nettools
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -35,14 +34,14 @@ func GetNetworkTools() map[string]NetworkTool {
 		"mtr": {
 			Name:    "mtr",
 			Command: "mtr",
-			Args:    []string{"-r", "-c", "10"},
+			Args:    []string{"--raw", "-c", "10"},
 			IPv6:    false,
 			Timeout: 60 * time.Second,
 		},
 		"mtr6": {
 			Name:    "mtr6",
 			Command: "mtr",
-			Args:    []string{"-r", "-c", "10", "-6"},
+			Args:    []string{"--raw", "-c", "10", "-6"},
 			IPv6:    true,
 			Timeout: 60 * time.Second,
 		},
@@ -172,11 +171,14 @@ func executeNetworkTool(tool NetworkTool, target string, channel chan *client.Me
 
 	// Read stdout in goroutine
 	go func() {
-		scanner := bufio.NewScanner(stdout)
-		for scanner.Scan() {
-			line := scanner.Text()
-			if line != "" {
-				output := fmt.Sprintf("%s\n", line)
+		buf := make([]byte, 1024)
+		for {
+			n, err := stdout.Read(buf)
+			if err != nil {
+				return
+			}
+			if n > 0 {
+				output := string(buf[:n])
 				content, _ := json.Marshal(map[string]interface{}{
 					"output":   output,
 					"finished": false,
@@ -196,11 +198,14 @@ func executeNetworkTool(tool NetworkTool, target string, channel chan *client.Me
 
 	// Read stderr in goroutine
 	go func() {
-		scanner := bufio.NewScanner(stderr)
-		for scanner.Scan() {
-			line := scanner.Text()
-			if line != "" {
-				output := fmt.Sprintf("ERROR: %s\n", line)
+		buf := make([]byte, 1024)
+		for {
+			n, err := stderr.Read(buf)
+			if err != nil {
+				return
+			}
+			if n > 0 {
+				output := fmt.Sprintf("ERROR: %s", string(buf[:n]))
 				content, _ := json.Marshal(map[string]interface{}{
 					"output":   output,
 					"finished": false,
