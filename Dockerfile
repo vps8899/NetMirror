@@ -17,7 +17,7 @@ COPY ui/ ./
 RUN npm run build
 
 # Go 构建阶段
-FROM golang:1.21-alpine as go-builder
+FROM golang:1.24-alpine as go-builder
 
 # 安装构建依赖
 RUN apk add --no-cache git ca-certificates tzdata
@@ -45,11 +45,11 @@ FROM alpine:3.18 as software-installer
 
 # 安装基础工具
 RUN apk add --no-cache \
-    bash \
-    wget \
-    curl \
-    ca-certificates \
-    tzdata
+   bash \
+   wget \
+   curl \
+   ca-certificates \
+   tzdata
 
 # 复制安装脚本
 COPY scripts/ /tmp/scripts/
@@ -66,9 +66,9 @@ LABEL version="2.0.0"
 
 # 安装运行时依赖
 RUN apk add --no-cache \
-    ca-certificates \
-    tzdata \
-    bash
+   ca-certificates \
+   tzdata \
+   bash
 
 # 从软件安装阶段复制已安装的工具
 COPY --from=software-installer /usr/local/bin/ /usr/local/bin/
@@ -80,7 +80,7 @@ COPY --from=go-builder /app/als /bin/als
 
 # 创建非 root 用户
 RUN addgroup -g 1001 -S als && \
-    adduser -u 1001 -S als -G als
+   adduser -u 1001 -S als -G als
 
 # 创建数据目录
 RUN mkdir -p /data && chown als:als /data
@@ -93,7 +93,7 @@ EXPOSE 80
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost:${HTTP_PORT:-80}/ || exit 1
+   CMD wget --quiet --tries=1 --spider http://localhost:${HTTP_PORT:-80}/ || exit 1
 
 # 启动命令
 CMD ["/bin/als"]
@@ -103,10 +103,10 @@ FROM go-builder as development
 
 # 安装开发工具
 RUN apk add --no-cache \
-    git \
-    make \
-    gcc \
-    musl-dev
+   git \
+   make \
+   gcc \
+   musl-dev
 
 # 安装 air 用于热重载
 RUN go install github.com/cosmtrek/air@latest
