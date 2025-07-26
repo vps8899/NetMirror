@@ -35,7 +35,8 @@
     "@xterm/addon-serialize": "^0.12.0-beta.1",
     "vue3-markdown-it": "^1.0.10",
     "markdown-it": "^14.0.0",
-    "v-clipboard": "^3.0.0-next.1"
+    "v-clipboard": "^3.0.0-next.1",
+    "naive-ui": "^2.38.1"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.7.0",
