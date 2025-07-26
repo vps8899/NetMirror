@@ -105,14 +105,14 @@ const charts = ref({
     ref: null,
     options: { 
       ...baseChartOptions,
-      colors: ['#10b981'],
+      colors: ['#0ea5e9'],
       fill: {
         ...baseChartOptions.fill,
         gradient: {
           ...baseChartOptions.fill.gradient,
           colorStops: [
-            { offset: 0, color: '#10b981', opacity: 0.8 },
-            { offset: 100, color: '#10b981', opacity: 0.1 }
+            { offset: 0, color: '#0ea5e9', opacity: 0.8 },
+            { offset: 100, color: '#0ea5e9', opacity: 0.1 }
           ]
         }
       }
@@ -125,14 +125,14 @@ const charts = ref({
     ref: null,
     options: { 
       ...baseChartOptions,
-      colors: ['#8b5cf6'],
+      colors: ['#3b82f6'],
       fill: {
         ...baseChartOptions.fill,
         gradient: {
           ...baseChartOptions.fill.gradient,
           colorStops: [
-            { offset: 0, color: '#8b5cf6', opacity: 0.8 },
-            { offset: 100, color: '#8b5cf6', opacity: 0.1 }
+            { offset: 0, color: '#3b82f6', opacity: 0.8 },
+            { offset: 100, color: '#3b82f6', opacity: 0.1 }
           ]
         }
       }
@@ -256,11 +256,11 @@ onMounted(() => {
 <template>
   <div ref="containerRef" class="space-y-6">
     <div class="text-center">
-      <ChartBarIcon class="w-12 h-12 text-emerald-500 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+      <ChartBarIcon class="w-12 h-12 text-primary-500 mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
         {{ $t('server_speedtest') }}
       </h3>
-      <p class="text-gray-600 dark:text-gray-400">
+      <p class="text-gray-600 dark:text-gray-300">
         Real-time bandwidth measurement using LibreSpeed
       </p>
     </div>
@@ -268,14 +268,14 @@ onMounted(() => {
     <!-- Results Display -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Download -->
-      <div class="bg-white/50 dark:bg-gray-700/30 rounded-2xl p-6 border border-gray-200 dark:border-gray-700/50 relative overflow-hidden">
+      <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-primary-200/30 dark:border-primary-700/30 relative overflow-hidden shadow-lg">
         <div class="flex items-center space-x-4 mb-4">
-          <div class="flex items-center justify-center w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex-shrink-0">
-            <ArrowDownIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
+          <div class="flex items-center justify-center w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex-shrink-0">
+            <ArrowDownIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
           </div>
           <div>
-            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('librespeed_download') }}</h4>
-            <p class="text-3xl font-bold text-green-600 dark:text-green-400">{{ downloadText }} <span class="text-xl">Mbps</span></p>
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $t('librespeed_download') }}</h4>
+            <p class="text-3xl font-bold text-primary-600 dark:text-primary-400">{{ downloadText }} <span class="text-xl">Mbps</span></p>
           </div>
         </div>
         <VueApexCharts
@@ -287,14 +287,14 @@ onMounted(() => {
       </div>
 
       <!-- Upload -->
-      <div class="bg-white/50 dark:bg-gray-700/30 rounded-2xl p-6 border border-gray-200 dark:border-gray-700/50 relative overflow-hidden">
+      <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-primary-200/30 dark:border-primary-700/30 relative overflow-hidden shadow-lg">
         <div class="flex items-center space-x-4 mb-4">
-          <div class="flex items-center justify-center w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex-shrink-0">
-            <ArrowUpIcon class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          <div class="flex items-center justify-center w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex-shrink-0">
+            <ArrowUpIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('librespeed_upload') }}</h4>
-            <p class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ uploadText }} <span class="text-xl">Mbps</span></p>
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $t('librespeed_upload') }}</h4>
+            <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ uploadText }} <span class="text-xl">Mbps</span></p>
           </div>
         </div>
         <VueApexCharts
@@ -313,7 +313,7 @@ onMounted(() => {
         class="inline-flex items-center px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105"
         :class="working 
           ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg hover:shadow-red-500/30' 
-          : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-emerald-500/30'"
+          : 'bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white shadow-lg hover:shadow-primary-500/30'"
       >
         <component :is="working ? StopIcon : PlayIcon" class="w-6 h-6 mr-3" />
         <span v-if="working" class="flex items-center">
