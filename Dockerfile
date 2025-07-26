@@ -23,6 +23,7 @@ FROM alpine:3 as builderEnv
 WORKDIR /app
 ADD scripts /app
 RUN sh /app/install-software.sh
+RUN sh /app/install-speedtest.sh
 RUN apk add --no-cache \
     iperf iperf3 \
     mtr \

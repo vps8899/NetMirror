@@ -45,6 +45,8 @@ func HandlePing6(c *gin.Context) {
 
 	clientSession := v.(*client.ClientSession)
 
+	fmt.Printf("[Ping6] Request received for IP: %s\n", ip)
+
 	// Create timeout context
 	timeout := 30 * time.Second
 	ctx, cancel := context.WithTimeout(clientSession.GetContext(c.Request.Context()), timeout)
@@ -54,9 +56,11 @@ func HandlePing6(c *gin.Context) {
 	var cmd *exec.Cmd
 	if _, err := exec.LookPath("ping6"); err == nil {
 		cmd = exec.CommandContext(ctx, "ping6", "-c", "10", ip)
+		fmt.Println("[Ping6] Using ping6 command")
 	} else {
 		// Alpine Linux uses ping with -6 flag
 		cmd = exec.CommandContext(ctx, "ping", "-6", "-c", "10", ip)
+		fmt.Println("[Ping6] Using ping -6 command (Alpine)")
 	}
 
 	// Start the command
@@ -71,6 +75,7 @@ func HandlePing6(c *gin.Context) {
 
 	err = cmd.Start()
 	if err != nil {
+		fmt.Printf("[Ping6] Failed to start command: %v\n", err)
 		c.JSON(400, &gin.H{
 			"success": false,
 			"error":   err.Error(),
@@ -105,6 +110,8 @@ func HandlePing6(c *gin.Context) {
 				if strings.TrimSpace(line) == "" {
 					continue
 				}
+
+				fmt.Printf("[Ping6] Output line: %s\n", line)
 
 				// Parse ping output
 				// Example: "64 bytes from 2001:db8::1: icmp_seq=1 ttl=64 time=0.456 ms"

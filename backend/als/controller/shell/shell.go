@@ -21,15 +21,17 @@ var upgrader = websocket.Upgrader{
 }
 
 func HandleNewShell(c *gin.Context) {
+	fmt.Println("[Shell] WebSocket connection request received")
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("[Shell] WebSocket upgrade error: %v\n", err)
 		return
 	}
 	defer conn.Close()
 	v, _ := c.Get("clientSession")
 	clientSession := v.(*client.ClientSession)
+	fmt.Printf("[Shell] Client session established, starting shell...\n")
 	handleNewConnection(conn, clientSession, c)
 }
 
@@ -38,9 +40,11 @@ func handleNewConnection(conn *websocket.Conn, session *client.ClientSession, gi
 	defer cancel()
 
 	ex, _ := os.Executable()
+	fmt.Printf("[Shell] Starting shell process: %s --shell\n", ex)
 	c := exec.Command(ex, "--shell")
 	ptmx, err := pty.Start(c)
 	if err != nil {
+		fmt.Printf("[Shell] Failed to start PTY: %v\n", err)
 		return
 	}
 	defer ptmx.Close()
@@ -69,9 +73,11 @@ func handleNewConnection(conn *websocket.Conn, session *client.ClientSession, gi
 	// websocket -> cmd
 	go func() {
 		defer cancel()
+		fmt.Println("[Shell] WebSocket reader started")
 		for {
 			_, buf, err := conn.ReadMessage()
 			if err != nil {
+				fmt.Printf("[Shell] WebSocket read error: %v\n", err)
 				break
 			}
 			index := string(buf[:1])
@@ -92,4 +98,5 @@ func handleNewConnection(conn *websocket.Conn, session *client.ClientSession, gi
 		}
 	}()
 	c.Wait()
+	fmt.Println("[Shell] Shell process exited")
 }

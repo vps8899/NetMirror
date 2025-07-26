@@ -37,6 +37,17 @@ func HandleSpeedtestDotNet(c *gin.Context) {
 	if !ok {
 		nodeId = ""
 	}
+	fmt.Printf("[SpeedtestDotNet] Request received, node_id: %s\n", nodeId)
+	
+	// Check if speedtest binary exists
+	if _, err := exec.LookPath("speedtest"); err != nil {
+		fmt.Printf("[SpeedtestDotNet] ERROR: speedtest binary not found: %v\n", err)
+		c.JSON(500, &gin.H{
+			"success": false,
+			"error":   "Speedtest CLI not installed",
+		})
+		return
+	}
 	closed := false
 	timeout := time.Second * 60
 	count = 1
@@ -64,6 +75,7 @@ func HandleSpeedtestDotNet(c *gin.Context) {
 		args = append(args, "-s", nodeId)
 	}
 	cmd := exec.Command("speedtest", args...)
+	fmt.Printf("[SpeedtestDotNet] Running command: speedtest %s\n", strings.Join(args, " "))
 
 	go func() {
 		<-ctx.Done()
@@ -74,7 +86,7 @@ func HandleSpeedtestDotNet(c *gin.Context) {
 
 	writer := func(pipe io.ReadCloser, err error) {
 		if err != nil {
-			fmt.Println("Pipe closed", err)
+			fmt.Printf("[SpeedtestDotNet] Pipe error: %v\n", err)
 			return
 		}
 		
@@ -107,6 +119,7 @@ func HandleSpeedtestDotNet(c *gin.Context) {
 				// Parse JSON line and forward it
 				var jsonData map[string]interface{}
 				if err := json.Unmarshal([]byte(line), &jsonData); err == nil {
+					fmt.Printf("[SpeedtestDotNet] JSON data: %v\n", jsonData)
 					if !closed {
 						// Forward the parsed JSON as a string
 						msg, _ := json.Marshal(jsonData)
@@ -115,6 +128,8 @@ func HandleSpeedtestDotNet(c *gin.Context) {
 							Content: string(msg),
 						}
 					}
+				} else {
+					fmt.Printf("[SpeedtestDotNet] Failed to parse JSON: %s\n", line)
 				}
 			}
 		}
@@ -123,8 +138,10 @@ func HandleSpeedtestDotNet(c *gin.Context) {
 	go writer(cmd.StdoutPipe())
 	go writer(cmd.StderrPipe())
 
-	cmd.Run()
-	fmt.Println("speedtest-cli quit")
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("[SpeedtestDotNet] Command error: %v\n", err)
+	}
+	fmt.Println("[SpeedtestDotNet] Command completed")
 	c.JSON(200, &gin.H{
 		"success": true,
 	})
