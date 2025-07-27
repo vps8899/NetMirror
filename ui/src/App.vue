@@ -205,7 +205,7 @@ onUnmounted(() => {
           <div class="inline-flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
             <span>Powered by</span>
             <a 
-              href="https://github.com/X-Zero-L/als" 
+              href="https://github.com/Yuri-NagaSaki/NetMirror" 
               target="_blank"
               class="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors duration-200"
             >

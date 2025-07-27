@@ -17,13 +17,28 @@ NetMirror 是一个功能丰富的现代 Looking-glass 服务器，拥有一个�
 
 **直接从 DockerHub 运行:**
 ```bash
-docker run -d \
-  --name netmirror \
-  --network host \
-  -e HTTP_PORT=80 \
-  -e LOCATION="您的位置" \
-  -v ./data:/data \
-  soyorins/netmirror:latest
+services:
+  als:
+    image: soyorins/netmirror:latest
+    container_name: looking-glass-e
+    restart: always
+    network_mode: host
+    user: root
+    env_file:
+      - .env
+    volumes:
+      - ./data:/data
+      - ./.air.toml:/app/.air.toml
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:${HTTP_PORT:-80}/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 ```
 
 ### 方式二：使用 Docker Compose
