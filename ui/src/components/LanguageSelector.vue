@@ -1,9 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { ChevronDownIcon, GlobeAltIcon } from '@heroicons/vue/24/outline'
-import { useMotion } from '@vueuse/motion'
-
-const { apply } = useMotion()
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   currentLang: String,
@@ -28,6 +24,22 @@ const selectLanguage = (langValue) => {
   emit('change', langValue)
   isOpen.value = false
 }
+
+// Close dropdown when clicking outside
+const closeDropdown = (event) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
+    isOpen.value = false
+  }
+}
+
+// Add/remove event listener for clicking outside
+onMounted(() => {
+  document.addEventListener('click', closeDropdown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeDropdown)
+})
 </script>
 
 <template>
@@ -35,15 +47,24 @@ const selectLanguage = (langValue) => {
     <button
       @click="isOpen = !isOpen"
       class="inline-flex items-center justify-center transition-all duration-200"
-      :class="showLabel ? 'space-x-2 px-3 py-2 bg-white/50 dark:bg-gray-700/50 hover:bg-white/80 dark:hover:bg-gray-700/80 rounded-xl' : 'w-full h-full'"
+      :class="showLabel ? 'space-x-2 px-3 py-2 bg-white/50 dark:bg-gray-700/50 hover:bg-white/80 dark:hover:bg-gray-700/80 rounded-xl' : 'w-full h-full hover:bg-gray-100 dark:hover:bg-gray-600 rounded-xl'"
     >
-      <GlobeAltIcon class="w-6 h-6 text-gray-600 dark:text-gray-300" />
+      <!-- Globe Icon -->
+      <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+      </svg>
       <span v-if="showLabel" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ currentLangLabel }}</span>
-      <ChevronDownIcon 
+      <!-- Chevron Down Icon -->
+      <svg 
         v-if="showLabel"
         class="w-4 h-4 text-gray-500 transition-transform duration-200"
         :class="{ 'rotate-180': isOpen }"
-      />
+        fill="none" 
+        stroke="currentColor" 
+        viewBox="0 0 24 24"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
     </button>
 
     <Transition

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { list as langList, setI18nLanguage, loadLocaleMessages } from './config/lang.js'
 import { useAppStore } from './stores/app'
 import NodeListCard from '@/components/Utilities/NodeList.vue'
@@ -94,7 +94,7 @@ onMounted(async () => {
   
   // Load stored language
   await loadLocaleMessages(appStore.language)
-  setI1-nLanguage(appStore.language)
+  setI18nLanguage(appStore.language)
 
   window.addEventListener('scroll', handleScroll)
 })
