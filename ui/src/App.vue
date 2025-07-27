@@ -141,10 +141,14 @@ onUnmounted(() => {
         <div class="max-w-6xl mx-auto text-center">
           <!-- Logo/Icon -->
           <div 
-            class="inline-flex items-center justify-center mb-4 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg shadow-primary-500/25 animate-scale-in"
-            :class="appStore.config?.logo && (appStore.config.logo_type === 'text' || appStore.config.logo_type === 'emoji') 
-              ? 'min-w-14 h-14 px-4 py-2' 
-              : 'w-14 h-14'"
+            class="inline-flex items-center justify-center mb-4 animate-scale-in"
+            :class="[
+              appStore.config?.logo && (appStore.config.logo_type === 'text' || appStore.config.logo_type === 'emoji') 
+                ? 'min-w-14 h-14 px-4 py-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg shadow-primary-500/25' 
+                : appStore.config?.logo && (appStore.config.logo_type === 'svg' || appStore.config.logo_type === 'url' || appStore.config.logo_type === 'base64')
+                ? 'w-14 h-14'
+                : 'w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg shadow-primary-500/25'
+            ]"
           >
             <!-- 根据logo类型显示不同内容 -->
             <template v-if="appStore.config?.logo">
@@ -153,13 +157,13 @@ onUnmounted(() => {
                 v-if="appStore.config.logo_type === 'url' || appStore.config.logo_type === 'base64'"
                 :src="appStore.config.logo" 
                 alt="Logo" 
-                class="w-8 h-8 object-contain"
+                class="w-12 h-12 object-contain"
                 @error="($event) => $event.target.style.display = 'none'"
               />
               <!-- SVG类型 -->
               <div 
                 v-else-if="appStore.config.logo_type === 'svg'"
-                class="w-8 h-8 flex items-center justify-center text-white"
+                class="w-12 h-12 flex items-center justify-center"
                 v-html="appStore.config.logo"
               ></div>
               <!-- Emoji类型 -->
