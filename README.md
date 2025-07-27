@@ -11,7 +11,22 @@ NetMirror is a modern, feature-rich looking-glass server with a beautiful web in
 - **Easy Deployment**: Ships as a single Docker container.
 - **Customizable**: Configure features and server details via environment variables.
 
-## 🚀 Quick Start (Docker Compose)
+## 🚀 Quick Start
+
+### Option 1: Using Pre-built Docker Image
+
+**Run directly from DockerHub:**
+```bash
+docker run -d \
+  --name netmirror \
+  --network host \
+  -e HTTP_PORT=80 \
+  -e LOCATION="Your Location" \
+  -v ./data:/data \
+  soyorins/netmirror:latest
+```
+
+### Option 2: Using Docker Compose
 
 1.  **Clone the repository:**
     ```bash
@@ -37,6 +52,16 @@ NetMirror is a modern, feature-rich looking-glass server with a beautiful web in
     ```
 
 The application will be accessible at `http://<your-server-ip>`. The default port is 3000, which can be changed via the `HTTP_PORT` environment variable.
+
+## 📦 Docker Images
+
+Pre-built multi-architecture Docker images are available on DockerHub:
+
+- **Supported architectures**: `linux/amd64`, `linux/arm64`
+- **Image repository**: `soyorins/netmirror`
+- **Available tags**: `latest`, version tags (e.g., `v1.0.0`), branch names
+
+Images are automatically built and published via GitHub Actions when code is pushed to the main branch or when new tags are created.
 
 ## 🔧 Configuration
 

@@ -11,7 +11,22 @@ NetMirror 是一个功能丰富的现代 Looking-glass 服务器，拥有一个�
 - **轻松部署**: 以单个 Docker 容器的形式提供。
 - **可定制**: 通过环境变量配置功能和服务器详情。
 
-## 🚀 快速开始 (使用 Docker Compose)
+## 🚀 快速开始
+
+### 方式一：使用预构建的 Docker 镜像
+
+**直接从 DockerHub 运行:**
+```bash
+docker run -d \
+  --name netmirror \
+  --network host \
+  -e HTTP_PORT=80 \
+  -e LOCATION="您的位置" \
+  -v ./data:/data \
+  soyorins/netmirror:latest
+```
+
+### 方式二：使用 Docker Compose
 
 1.  **克隆仓库:**
     ```bash
@@ -37,6 +52,16 @@ NetMirror 是一个功能丰富的现代 Looking-glass 服务器，拥有一个�
     ```
 
 应用将可以通过 `http://<您的服务器IP>` 访问。默认端口是 3000，可以通过 `HTTP_PORT` 环境变量进行更改。
+
+## 📦 Docker 镜像
+
+预构建的多架构 Docker 镜像可在 DockerHub 上获取：
+
+- **支持的架构**: `linux/amd64`, `linux/arm64`
+- **镜像仓库**: `soyorins/netmirror`
+- **可用标签**: `latest`、版本标签（如 `v1.0.0`）、分支名称
+
+当代码推送到主分支或创建新标签时，镜像会通过 GitHub Actions 自动构建和发布。
 
 ## 🔧 配置
 
