@@ -61,9 +61,9 @@ jobs:
             type=semver,pattern={{version}},suffix=-${{ matrix.arch }}
             type=semver,pattern={{major}}.{{minor}},suffix=-${{ matrix.arch }}
             type=semver,pattern={{major}},suffix=-${{ matrix.arch }}
-            type=raw,value=latest,enable=${{ is_default_branch && matrix.arch == 'amd64' }}
-            type=raw,value=main-${{ matrix.arch }},enable=${{ is_default_branch }}
-            type=raw,value=latest-${{ matrix.arch }},enable=${{ is_default_branch }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' && matrix.arch == 'amd64' }}
+            type=raw,value=main-${{ matrix.arch }},enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=latest-${{ matrix.arch }},enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -75,4 +75,4 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=max 
