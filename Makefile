@@ -22,14 +22,20 @@ dev-frontend: ## 仅启动前端开发服务器
 	cd ui && npm run dev
 
 # 构建相关
-build: check-deps ## 构建版本
+build: check-deps ## 构建完整版本
 	docker-compose build
 
 build-frontend: ## 构建前端
 	cd ui && npm run build
 
+build-frontend-only: check-deps ## 仅构建前端部分（用于快速前端开发）
+	docker build --target frontend-builder -t als-frontend:latest .
+
 build-backend: ## 构建后端
 	cd backend && go build -o als
+
+build-fast: check-deps ## 快速构建（利用Docker缓存层）
+	docker-compose build --parallel
 
 # Docker 相关
 docker-build: check-deps ## 构建 Docker 镜像
