@@ -104,9 +104,17 @@ onMounted(() => {
 
     <!-- Results Section -->
     <div v-if="output" class="bg-gray-900 dark:bg-gray-950 rounded-xl border border-gray-700 overflow-hidden shadow-sm">
+      <div class="px-4 py-3 bg-gray-800 dark:bg-gray-900 border-b border-gray-700">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-medium text-gray-300">MTR Report to {{ host }}</h3>
+          <span class="text-xs text-gray-400" v-if="working">Running...</span>
+          <span class="text-xs text-green-400" v-else>Completed</span>
+        </div>
+      </div>
       <div 
         ref="outputRef"
-        class="p-4 text-sm font-mono text-gray-100 overflow-x-auto max-h-[30rem] overflow-y-auto whitespace-pre"
+        class="p-4 text-xs font-mono text-gray-100 overflow-x-auto max-h-[30rem] overflow-y-auto whitespace-pre leading-relaxed"
+        style="font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;"
       >{{ output }}</div>
     </div>
 
