@@ -38,6 +38,44 @@ func SetupHttpRoute(e *gin.Engine) {
 
 	e.GET("/session", session.Handle)
 	
+	// BGP graph proxy endpoint
+	e.GET("/bgp/graph/:asn/:type", func(c *gin.Context) {
+		asn := c.Param("asn")
+		graphType := c.Param("type") // combined, ipv4, ipv6
+		
+		// Construct BGPView URL
+		var url string
+		switch graphType {
+		case "ipv4":
+			url = fmt.Sprintf("https://api.bgpview.io/assets/graphs/AS%s_IPv4.svg", asn)
+		case "ipv6":
+			url = fmt.Sprintf("https://api.bgpview.io/assets/graphs/AS%s_IPv6.svg", asn)
+		case "combined":
+			url = fmt.Sprintf("https://api.bgpview.io/assets/graphs/AS%s_Combined.svg", asn)
+		default:
+			c.JSON(400, gin.H{"error": "Invalid graph type"})
+			return
+		}
+		
+		// Fetch SVG from BGPView
+		resp, err := http.Get(url)
+		if err != nil {
+			c.JSON(500, gin.H{"error": "Failed to fetch BGP graph"})
+			return
+		}
+		defer resp.Body.Close()
+		
+		if resp.StatusCode != 200 {
+			c.JSON(resp.StatusCode, gin.H{"error": "BGP graph not found"})
+			return
+		}
+		
+		// Set proper headers and stream the SVG
+		c.Header("Content-Type", "image/svg+xml")
+		c.Header("Cache-Control", "public, max-age=3600") // Cache for 1 hour
+		c.DataFromReader(200, resp.ContentLength, "image/svg+xml", resp.Body, nil)
+	})
+	
 	// Node management endpoints (no session required for cross-node functionality)
 	e.GET("/nodes", nodes.GetNodes)
 	e.GET("/nodes/current", nodes.GetNodeConfig)

@@ -120,6 +120,7 @@ const appStore = useAppStore()
 // BGP Graph related
 const bgpGraphType = ref('combined')
 const bgpGraphContent = ref('')
+const bgpGraphOriginalContent = ref('') // Store original content for theme switching
 const bgpGraphLoading = ref(false)
 const bgpGraphError = ref(false)
 
@@ -143,17 +144,16 @@ const currentGraphName = computed(() => {
 const bgpGraphUrl = computed(() => {
   if (!asnNumber.value) return null
   
-  const baseUrl = `https://api.bgpview.io/assets/graphs/AS${asnNumber.value}`
-  
+  // Use backend proxy instead of direct BGPView access
   switch (bgpGraphType.value) {
     case 'ipv4':
-      return `${baseUrl}_IPv4.svg`
+      return `/bgp/graph/${asnNumber.value}/ipv4`
     case 'ipv6':
-      return `${baseUrl}_IPv6.svg`
+      return `/bgp/graph/${asnNumber.value}/ipv6`
     case 'combined':
-      return `${baseUrl}_Combined.svg`
+      return `/bgp/graph/${asnNumber.value}/combined`
     default:
-      return `${baseUrl}_Combined.svg`
+      return `/bgp/graph/${asnNumber.value}/combined`
   }
 })
 
@@ -171,10 +171,16 @@ watch(bgpGraphType, () => {
   }
 })
 
-// Watch for theme changes and reload graph
+// Watch for theme changes and reprocess existing content (no reload)
 watch(() => appStore.theme, () => {
-  if (bgpGraphContent.value) {
-    loadBGPGraph()
+  if (bgpGraphOriginalContent.value && bgpGraphOriginalContent.value.includes('<svg')) {
+    // Reprocess original SVG content for new theme
+    if (isDarkMode.value) {
+      bgpGraphContent.value = processSvgForDarkMode(bgpGraphOriginalContent.value)
+    } else {
+      // Use original content for light mode
+      bgpGraphContent.value = bgpGraphOriginalContent.value
+    }
   }
 })
 
@@ -185,6 +191,7 @@ const loadBGPGraph = async () => {
   bgpGraphLoading.value = true
   bgpGraphError.value = false
   bgpGraphContent.value = ''
+  bgpGraphOriginalContent.value = ''
   
   console.log('Loading BGP graph from:', bgpGraphUrl.value)
   
@@ -200,11 +207,15 @@ const loadBGPGraph = async () => {
     console.log('BGP graph loaded, content length:', svgContent.length)
     
     if (svgContent.includes('<svg')) {
-      // 在暗色模式下修改SVG内容
+      // Store original content
+      bgpGraphOriginalContent.value = svgContent
+      
+      // Apply theme processing if needed
       if (isDarkMode.value) {
-        svgContent = processSvgForDarkMode(svgContent)
+        bgpGraphContent.value = processSvgForDarkMode(svgContent)
+      } else {
+        bgpGraphContent.value = svgContent
       }
-      bgpGraphContent.value = svgContent
     } else {
       throw new Error('Invalid SVG content')
     }
