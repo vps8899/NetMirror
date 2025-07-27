@@ -3,6 +3,7 @@ ui/public/speedtest_worker.js
 ui/pnpm-lock.yaml
 backend/embed/ui/
 backend/als-bin
+backend/als/als
 tmp
 .cursor
 .idea/
