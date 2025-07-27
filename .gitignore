@@ -9,3 +9,16 @@ tmp
 .vscode/
 data/
 CLAUDE.md
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
