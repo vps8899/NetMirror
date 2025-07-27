@@ -124,7 +124,7 @@
                   <div class="flex items-center justify-between mt-auto">
                     <!-- Ping Button on the left -->
                     <button
-                      @click.stop="pingSingleNode(node)"
+                      @click.stop.prevent="pingSingleNode(node)"
                       :disabled="pingStates[node.name]?.isPinging"
                       class="inline-flex items-center px-2 py-1 rounded text-xs font-medium transition-all duration-200"
                       :class="pingStates[node.name]?.isPinging 
