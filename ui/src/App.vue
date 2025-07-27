@@ -206,15 +206,14 @@ onUnmounted(() => {
       </header>
 
       <!-- Main content area -->
-      <main class="pb-16 px-4">
-        <div class="max-w-7xl mx-auto space-y-6">
-          <LoadingCard v-if="appStore.connecting" />
-          <template v-else>
-            <!-- Node List Card - Display at the top -->
+      <main class="pb-16">
+        <LoadingCard v-if="appStore.connecting" />
+        <template v-else>
+          <div class="max-w-7xl mx-auto space-y-6 px-4">
+            <!-- Node List Card -->
             <div class="animate-slide-up">
               <NodeListCard />
             </div>
-            
             <!-- Tab Navigation -->
             <div ref="tabNavigation" class="animate-slide-up" style="animation-delay: 0.1s;">
               <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 p-2 inline-block">
@@ -256,8 +255,8 @@ onUnmounted(() => {
                 </div>
               </div>
             </div>
-          </template>
-        </div>
+          </div>
+        </template>
       </main>
 
       <!-- Footer -->
