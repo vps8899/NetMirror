@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useI18n } from 'vue-i18n'
 import Copyable from './Copy.vue'
-import Markdown from 'vue3-markdown-it'
+import SafeHtml from './SafeHtml.vue'
 
 const appStore = useAppStore()
 const { t } = useI18n({ useScope: 'global' })
@@ -152,9 +152,11 @@ const copyToClipboard = async (text, buttonRef = null) => {
         v-if="appStore.config?.sponsor_message?.length > 0"
         class="mt-6 p-4 bg-primary-50/50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-700/30"
       >
-        <div class="prose prose-primary max-w-none dark:prose-invert text-primary-700 dark:text-primary-300">
-          <Markdown :source="appStore.config.sponsor_message" />
-        </div>
+        <SafeHtml 
+          :content="appStore.config.sponsor_message"
+          :content-type="appStore.config.sponsor_message_type || 'auto'"
+          :iframe-height="'300px'"
+        />
       </div>
     </div>
   </div>

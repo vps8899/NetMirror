@@ -18,25 +18,28 @@
     "prepare": "husky install || true"
   },
   "dependencies": {
-    "pinia": "^2.1.7",
-    "vue": "^3.4.15",
-    "@vueuse/motion": "^2.0.0",
-    "@vueuse/core": "^10.7.2",
     "@headlessui/vue": "^1.7.16",
     "@heroicons/vue": "^2.0.18",
-    "lucide-vue-next": "^0.294.0",
-    "axios": "^1.6.5",
-    "vue-i18n": "^9.9.1",
-    "vue3-apexcharts": "1.5.3",
-    "apexcharts": "^3.45.2",
-    "xterm": "^5.3.0",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/dompurify": "^3.0.5",
+    "@vueuse/core": "^10.7.2",
+    "@vueuse/motion": "^2.0.0",
     "@xterm/addon-attach": "^0.10.0-beta.1",
     "@xterm/addon-fit": "^0.9.0-beta.1",
     "@xterm/addon-serialize": "^0.12.0-beta.1",
-    "vue3-markdown-it": "^1.0.10",
+    "apexcharts": "^3.45.2",
+    "axios": "^1.6.5",
+    "dompurify": "^3.2.6",
+    "lucide-vue-next": "^0.294.0",
     "markdown-it": "^14.0.0",
+    "naive-ui": "^2.38.1",
+    "pinia": "^2.1.7",
     "v-clipboard": "^3.0.0-next.1",
-    "naive-ui": "^2.38.1"
+    "vue": "^3.4.15",
+    "vue-i18n": "^9.9.1",
+    "vue3-apexcharts": "1.5.3",
+    "vue3-markdown-it": "^1.0.10",
+    "xterm": "^5.3.0"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.7.0",
@@ -60,12 +63,22 @@
     "vue-tsc": "^1.8.27"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,vue}": ["eslint --fix", "prettier --write"],
-    "*.{css,scss,less,html,json,md}": ["prettier --write"]
+    "*.{js,jsx,ts,tsx,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,scss,less,html,json,md}": [
+      "prettier --write"
+    ]
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
-  "browserslist": ["> 1%", "last 2 versions", "not dead", "not ie 11"]
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
 }
