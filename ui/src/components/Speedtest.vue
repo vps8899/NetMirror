@@ -37,12 +37,12 @@ onMounted(() => {
   <div 
     v-if="availableTests.length > 0"
     ref="cardRef" 
-    class="bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-700/50 overflow-hidden"
+    class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 overflow-hidden animate-slide-up"
   >
     <div class="p-6 space-y-6">
       <!-- Sub-tabs for speed tests -->
       <div v-if="availableTests.length > 1" class="flex justify-center">
-        <div class="bg-gray-700/50 rounded-lg p-1 flex space-x-1">
+        <div class="bg-primary-100/50 dark:bg-gray-700/50 rounded-lg p-1 flex space-x-1">
           <button
             v-for="test in availableTests"
             :key="test.id"
@@ -50,8 +50,8 @@ onMounted(() => {
             :class="[
               'px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 focus:outline-none',
               activeTest === test.id
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'text-gray-300 hover:bg-gray-600/50 hover:text-white'
+                ? 'bg-primary-600 text-white shadow-lg'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-600/50 hover:text-primary-700 dark:hover:text-white'
             ]"
           >
             {{ test.name }}
