@@ -4,3 +4,8 @@ ui/pnpm-lock.yaml
 backend/embed/ui/
 backend/als-bin
 tmp
+.cursor
+.idea/
+.vscode/
+data/
+CLAUDE.md
