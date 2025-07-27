@@ -23,11 +23,12 @@ const toolComponentShow = computed({
 
 const tools = ref([
   {
+    id: 'ping',
     label: 'Ping',
     description: 'IPv4 connectivity test',
     color: 'from-primary-500 to-primary-600',
-    show: false,
-    enable: false,
+    featureFlag: 'feature_ping',
+    icon: 'M13 10V3L4 14h7v7l9-11h-7z',
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/Ping.vue'),
       delay: 200,
@@ -37,11 +38,12 @@ const tools = ref([
     })
   },
   {
-    label: 'Ping6',
+    id: 'ping6',
+    label: 'Ping IPv6',
     description: 'IPv6 connectivity test',
     color: 'from-primary-600 to-blue-600',
-    show: false,
-    enable: false,
+    featureFlag: 'feature_ping',
+    icon: 'M13 10V3L4 14h7v7l9-11h-7z',
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/Ping6.vue'),
       delay: 200,
@@ -51,11 +53,12 @@ const tools = ref([
     })
   },
   {
+    id: 'mtr',
     label: 'MTR',
     description: 'Network path analysis',
     color: 'from-blue-500 to-sky-500',
-    show: false,
-    enable: false,
+    featureFlag: 'feature_mtr',
+    icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/MTR.vue'),
       delay: 200,
@@ -65,11 +68,12 @@ const tools = ref([
     })
   },
   {
-    label: 'MTR6',
+    id: 'mtr6',
+    label: 'MTR IPv6',
     description: 'IPv6 path analysis',
     color: 'from-sky-500 to-cyan-500',
-    show: false,
-    enable: false,
+    featureFlag: 'feature_mtr',
+    icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/MTR6.vue'),
       delay: 200,
@@ -79,11 +83,12 @@ const tools = ref([
     })
   },
   {
+    id: 'traceroute',
     label: 'Traceroute',
     description: 'Route path discovery',
     color: 'from-purple-500 to-pink-500',
-    show: false,
-    enable: false,
+    featureFlag: 'feature_traceroute',
+    icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/Traceroute.vue'),
       delay: 200,
@@ -93,11 +98,12 @@ const tools = ref([
     })
   },
   {
-    label: 'Traceroute6',
+    id: 'traceroute6',
+    label: 'Traceroute IPv6',
     description: 'IPv6 route discovery',
     color: 'from-pink-500 to-rose-500',
-    show: false,
-    enable: false,
+    featureFlag: 'feature_traceroute',
+    icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/Traceroute6.vue'),
       delay: 200,
@@ -107,11 +113,12 @@ const tools = ref([
     })
   },
   {
+    id: 'iperf3',
     label: 'IPerf3',
     description: 'Bandwidth measurement',
     color: 'from-green-500 to-emerald-500',
-    show: false,
-    enable: false,
+    featureFlag: 'feature_iperf3',
+    icon: 'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z',
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/IPerf3.vue'),
       delay: 200,
@@ -121,11 +128,12 @@ const tools = ref([
     })
   },
   {
+    id: 'speedtest-net',
     label: 'Speedtest.net',
     description: 'Official Speedtest CLI',
     color: 'from-orange-500 to-amber-500',
-    show: false,
-    enable: false,
+    featureFlag: 'feature_speedtest_dot_net',
+    icon: 'M13 10V3L4 14h7v7l9-11h-7z',
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/SpeedtestNet.vue'),
       delay: 200,
@@ -135,11 +143,12 @@ const tools = ref([
     })
   },
   {
+    id: 'shell',
     label: 'Shell',
     description: 'Interactive command line',
     color: 'from-gray-600 to-gray-700',
-    show: false,
-    enable: false,
+    featureFlag: 'feature_shell',
+    icon: 'M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/Shell.vue'),
       delay: 200,
@@ -150,11 +159,11 @@ const tools = ref([
   }
 ])
 
-onMounted(() => {
-  for (const tool of tools.value) {
-    const configKey = 'feature_' + tool.label.toLowerCase().replace('.', '_dot_').replace('6', '')
-    tool.enable = config.value[configKey] ?? false
-  }
+// 过滤可用的工具
+const availableTools = computed(() => {
+  return tools.value.filter(tool => {
+    return config.value && config.value[tool.featureFlag]
+  })
 })
 
 const openTool = (tool) => {
@@ -171,185 +180,34 @@ const closeTool = () => {
   <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 overflow-hidden animate-slide-up" style="animation-delay: 0.1s;">
     <div class="p-6">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Ping IPv4 -->
+        <!-- 动态渲染工具卡片 -->
         <button
-          v-if="config.feature_ping"
-          @click="openTool(tools.find(t => t.label === 'Ping'))"
+          v-for="tool in availableTools"
+          :key="tool.id"
+          @click="openTool(tool)"
           class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
         >
-          <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-primary-500 to-primary-600"></div>
+          <!-- 渐变边框效果 -->
+          <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br" :class="tool.color"></div>
+          
+          <!-- 卡片内容 -->
           <div class="relative z-10 flex items-center space-x-4">
-            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300 group-hover:rotate-12">
+            <!-- 图标 -->
+            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300 group-hover:rotate-12" :class="tool.color">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tool.icon"></path>
               </svg>
             </div>
+            
+            <!-- 文字内容 -->
             <div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300">Ping</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-300 group-hover:text-white/80 transition-colors duration-300">IPv4 connectivity test</p>
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300">{{ tool.label }}</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300 group-hover:text-white/80 transition-colors duration-300">{{ tool.description }}</p>
             </div>
           </div>
-          <div class="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-primary-500 to-primary-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-        </button>
-
-        <!-- Ping IPv6 -->
-        <button
-          v-if="config.feature_ping"
-          @click="openTool(tools.find(t => t.label === 'Ping6'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-primary-600 to-blue-600"></div>
-          <div class="relative z-10 flex items-center space-x-4">
-            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary-600 to-blue-600 group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300">Ping IPv6</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-300 group-hover:text-white/80 transition-colors duration-300">IPv6 connectivity test</p>
-            </div>
-          </div>
-        </button>
-
-        <!-- MTR -->
-        <button
-          v-if="config.feature_mtr"
-          @click="openTool(tools.find(t => t.label === 'MTR'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-blue-500 to-sky-500"></div>
-          <div class="relative z-10 flex items-center space-x-4">
-            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-sky-500 group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300">MTR</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-300 group-hover:text-white/80 transition-colors duration-300">Network path analysis</p>
-            </div>
-          </div>
-        </button>
-
-        <!-- MTR IPv6 -->
-        <button
-          v-if="config.feature_mtr"
-          @click="openTool(tools.find(t => t.label === 'MTR6'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-sky-500 to-cyan-500"></div>
-          <div class="relative z-10 flex items-center space-x-4">
-            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300">MTR IPv6</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-300 group-hover:text-white/80 transition-colors duration-300">IPv6 path analysis</p>
-            </div>
-          </div>
-        </button>
-
-        <!-- Traceroute -->
-        <button
-          v-if="config.feature_traceroute"
-          @click="openTool(tools.find(t => t.label === 'Traceroute'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-purple-500 to-pink-500"></div>
-          <div class="relative z-10 flex items-center space-x-4">
-            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300">Traceroute</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-300 group-hover:text-white/80 transition-colors duration-300">Route path discovery</p>
-            </div>
-          </div>
-        </button>
-
-        <!-- Traceroute IPv6 -->
-        <button
-          v-if="config.feature_traceroute"
-          @click="openTool(tools.find(t => t.label === 'Traceroute6'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-pink-500 to-rose-500"></div>
-          <div class="relative z-10 flex items-center space-x-4">
-            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300">Traceroute IPv6</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-300 group-hover:text-white/80 transition-colors duration-300">IPv6 route discovery</p>
-            </div>
-          </div>
-        </button>
-
-        <!-- IPerf3 -->
-        <button
-          v-if="config.feature_iperf3"
-          @click="openTool(tools.find(t => t.label === 'IPerf3'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-green-500 to-emerald-500"></div>
-          <div class="relative z-10 flex items-center space-x-4">
-            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300">IPerf3</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-300 group-hover:text-white/80 transition-colors duration-300">Bandwidth measurement</p>
-            </div>
-          </div>
-        </button>
-
-        <!-- Speedtest.net -->
-        <button
-          v-if="config.feature_speedtest_dot_net"
-          @click="openTool(tools.find(t => t.label === 'Speedtest.net'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-orange-500 to-amber-500"></div>
-          <div class="relative z-10 flex items-center space-x-4">
-            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300">Speedtest.net</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-300 group-hover:text-white/80 transition-colors duration-300">Official speed test</p>
-            </div>
-          </div>
-        </button>
-
-        <!-- Shell -->
-        <button
-          v-if="config.feature_shell"
-          @click="openTool(tools.find(t => t.label === 'Shell'))"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-gray-600 to-gray-700"></div>
-          <div class="relative z-10 flex items-center space-x-4">
-            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-gray-600 to-gray-700 group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300">Shell</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-300 group-hover:text-white/80 transition-colors duration-300">Interactive terminal</p>
-            </div>
-          </div>
+          
+          <!-- 底部进度条 -->
+          <div class="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" :class="tool.color"></div>
         </button>
       </div>
     </div>
