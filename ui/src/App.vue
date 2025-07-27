@@ -10,6 +10,7 @@ import UtilitiesCard from '@/components/Utilities.vue'
 import TrafficCard from '@/components/TrafficDisplay.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import LanguageSelector from '@/components/LanguageSelector.vue'
+import Toast from '@/components/Toast.vue'
 
 const appStore = useAppStore()
 const activeTab = ref('info')
@@ -255,6 +256,9 @@ onUnmounted(() => {
         </div>
       </transition>
     </div>
+
+    <!-- Toast Notifications -->
+    <Toast />
   </div>
 </template>
 

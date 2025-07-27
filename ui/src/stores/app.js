@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { formatBytes } from '@/helper/unit'
+
 export const useAppStore = defineStore('app', () => {
   const source = ref()
   const sessionId = ref()
@@ -9,6 +10,10 @@ export const useAppStore = defineStore('app', () => {
   const config = ref()
   const drawerWidth = ref()
   const memoryUsage = ref()
+  
+  // Toast management
+  const toasts = ref([])
+  let toastIdCounter = 0
   
   // Theme and language settings with persistence
   const theme = ref(localStorage.getItem('theme') || 'light')
@@ -123,10 +128,49 @@ export const useAppStore = defineStore('app', () => {
             reject(error)
             return
           }
+          
+          // Handle 400 Bad Request errors
+          if (error.response && error.response.status === 400) {
+            showToast('输入参数无效，请检查您的输入', 'error')
+          }
+          
           console.error(error)
           reject(error)
         })
     })
+  }
+
+  // Toast methods
+  const showToast = (message, type = 'info', duration = 5000) => {
+    const id = ++toastIdCounter
+    const toast = {
+      id,
+      message,
+      type,
+      timestamp: Date.now()
+    }
+    
+    toasts.value.push(toast)
+    
+    // Auto remove after duration
+    if (duration > 0) {
+      setTimeout(() => {
+        removeToast(id)
+      }, duration)
+    }
+    
+    return id
+  }
+
+  const removeToast = (id) => {
+    const index = toasts.value.findIndex(toast => toast.id === id)
+    if (index > -1) {
+      toasts.value.splice(index, 1)
+    }
+  }
+
+  const clearToasts = () => {
+    toasts.value = []
   }
 
   return {
@@ -139,11 +183,15 @@ export const useAppStore = defineStore('app', () => {
     memoryUsage,
     theme,
     language,
+    toasts,
 
     //methods
     initialize,
     requestMethod,
     setTheme,
-    setLanguage
+    setLanguage,
+    showToast,
+    removeToast,
+    clearToasts
   }
 })
