@@ -17,6 +17,8 @@ type ALSConfig struct {
 	ListenPort string `json:"-"`
 
 	Location string `json:"location"`
+	Logo     string `json:"logo"`
+	LogoType string `json:"logo_type"`
 
 	PublicIPv4 string `json:"public_ipv4"`
 	PublicIPv6 string `json:"public_ipv6"`
@@ -45,6 +47,8 @@ func GetDefaultConfig() *ALSConfig {
 		ListenHost:      "0.0.0.0",
 		ListenPort:      "80",
 		Location:        "",
+		Logo:            "",
+		LogoType:        "auto",
 		Iperf3StartPort: 30000,
 		Iperf3EndPort:   31000,
 
@@ -75,6 +79,7 @@ func Load() {
 func LoadWebConfig() {
 	Load()
 	LoadSponsorMessage()
+	LoadLogoType()
 	log.Default().Println("Loading config for web services...")
 
 	_, err := exec.LookPath("iperf3")
@@ -160,4 +165,60 @@ func LoadSponsorMessage() {
 	}
 
 	log.Default().Printf("Sponsor message type detected: %s", Config.SponsorMessageType)
+}
+
+func LoadLogoType() {
+	if Config.Logo == "" {
+		return
+	}
+
+	// 如果用户已经指定了类型，就不要自动检测
+	if Config.LogoType != "auto" {
+		return
+	}
+
+	log.Default().Println("Detecting logo type...")
+
+	content := Config.Logo
+
+	// 检测是否为URL
+	if strings.HasPrefix(content, "http://") || strings.HasPrefix(content, "https://") {
+		Config.LogoType = "url"
+		log.Default().Println("Logo type detected: url")
+		return
+	}
+
+	// 检测是否为base64
+	if strings.HasPrefix(content, "data:image/") {
+		Config.LogoType = "base64"
+		log.Default().Println("Logo type detected: base64")
+		return
+	}
+
+	// 检测是否为SVG
+	if strings.Contains(content, "<svg") && strings.Contains(content, "</svg>") {
+		Config.LogoType = "svg"
+		log.Default().Println("Logo type detected: svg")
+		return
+	}
+
+	// 检测是否为emoji（简单检测Unicode范围）
+	runes := []rune(content)
+	if len(runes) <= 5 && len(runes) > 0 {
+		for _, r := range runes {
+			if r >= 0x1F600 && r <= 0x1F64F || // 表情符号
+			   r >= 0x1F300 && r <= 0x1F5FF || // 其他符号
+			   r >= 0x1F680 && r <= 0x1F6FF || // 交通和地图符号
+			   r >= 0x2600 && r <= 0x26FF ||   // 杂项符号
+			   r >= 0x2700 && r <= 0x27BF {    // 装饰符号
+				Config.LogoType = "emoji"
+				log.Default().Println("Logo type detected: emoji")
+				return
+			}
+		}
+	}
+
+	// 默认当作纯文本处理
+	Config.LogoType = "text"
+	log.Default().Println("Logo type detected: text")
 }

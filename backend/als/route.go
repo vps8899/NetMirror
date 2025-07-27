@@ -1,8 +1,10 @@
 package als
 
 import (
+	"fmt"
 	"io/fs"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/X-Zero-L/als/als/controller"
@@ -109,9 +111,7 @@ func SetupHttpRoute(e *gin.Engine) {
 	})
 
 	e.GET("/", func(c *gin.Context) {
-		filePath := "/index.html"
-		filePath = filePath[1:]
-		handleStatisFile(filePath, c)
+		handleIndexHTML(c)
 	})
 
 	e.GET("/speedtest_worker.js", func(c *gin.Context) {
@@ -119,7 +119,7 @@ func SetupHttpRoute(e *gin.Engine) {
 	})
 
 	e.GET("/favicon.ico", func(c *gin.Context) {
-		handleStatisFile("favicon.ico", c)
+		handleFavicon(c)
 	})
 }
 
@@ -134,4 +134,59 @@ func handleStatisFile(filePath string, c *gin.Context) {
 		return
 	}
 	httpFs.ServeHTTP(c.Writer, c.Request)
+}
+
+func handleIndexHTML(c *gin.Context) {
+	uiFs := iEmbed.UIStaticFiles
+	subFs, _ := fs.Sub(uiFs, "ui")
+	
+	// 读取原始HTML文件
+	htmlBytes, err := fs.ReadFile(subFs, "index.html")
+	if err != nil {
+		c.String(404, "Not found")
+		c.Abort()
+		return
+	}
+	
+	htmlContent := string(htmlBytes)
+	
+	// 注入动态标题和favicon
+	if config.Config.Location != "" {
+		title := config.Config.Location
+		htmlContent = strings.Replace(htmlContent, "<title>Looking glass server</title>", 
+			fmt.Sprintf("<title>%s</title>", title), 1)
+	}
+	
+	// 注入favicon
+	if config.Config.Logo != "" && (config.Config.LogoType == "url" || config.Config.LogoType == "base64") {
+		faviconLink := fmt.Sprintf(`<link rel="icon" href="%s">`, config.Config.Logo)
+		htmlContent = strings.Replace(htmlContent, `<link rel="icon" href="/favicon.ico">`, faviconLink, 1)
+	}
+	
+	c.Header("Content-Type", "text/html; charset=utf-8")
+	c.String(200, htmlContent)
+}
+
+func handleFavicon(c *gin.Context) {
+	// 如果配置了自定义logo且为emoji类型，生成emoji favicon
+	if config.Config.Logo != "" && config.Config.LogoType == "emoji" {
+		// 生成简单的emoji SVG favicon
+		svgContent := fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+			<text y="24" font-size="24">%s</text>
+		</svg>`, config.Config.Logo)
+		
+		c.Header("Content-Type", "image/svg+xml")
+		c.String(200, svgContent)
+		return
+	}
+	
+	// 如果配置了SVG logo，将其作为favicon
+	if config.Config.Logo != "" && config.Config.LogoType == "svg" {
+		c.Header("Content-Type", "image/svg+xml")
+		c.String(200, config.Config.Logo)
+		return
+	}
+	
+	// 默认使用内置favicon
+	handleStatisFile("favicon.ico", c)
 }

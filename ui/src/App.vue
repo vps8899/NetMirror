@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { list as langList, setI18nLanguage, loadLocaleMessages } from './config/lang.js'
 import { useAppStore } from './stores/app'
 import NodeListCard from '@/components/Utilities/NodeList.vue'
@@ -89,6 +89,17 @@ const scrollToTop = () => {
   })
 }
 
+// 设置页面标题（favicon由后端处理）
+const updatePageInfo = () => {
+  if (!appStore.config) return
+  
+  // 设置页面标题（如果后端没有注入的话）
+  const title = appStore.config.location || 'Network Diagnostic Tools'
+  if (document.title === 'Looking glass server') {
+    document.title = title
+  }
+}
+
 onMounted(async () => {
   // Initialize the app store and wait for session ID
   await appStore.initialize()
@@ -97,8 +108,16 @@ onMounted(async () => {
   await loadLocaleMessages(appStore.language)
   setI18nLanguage(appStore.language)
 
+  // Update page info when config is loaded
+  updatePageInfo()
+
   window.addEventListener('scroll', handleScroll)
 })
+
+// Watch for config changes to update page info
+watch(() => appStore.config, () => {
+  updatePageInfo()
+}, { deep: true })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
@@ -121,8 +140,49 @@ onUnmounted(() => {
       <header class="pt-8 pb-6 px-4">
         <div class="max-w-6xl mx-auto text-center">
           <!-- Logo/Icon -->
-          <div class="inline-flex items-center justify-center w-14 h-14 mb-4 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg shadow-primary-500/25 animate-scale-in">
-            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <div 
+            class="inline-flex items-center justify-center mb-4 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg shadow-primary-500/25 animate-scale-in"
+            :class="appStore.config?.logo && (appStore.config.logo_type === 'text' || appStore.config.logo_type === 'emoji') 
+              ? 'min-w-14 h-14 px-4 py-2' 
+              : 'w-14 h-14'"
+          >
+            <!-- 根据logo类型显示不同内容 -->
+            <template v-if="appStore.config?.logo">
+              <!-- URL类型或base64图片 -->
+              <img 
+                v-if="appStore.config.logo_type === 'url' || appStore.config.logo_type === 'base64'"
+                :src="appStore.config.logo" 
+                alt="Logo" 
+                class="w-8 h-8 object-contain"
+                @error="($event) => $event.target.style.display = 'none'"
+              />
+              <!-- SVG类型 -->
+              <div 
+                v-else-if="appStore.config.logo_type === 'svg'"
+                class="w-8 h-8 flex items-center justify-center text-white"
+                v-html="appStore.config.logo"
+              ></div>
+              <!-- Emoji类型 -->
+              <span 
+                v-else-if="appStore.config.logo_type === 'emoji'"
+                class="text-2xl"
+              >{{ appStore.config.logo }}</span>
+              <!-- 纯文本类型 - 智能适配 -->
+              <span 
+                v-else
+                class="font-bold text-white text-center leading-tight px-1"
+                :class="appStore.config.logo.length > 8 ? 'text-xs' : appStore.config.logo.length > 5 ? 'text-sm' : 'text-base'"
+              >{{ appStore.config.logo }}</span>
+            </template>
+            <!-- 默认SVG图标 -->
+            <svg 
+              v-else
+              class="w-7 h-7 text-white" 
+              fill="none" 
+              stroke="currentColor" 
+              stroke-width="2" 
+              viewBox="0 0 24 24"
+            >
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"/>
             </svg>
           </div>
