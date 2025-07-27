@@ -33,7 +33,7 @@ const uploadGauge = computed(() => gaugeValue(uploadText.value))
 
 const baseChartOptions = {
   chart: {
-    height: 80,
+    height: 150,
     foreColor: '#6b7280',
     animations: {
       enabled: true,
@@ -254,40 +254,39 @@ onMounted(() => {
 </script>
 
 <template>
-  <div ref="containerRef" class="space-y-4">
+  <div ref="containerRef" class="space-y-6">
     <!-- Results Display -->
-    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-primary-200/30 dark:border-primary-700/30 relative overflow-hidden shadow-lg">
-      <!-- Speed Values -->
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <!-- Download -->
-        <div class="text-center">
-          <div class="flex items-center justify-center w-8 h-8 bg-primary-100 dark:bg-primary-900/30 rounded-lg mx-auto mb-2">
-            <ArrowDownIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Download -->
+      <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-primary-200/30 dark:border-primary-700/30 relative overflow-hidden shadow-lg">
+        <div class="flex items-center space-x-4 mb-4">
+          <div class="flex items-center justify-center w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex-shrink-0">
+            <ArrowDownIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
           </div>
-          <h4 class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ $t('librespeed_download') }}</h4>
-          <p class="text-2xl font-bold text-primary-600 dark:text-primary-400">{{ downloadText }}</p>
-          <span class="text-xs text-gray-500 dark:text-gray-400">Mbps</span>
-        </div>
-        
-        <!-- Upload -->
-        <div class="text-center">
-          <div class="flex items-center justify-center w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg mx-auto mb-2">
-            <ArrowUpIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <div>
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Download</h4>
+            <p class="text-3xl font-bold text-primary-600 dark:text-primary-400">{{ downloadText }} <span class="text-xl">Mbps</span></p>
           </div>
-          <h4 class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ $t('librespeed_upload') }}</h4>
-          <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ uploadText }}</p>
-          <span class="text-xs text-gray-500 dark:text-gray-400">Mbps</span>
         </div>
-      </div>
-      
-      <!-- Charts -->
-      <div class="grid grid-cols-2 gap-2">
         <VueApexCharts
           type="area"
           ref="chartDownloadRef"
           :options="charts.download.options"
           :series="charts.download.series"
         />
+      </div>
+
+      <!-- Upload -->
+      <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-primary-200/30 dark:border-primary-700/30 relative overflow-hidden shadow-lg">
+        <div class="flex items-center space-x-4 mb-4">
+          <div class="flex items-center justify-center w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex-shrink-0">
+            <ArrowUpIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Upload</h4>
+            <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ uploadText }} <span class="text-xl">Mbps</span></p>
+          </div>
+        </div>
         <VueApexCharts
           type="area"
           ref="chartUploadRef"
@@ -298,20 +297,20 @@ onMounted(() => {
     </div>
 
     <!-- Control Button -->
-    <div class="text-center">
+    <div class="text-center pt-4">
       <button
         @click="startOrStopSpeedtest"
-        class="inline-flex items-center px-5 py-2.5 rounded-lg font-medium transition-all duration-200 transform hover:scale-105"
+        class="inline-flex items-center px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105"
         :class="working 
           ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg hover:shadow-red-500/30' 
           : 'bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white shadow-lg hover:shadow-primary-500/30'"
       >
-        <component :is="working ? StopIcon : PlayIcon" class="w-4 h-4 mr-2" />
+        <component :is="working ? StopIcon : PlayIcon" class="w-6 h-6 mr-3" />
         <span v-if="working" class="flex items-center">
           <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-          {{ $t('librespeed_stop') }}
+          Stop
         </span>
-        <span v-else>{{ $t('librespeed_begin') }}</span>
+        <span v-else>Begin test</span>
       </button>
     </div>
   </div>
