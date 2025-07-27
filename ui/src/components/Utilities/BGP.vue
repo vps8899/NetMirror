@@ -7,7 +7,7 @@
           <div>
             <h2 class="text-xl font-bold text-gray-900 dark:text-white">BGP Network Topology</h2>
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              AS{{ asnNumber }} - {{ appStore.config.bgp?.split('(')[1]?.replace(')', '') || 'Network topology visualization' }}
+              {{ getBGPDescription() }}
             </p>
           </div>
           <div class="flex space-x-2">
@@ -233,6 +233,21 @@ const processSvgForDarkMode = (svgContent) => {
     .replace(/<svg([^>]*?)>/, '<svg$1 style="background-color: #1f2937; border-radius: 8px; padding: 10px;">')
   
   return processed
+}
+
+// Get BGP description for display
+const getBGPDescription = () => {
+  if (!appStore.config?.bgp && !appStore.config?.asn) {
+    return 'Network topology visualization'
+  }
+  
+  // If we have full BGP info, show it as is
+  if (appStore.config.bgp) {
+    return appStore.config.bgp
+  }
+  
+  // If we only have ASN, show it
+  return appStore.config.asn || 'Network topology visualization'
 }
 
 // Load graph on component mount if ASN is already available

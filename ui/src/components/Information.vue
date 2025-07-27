@@ -83,27 +83,6 @@ const copyToClipboard = async (text, buttonRef = null) => {
             </div>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">BGP</label>
-            <div class="flex">
-              <input 
-                type="text" 
-                class="flex-1 bg-primary-50/50 dark:bg-gray-700 border border-primary-200 dark:border-gray-600 rounded-l-lg px-4 py-3 text-slate-800 dark:text-gray-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" 
-                :value="appStore.config.bgp || 'N/A'" 
-                @focus="$event.target.select()" 
-                readonly
-              >
-              <button 
-                v-if="appStore.config.bgp"
-                class="bg-primary-100 hover:bg-primary-200 dark:bg-gray-600 dark:hover:bg-gray-500 border border-l-0 border-primary-200 dark:border-gray-600 rounded-r-lg px-4 py-3 text-primary-600 dark:text-gray-100 transition-colors duration-200 min-w-[44px] flex items-center justify-center" 
-                @click="copyToClipboard(appStore.config.bgp, $event.target)"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div>
             <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Server IPv4</label>
             <div class="flex">
               <input 
@@ -131,14 +110,14 @@ const copyToClipboard = async (text, buttonRef = null) => {
               <input 
                 type="text" 
                 class="flex-1 bg-primary-50/50 dark:bg-gray-700 border border-primary-200 dark:border-gray-600 rounded-l-lg px-4 py-3 text-slate-800 dark:text-gray-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" 
-                :value="appStore.config.asn || 'N/A'" 
+                :value="appStore.config.bgp || appStore.config.asn || 'N/A'" 
                 @focus="$event.target.select()" 
                 readonly
               >
               <button 
-                v-if="appStore.config.asn"
+                v-if="appStore.config.bgp || appStore.config.asn"
                 class="bg-primary-100 hover:bg-primary-200 dark:bg-gray-600 dark:hover:bg-gray-500 border border-l-0 border-primary-200 dark:border-gray-600 rounded-r-lg px-4 py-3 text-primary-600 dark:text-gray-100 transition-colors duration-200 min-w-[44px] flex items-center justify-center" 
-                @click="copyToClipboard(appStore.config.asn, $event.target)"
+                @click="copyToClipboard(appStore.config.bgp || appStore.config.asn, $event.target)"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
