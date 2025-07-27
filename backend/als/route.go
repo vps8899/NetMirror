@@ -168,6 +168,37 @@ func handleIndexHTML(c *gin.Context) {
 }
 
 func handleFavicon(c *gin.Context) {
+	// 如果配置了URL类型的logo，重定向到该URL
+	if config.Config.Logo != "" && config.Config.LogoType == "url" {
+		c.Redirect(302, config.Config.Logo)
+		return
+	}
+	
+	// 如果配置了base64类型的logo，直接返回数据
+	if config.Config.Logo != "" && config.Config.LogoType == "base64" {
+		// 解析data URL获取MIME类型和数据
+		if strings.HasPrefix(config.Config.Logo, "data:") {
+			parts := strings.Split(config.Config.Logo, ",")
+			if len(parts) == 2 {
+				// 解析MIME类型
+				mimeType := "image/png" // 默认类型
+				if strings.Contains(parts[0], "image/") {
+					mimeStart := strings.Index(parts[0], "image/")
+					mimeEnd := strings.Index(parts[0][mimeStart:], ";")
+					if mimeEnd == -1 {
+						mimeType = parts[0][mimeStart:]
+					} else {
+						mimeType = parts[0][mimeStart:mimeStart+mimeEnd]
+					}
+				}
+				
+				c.Header("Content-Type", mimeType)
+				c.String(200, parts[1])
+				return
+			}
+		}
+	}
+	
 	// 如果配置了自定义logo且为emoji类型，生成emoji favicon
 	if config.Config.Logo != "" && config.Config.LogoType == "emoji" {
 		// 生成简单的emoji SVG favicon
