@@ -117,26 +117,26 @@ onUnmounted(() => {
     <!-- Main container -->
     <div class="relative z-10 min-h-screen">
       <!-- Header -->
-      <header class="pt-12 pb-8 px-4">
+      <header class="pt-8 pb-6 px-4">
         <div class="max-w-6xl mx-auto text-center">
           <!-- Logo/Icon -->
-          <div class="inline-flex items-center justify-center w-20 h-20 mb-6 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl shadow-lg shadow-primary-500/25 animate-scale-in">
-            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <div class="inline-flex items-center justify-center w-14 h-14 mb-4 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg shadow-primary-500/25 animate-scale-in">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"/>
             </svg>
           </div>
 
           <!-- Title and subtitle -->
-          <div class="space-y-4 animate-fade-in">
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary-600 via-primary-500 to-blue-600 bg-clip-text text-transparent tracking-tight">
+          <div class="space-y-3 animate-fade-in">
+            <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary-600 via-primary-500 to-blue-600 bg-clip-text text-transparent tracking-tight">
               Network Diagnostic Tools
             </h1>
-            <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 font-medium max-w-3xl mx-auto">
+            <p class="text-base md:text-lg text-gray-600 dark:text-gray-300 font-medium max-w-2xl mx-auto">
               {{ appStore.config?.location || 'Professional Looking Glass Server' }}
             </p>
             
             <!-- Status indicator -->
-            <div class="inline-flex items-center px-4 py-2 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-full border border-primary-200/50 dark:border-primary-700/50 shadow-lg">
+            <div class="inline-flex items-center px-3 py-1.5 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-full border border-primary-200/50 dark:border-primary-700/50 shadow-lg">
               <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
               <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Server Online</span>
             </div>
@@ -145,8 +145,8 @@ onUnmounted(() => {
       </header>
 
       <!-- Main content area -->
-      <main class="pb-20 px-4">
-        <div class="max-w-7xl mx-auto space-y-10">
+      <main class="pb-16 px-4">
+        <div class="max-w-7xl mx-auto space-y-6">
           <LoadingCard v-if="appStore.connecting" />
           <template v-else>
             <!-- Node List Card - Display at the top -->
@@ -200,7 +200,7 @@ onUnmounted(() => {
       </main>
 
       <!-- Footer -->
-      <footer class="pb-12 px-4">
+      <footer class="pb-8 px-4">
         <div class="max-w-7xl mx-auto text-center">
           <div class="inline-flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
             <span>Powered by</span>
