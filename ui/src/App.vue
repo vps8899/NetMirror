@@ -205,11 +205,11 @@ onUnmounted(() => {
           <div class="inline-flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
             <span>Powered by</span>
             <a 
-              href="https://github.com/Yuri-NagaSaki/NetMirror" 
+              href="https://github.com/catcat-blog/NetMirror" 
               target="_blank"
               class="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors duration-200"
             >
-              ALS - Another Looking Glass Server
+              NetMirror - Another Looking Glass Server
             </a>
           </div>
         </div>
@@ -234,7 +234,7 @@ onUnmounted(() => {
               <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
             </button>
             <!-- Language Selector -->
-            <div class="w-14 h-14 flex items-center justify-center bg-white dark:bg-gray-700 rounded-full shadow-lg">
+            <div class="w-14 h-14 flex items-center justify-center bg-white dark:bg-gray-700 rounded-full shadow-lg" style="display: none;">
               <LanguageSelector 
                 :current-lang="currentLangCode" 
                 :lang-list="langList"

@@ -150,9 +150,9 @@ const copyToClipboard = async (text, buttonRef = null) => {
       <!-- Sponsor Message -->
       <div 
         v-if="appStore.config?.sponsor_message?.length > 0"
-        class="mt-6 p-4 bg-primary-50/50 dark:bg-gray-700/50 rounded-lg border border-primary-200 dark:border-gray-600"
+        class="mt-6 p-4 bg-primary-50/50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-700/30"
       >
-        <div class="prose prose-amber max-w-none dark:prose-invert">
+        <div class="prose prose-primary max-w-none dark:prose-invert text-primary-700 dark:text-primary-300">
           <Markdown :source="appStore.config.sponsor_message" />
         </div>
       </div>
