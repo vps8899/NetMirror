@@ -208,10 +208,10 @@ const getStatusByLatency = (latency) => {
 onMounted(() => {
   fetchNodes()
   
-  // Refresh latencies every 1 second
+  // Refresh latencies every 5 minutes (300,000 ms) to reduce system load.
   latencyInterval = setInterval(() => {
     testAllLatencies()
-  }, 1000)
+  }, 300000)
 })
 
 onUnmounted(() => {
