@@ -11,8 +11,14 @@ type Server struct {
 
 func CreateServer() *Server {
 	gin.SetMode(gin.ReleaseMode)
+	engine := gin.Default()
+	
+	// Configure trusted proxies to handle frp and other reverse proxies
+	// This allows ClientIP() to properly parse X-Forwarded-For and X-Real-IP headers
+	engine.SetTrustedProxies([]string{"127.0.0.1", "::1", "0.0.0.0/0"})
+	
 	e := &Server{
-		engine: gin.Default(),
+		engine: engine,
 		listen: ":8080",
 	}
 	return e
