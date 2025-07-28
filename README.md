@@ -1,4 +1,6 @@
 # NetMirror - A Modern Looking-glass Server
+[![Docker Pulls](https://img.shields.io/docker/pulls/soyorins/netmirror)](https://hub.docker.com/r/soyorins/netmirror)
+[![License](https://img.shields.io/badge/license-Apache%202.0%20%2B%20Commons%20Clause-blue)](LICENSE)
 
 NetMirror is a modern, feature-rich looking-glass server with a beautiful web interface for network diagnostics and performance testing.
 
@@ -12,10 +14,27 @@ NetMirror is a modern, feature-rich looking-glass server with a beautiful web in
 - **Customizable**: Configure features and server details via environment variables.
 
 ## 🚀 Quick Start
+### Using Docker Compose
 
-### Option 1: Using Pre-built Docker Image
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/Yuri-NagaSaki/NetMirror.git
+    cd NetMirror
+    ```
 
-**Run directly from DockerHub:**
+2.  **Create an environment file:**
+
+    Copy the example environment file to create your own configuration.
+    ```bash
+    cp .env.example .env
+    ```
+    *Note: If `.env.example` does not exist, you can create a blank `.env` file and add the variables you need from the table below.*
+
+3.  **Customize your configuration (optional):**
+
+    Edit the `.env` file to set your server location, public IP addresses, and other options.
+
+4.  **Start the server:**
 ```bash
 services:
   als:
@@ -40,31 +59,6 @@ services:
         max-size: "10m"
         max-file: "3"
 ```
-
-### Option 2: Using Docker Compose
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/Yuri-NagaSaki/NetMirror.git
-    cd NetMirror
-    ```
-
-2.  **Create an environment file:**
-
-    Copy the example environment file to create your own configuration.
-    ```bash
-    cp .env.example .env
-    ```
-    *Note: If `.env.example` does not exist, you can create a blank `.env` file and add the variables you need from the table below.*
-
-3.  **Customize your configuration (optional):**
-
-    Edit the `.env` file to set your server location, public IP addresses, and other options.
-
-4.  **Start the server:**
-    ```bash
-    docker compose up -d
-    ```
 
 The application will be accessible at `http://<your-server-ip>`. The default port is 3000, which can be changed via the `HTTP_PORT` environment variable.
 
