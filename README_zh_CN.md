@@ -132,4 +132,4 @@ services:
 
 ## 📄 许可证
 
-本项目基于 MIT 许可证。
+Apache License, Version 2.0 and the Commons Clause Restriction.
