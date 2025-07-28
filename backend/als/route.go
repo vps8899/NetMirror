@@ -2,6 +2,7 @@ package als
 
 import (
 	"fmt"
+	"io"
 	"io/fs"
 	"net/http"
 	"strings"
@@ -38,10 +39,19 @@ func SetupHttpRoute(e *gin.Engine) {
 
 	e.GET("/session", session.Handle)
 	
-	// BGP graph proxy endpoint
+	// BGP graph proxy endpoint with 24-hour caching
 	e.GET("/bgp/graph/:asn/:type", func(c *gin.Context) {
 		asn := c.Param("asn")
 		graphType := c.Param("type") // combined, ipv4, ipv6
+		
+		// Check cache first
+		if cachedData, found := config.GetBGPGraphCached(asn, graphType); found {
+			c.Header("Content-Type", "image/svg+xml")
+			c.Header("Cache-Control", "public, max-age=86400") // Cache for 24 hours
+			c.Header("X-Cache", "HIT")
+			c.Data(200, "image/svg+xml", cachedData)
+			return
+		}
 		
 		// Construct BGPView URL
 		var url string
@@ -70,10 +80,21 @@ func SetupHttpRoute(e *gin.Engine) {
 			return
 		}
 		
-		// Set proper headers and stream the SVG
+		// Read response data
+		data, err := io.ReadAll(resp.Body)
+		if err != nil {
+			c.JSON(500, gin.H{"error": "Failed to read BGP graph data"})
+			return
+		}
+		
+		// Cache the result for 24 hours
+		config.SetBGPGraphCache(asn, graphType, data)
+		
+		// Set proper headers and return the SVG
 		c.Header("Content-Type", "image/svg+xml")
-		c.Header("Cache-Control", "public, max-age=3600") // Cache for 1 hour
-		c.DataFromReader(200, resp.ContentLength, "image/svg+xml", resp.Body, nil)
+		c.Header("Cache-Control", "public, max-age=86400") // Cache for 24 hours
+		c.Header("X-Cache", "MISS")
+		c.Data(200, "image/svg+xml", data)
 	})
 	
 	// Node management endpoints (no session required for cross-node functionality)

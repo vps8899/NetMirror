@@ -55,19 +55,14 @@ func updatePublicIP() {
 	}()
 }
 
-// updateBGPInfo fetches BGP and ASN information for the given IP
+// updateBGPInfo fetches BGP and ASN information for the given IP with caching
 func updateBGPInfo(ip string) {
 	log.Default().Printf("Fetching BGP info for IP: %s", ip)
 	
-	bgpInfo, err := getBGPInfoFromIPInfo(ip)
+	bgpInfo, err := GetBGPInfoCached(ip)
 	if err != nil {
-		log.Default().Printf("Failed to get BGP info from ipinfo.io: %v", err)
-		// Try alternative API
-		bgpInfo, err = getBGPInfoFromBGPView(ip)
-		if err != nil {
-			log.Default().Printf("Failed to get BGP info from bgpview.io: %v", err)
-			return
-		}
+		log.Default().Printf("Failed to get BGP info: %v", err)
+		return
 	}
 	
 	if bgpInfo != nil {
