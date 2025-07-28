@@ -215,15 +215,41 @@ onUnmounted(() => {
       <main class="pb-16">
         <LoadingCard v-if="appStore.connecting" />
         <template v-else>
-          <div class="max-w-7xl mx-auto space-y-6 px-4">
-            <!-- Node List Card -->
+          <div class="max-w-7xl mx-auto space-y-4 md:space-y-6 px-4">
+            <!-- Node List Card with enhanced mobile spacing -->
             <div class="animate-slide-up">
-              <NodeListCard />
+              <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 overflow-hidden p-4 md:p-6">
+                <div class="mb-3 md:mb-4">
+                  <h2 class="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Looking Glass Nodes Configuration</h2>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Select and test connectivity to different network nodes</p>
+                </div>
+                <NodeListCard />
+              </div>
             </div>
-            <!-- Tab Navigation -->
-            <div ref="tabNavigation" class="animate-slide-up" style="animation-delay: 0.1s;">
-              <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 p-2 inline-block">
-                <div class="flex gap-2">
+            <!-- Tab Navigation with improved mobile layout -->
+            <div ref="tabNavigation" class="animate-slide-up mt-6 md:mt-8" style="animation-delay: 0.1s;">
+              <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 p-2">
+                <!-- Mobile: Scrollable horizontal tabs -->
+                <div class="md:hidden overflow-x-auto">
+                  <div class="flex gap-2 min-w-max px-1">
+                    <button
+                      v-for="tab in filteredTabs"
+                      :key="tab.id"
+                      @click="changeTab(tab.id)"
+                      class="flex items-center space-x-2 px-3 py-2 rounded-xl font-medium transition-all duration-200 group whitespace-nowrap flex-shrink-0"
+                      :class="activeTab === tab.id 
+                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg' 
+                        : 'bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80'"
+                    >
+                      <svg class="w-4 h-4 transition-transform duration-200" :class="activeTab === tab.id ? 'rotate-12' : 'group-hover:rotate-6'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tab.icon"></path>
+                      </svg>
+                      <span class="text-sm">{{ tab.label }}</span>
+                    </button>
+                  </div>
+                </div>
+                <!-- Desktop: Regular flex layout -->
+                <div class="hidden md:flex gap-2">
                   <button
                     v-for="tab in filteredTabs"
                     :key="tab.id"
@@ -242,8 +268,8 @@ onUnmounted(() => {
               </div>
             </div>
             
-            <!-- Tab Content -->
-            <div class="relative mt-6 overflow-hidden">
+            <!-- Tab Content with improved mobile spacing -->
+            <div class="relative mt-4 md:mt-6 overflow-hidden">
               <div 
                 class="flex transition-transform duration-300 ease-out"
                 :style="{ transform: `translateX(-${tabIndex * 100}%)` }"
@@ -251,7 +277,7 @@ onUnmounted(() => {
                 <div 
                   v-for="(tab, index) in filteredTabs" 
                   :key="tab.id"
-                  class="w-full flex-shrink-0"
+                  class="w-full flex-shrink-0 px-1 md:px-0"
                   :style="{ order: index }"
                 >
                   <InfoCard v-if="tab.id === 'info'" />
@@ -381,6 +407,27 @@ body {
 
 .animate-pulse-slow {
   animation: pulse-slow 4s ease-in-out infinite;
+}
+
+/* Mobile-friendly line clamping */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Mobile touch improvements */
+@media (hover: none) {
+  .group:hover .group-hover\:opacity-100 {
+    opacity: 1;
+  }
+  .group:hover .group-hover\:scale-110 {
+    transform: scale(1.1);
+  }
+  .group:hover .group-hover\:rotate-12 {
+    transform: rotate(12deg);
+  }
 }
 
 /* Custom scrollbar */

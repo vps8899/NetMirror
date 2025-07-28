@@ -178,31 +178,37 @@ const closeTool = () => {
 
 <template>
   <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 overflow-hidden animate-slide-up" style="animation-delay: 0.1s;">
-    <div class="p-6">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- 动态渲染工具卡片 -->
+    <div class="p-4 md:p-6">
+      <!-- Mobile: Header with description -->
+      <div class="mb-4 md:mb-6">
+        <h2 class="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Network Diagnostic Tools</h2>
+        <p class="text-sm text-gray-600 dark:text-gray-400">Choose from available network testing and diagnostic utilities</p>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        <!-- 动态渲染工具卡片 - 优化移动端 -->
         <button
           v-for="tool in availableTools"
           :key="tool.id"
           @click="openTool(tool)"
-          class="group relative overflow-hidden rounded-xl p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+          class="group relative overflow-hidden rounded-xl p-4 md:p-5 text-left bg-primary-50/30 dark:bg-gray-700/30 border border-primary-200/50 dark:border-gray-600/50 hover:border-transparent transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] min-h-[120px] md:min-h-[auto]"
         >
           <!-- 渐变边框效果 -->
           <div class="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br" :class="tool.color"></div>
           
-          <!-- 卡片内容 -->
-          <div class="relative z-10 flex items-center space-x-4">
+          <!-- 卡片内容 - 移动端垂直布局，桌面端水平布局 -->
+          <div class="relative z-10 flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 h-full">
             <!-- 图标 -->
-            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300 group-hover:rotate-12" :class="tool.color">
+            <div class="flex items-center justify-center w-12 h-12 mx-auto sm:mx-0 rounded-xl bg-gradient-to-br group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300 group-hover:rotate-12 flex-shrink-0" :class="tool.color">
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tool.icon"></path>
               </svg>
             </div>
             
             <!-- 文字内容 -->
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300">{{ tool.label }}</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-300 group-hover:text-white/80 transition-colors duration-300">{{ tool.description }}</p>
+            <div class="text-center sm:text-left flex-1">
+              <h3 class="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-white transition-colors duration-300 mb-1">{{ tool.label }}</h3>
+              <p class="text-xs md:text-sm text-gray-600 dark:text-gray-300 group-hover:text-white/80 transition-colors duration-300 line-clamp-2">{{ tool.description }}</p>
             </div>
           </div>
           
