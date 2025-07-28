@@ -43,12 +43,24 @@ export default defineConfig(({ command, mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
-            // Vendor chunks
+            // Core framework chunks
             "vendor-vue": ["vue", "pinia"],
             "vendor-ui": ["@vueuse/core", "@vueuse/motion"],
+            
+            // Large dependencies as separate chunks for lazy loading
             "vendor-charts": ["vue3-apexcharts", "apexcharts"],
-            "vendor-terminal": ["xterm", "@xterm/addon-fit"],
+            "vendor-terminal": ["xterm", "@xterm/addon-fit", "@xterm/addon-attach", "@xterm/addon-serialize"],
+            
+            // Utility libraries
             "vendor-utils": ["axios", "vue-i18n"],
+            "vendor-headless": ["@headlessui/vue", "@heroicons/vue"],
+            "vendor-markdown": ["markdown-it", "vue3-markdown-it", "dompurify"],
+            
+            // UI framework (separate from core)
+            "vendor-naive": ["naive-ui"],
+            
+            // Icons and clipboard utilities
+            "vendor-misc": ["lucide-vue-next", "v-clipboard"],
           },
           // Optimize chunk file names
           chunkFileNames: (chunkInfo) => {
@@ -74,6 +86,15 @@ export default defineConfig(({ command, mode }) => {
             }
             return `assets/[name]-[hash].${ext}`
           },
+          
+          // Build optimization
+          experimentalMinChunkSize: 1024,
+        },
+        
+        // Enable code splitting optimizations
+        external: (id) => {
+          // Don't externalize core dependencies, but allow for dynamic imports
+          return false;
         },
       },
 
@@ -83,6 +104,12 @@ export default defineConfig(({ command, mode }) => {
             compress: {
               drop_console: true,
               drop_debugger: true,
+              pure_funcs: ['console.log', 'console.info', 'console.warn'],
+              dead_code: true,
+              unused: true,
+            },
+            mangle: {
+              toplevel: true,
             },
           }
         : undefined,
@@ -198,9 +225,18 @@ export default defineConfig(({ command, mode }) => {
 
     // Optimization
     optimizeDeps: {
-      include: ["vue", "pinia", "@vueuse/core", "@vueuse/motion", "axios", "vue-i18n", "vue3-apexcharts", "apexcharts"],
+      include: ["vue", "pinia", "@vueuse/core", "@vueuse/motion", "axios", "vue-i18n"],
       exclude: [
         // Exclude large dependencies that should be loaded dynamically
+        "vue3-apexcharts", 
+        "apexcharts",
+        "xterm",
+        "@xterm/addon-fit",
+        "@xterm/addon-attach", 
+        "@xterm/addon-serialize",
+        "naive-ui",
+        "markdown-it",
+        "vue3-markdown-it"
       ],
     },
 

@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    BGP: typeof import('./src/components/Utilities/BGP.vue')['default']
     Copy: typeof import('./src/components/Copy.vue')['default']
     FileSpeedtest: typeof import('./src/components/Speedtest/FileSpeedtest.vue')['default']
     Information: typeof import('./src/components/Information.vue')['default']

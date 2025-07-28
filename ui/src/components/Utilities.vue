@@ -32,9 +32,11 @@ const tools = ref([
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/Ping.vue'),
       delay: 200,
+      timeout: 10000,
       loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
         h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
-      ])
+      ]),
+      errorComponent: () => h('div', { class: 'text-red-500 p-4' }, 'Failed to load component')
     })
   },
   {
@@ -47,9 +49,11 @@ const tools = ref([
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/Ping6.vue'),
       delay: 200,
+      timeout: 10000,
       loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
         h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
-      ])
+      ]),
+      errorComponent: () => h('div', { class: 'text-red-500 p-4' }, 'Failed to load component')
     })
   },
   {
@@ -62,9 +66,11 @@ const tools = ref([
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/MTR.vue'),
       delay: 200,
+      timeout: 10000,
       loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
         h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
-      ])
+      ]),
+      errorComponent: () => h('div', { class: 'text-red-500 p-4' }, 'Failed to load component')
     })
   },
   {
@@ -77,9 +83,11 @@ const tools = ref([
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/MTR6.vue'),
       delay: 200,
+      timeout: 10000,
       loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
         h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
-      ])
+      ]),
+      errorComponent: () => h('div', { class: 'text-red-500 p-4' }, 'Failed to load component')
     })
   },
   {
@@ -92,9 +100,11 @@ const tools = ref([
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/Traceroute.vue'),
       delay: 200,
+      timeout: 10000,
       loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
         h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
-      ])
+      ]),
+      errorComponent: () => h('div', { class: 'text-red-500 p-4' }, 'Failed to load component')
     })
   },
   {
@@ -107,9 +117,11 @@ const tools = ref([
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/Traceroute6.vue'),
       delay: 200,
+      timeout: 10000,
       loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
         h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
-      ])
+      ]),
+      errorComponent: () => h('div', { class: 'text-red-500 p-4' }, 'Failed to load component')
     })
   },
   {
@@ -122,9 +134,11 @@ const tools = ref([
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/IPerf3.vue'),
       delay: 200,
+      timeout: 10000,
       loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
         h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
-      ])
+      ]),
+      errorComponent: () => h('div', { class: 'text-red-500 p-4' }, 'Failed to load component')
     })
   },
   {
@@ -137,9 +151,11 @@ const tools = ref([
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/SpeedtestNet.vue'),
       delay: 200,
+      timeout: 10000,
       loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
         h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
-      ])
+      ]),
+      errorComponent: () => h('div', { class: 'text-red-500 p-4' }, 'Failed to load component')
     })
   },
   {
@@ -152,9 +168,11 @@ const tools = ref([
     componentNode: defineAsyncComponent({
       loader: () => import('./Utilities/Shell.vue'),
       delay: 200,
+      timeout: 10000,
       loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
         h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
-      ])
+      ]),
+      errorComponent: () => h('div', { class: 'text-red-500 p-4' }, 'Failed to load component')
     })
   }
 ])
@@ -166,9 +184,16 @@ const availableTools = computed(() => {
   })
 })
 
+const loadComponentOnDemand = (tool) => {
+  if (!toolComponent.value || toolComponent.value !== tool.componentNode) {
+    toolComponent.value = tool.componentNode
+  }
+}
+
 const openTool = (tool) => {
   currentTool.value = tool
-  toolComponent.value = toRaw(tool.componentNode)
+  // Only load component when actually needed
+  loadComponentOnDemand(tool)
 }
 
 const closeTool = () => {

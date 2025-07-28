@@ -1,17 +1,58 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch, defineAsyncComponent, h } from 'vue'
 import { list as langList, setI18nLanguage, loadLocaleMessages } from './config/lang.js'
 import { useAppStore } from './stores/app'
-import NodeListCard from '@/components/Utilities/NodeList.vue'
 import LoadingCard from '@/components/Loading.vue'
 import InfoCard from '@/components/Information.vue'
-import SpeedtestCard from '@/components/Speedtest.vue'
-import UtilitiesCard from '@/components/Utilities.vue'
-import BGPCard from '@/components/Utilities/BGP.vue'
-import TrafficCard from '@/components/TrafficDisplay.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import LanguageSelector from '@/components/LanguageSelector.vue'
 import Toast from '@/components/Toast.vue'
+
+// Lazy load heavy components
+const SpeedtestCard = defineAsyncComponent({
+  loader: () => import('@/components/Speedtest.vue'),
+  delay: 300,
+  timeout: 10000,
+  loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
+    h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
+  ])
+})
+
+const UtilitiesCard = defineAsyncComponent({
+  loader: () => import('@/components/Utilities.vue'),
+  delay: 300,
+  timeout: 10000,
+  loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
+    h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
+  ])
+})
+
+const BGPCard = defineAsyncComponent({
+  loader: () => import('@/components/Utilities/BGP.vue'),
+  delay: 300,
+  timeout: 10000,
+  loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
+    h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
+  ])
+})
+
+const TrafficCard = defineAsyncComponent({
+  loader: () => import('@/components/TrafficDisplay.vue'),
+  delay: 300,
+  timeout: 10000,
+  loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
+    h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
+  ])
+})
+
+const NodeListCard = defineAsyncComponent({
+  loader: () => import('@/components/Utilities/NodeList.vue'),
+  delay: 300,
+  timeout: 10000,
+  loadingComponent: () => h('div', { class: 'flex items-center justify-center p-8' }, [
+    h('div', { class: 'w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin' })
+  ])
+})
 
 const appStore = useAppStore()
 const activeTab = ref('info')
