@@ -132,4 +132,4 @@ Configure NetMirror by setting environment variables in the `.env` file.
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+Apache License, Version 2.0 and the Commons Clause Restriction.
