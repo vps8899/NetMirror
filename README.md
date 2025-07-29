@@ -4,6 +4,8 @@
 
 NetMirror is a modern, feature-rich looking-glass server with a beautiful web interface for network diagnostics and performance testing.
 
+The demo server for this project is sponsored by [Verasel](https://verasel.com).
+
 ## ✨ Features
 
 - **Modern UI**: A clean and responsive user interface built with Vue.js.
