@@ -89,35 +89,35 @@
                     <!-- Latency with icon -->
                     <div class="flex items-center space-x-1.5">
                       <div
-                        :key="`indicator-${node.name}`"
+                        :key="`indicator-${getNodeKey(node)}`"
                         class="w-2.5 h-2.5 rounded-full flex-shrink-0"
                         :class="{
-                          'bg-green-500': latencies[node.name]?.status === 'good',
-                          'bg-yellow-500': latencies[node.name]?.status === 'medium',
-                          'bg-red-500': latencies[node.name]?.status === 'high' || latencies[node.name]?.status === 'error',
-                          'bg-gray-400 animate-pulse': !latencies[node.name]
+                          'bg-green-500': latencies[getNodeKey(node)]?.status === 'good',
+                          'bg-yellow-500': latencies[getNodeKey(node)]?.status === 'medium',
+                          'bg-red-500': latencies[getNodeKey(node)]?.status === 'high' || latencies[getNodeKey(node)]?.status === 'error',
+                          'bg-gray-400 animate-pulse': !latencies[getNodeKey(node)]
                         }"
                       ></div>
-                      <span :key="`latency-${node.name}`" class="text-xs font-semibold min-w-0" :class="{
-                        'text-green-600 dark:text-green-400': latencies[node.name]?.status === 'good',
-                        'text-yellow-600 dark:text-yellow-400': latencies[node.name]?.status === 'medium',
-                        'text-red-600 dark:text-red-400': latencies[node.name]?.status === 'high' || latencies[node.name]?.status === 'error',
-                        'text-gray-600 dark:text-gray-400': !latencies[node.name]
+                      <span :key="`latency-${getNodeKey(node)}`" class="text-xs font-semibold min-w-0" :class="{
+                        'text-green-600 dark:text-green-400': latencies[getNodeKey(node)]?.status === 'good',
+                        'text-yellow-600 dark:text-yellow-400': latencies[getNodeKey(node)]?.status === 'medium',
+                        'text-red-600 dark:text-red-400': latencies[getNodeKey(node)]?.status === 'high' || latencies[getNodeKey(node)]?.status === 'error',
+                        'text-gray-600 dark:text-gray-400': !latencies[getNodeKey(node)]
                       }">
-                        <span v-if="!latencies[node.name]">Testing...</span>
-                        <span v-else-if="latencies[node.name].status === 'error'">Offline</span>
-                        <span v-else>{{ latencies[node.name].latency }}ms</span>
+                        <span v-if="!latencies[getNodeKey(node)]">Testing...</span>
+                        <span v-else-if="latencies[getNodeKey(node)].status === 'error'">Offline</span>
+                        <span v-else>{{ latencies[getNodeKey(node)].latency }}ms</span>
                       </span>
                     </div>
                     
                     <!-- Status Badge - 超小状态徽章 -->
-                    <div v-if="latencies[node.name]" :key="`status-${node.name}`" class="text-xs font-medium px-1.5 py-0.5 rounded flex-shrink-0" :class="{
-                      'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400': latencies[node.name].status === 'good',
-                      'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-400': latencies[node.name].status === 'medium',
-                      'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400': latencies[node.name].status === 'high',
-                      'bg-gray-100 text-gray-700 dark:bg-gray-900/50 dark:text-gray-400': latencies[node.name].status === 'error'
+                    <div v-if="latencies[getNodeKey(node)]" :key="`status-${getNodeKey(node)}`" class="text-xs font-medium px-1.5 py-0.5 rounded flex-shrink-0" :class="{
+                      'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400': latencies[getNodeKey(node)].status === 'good',
+                      'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-400': latencies[getNodeKey(node)].status === 'medium',
+                      'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400': latencies[getNodeKey(node)].status === 'high',
+                      'bg-gray-100 text-gray-700 dark:bg-gray-900/50 dark:text-gray-400': latencies[getNodeKey(node)].status === 'error'
                     }">
-                      {{ getStatusText(latencies[node.name]?.status) }}
+                      {{ getStatusText(latencies[getNodeKey(node)]?.status) }}
                     </div>
                   </div>
 
@@ -126,14 +126,14 @@
                     <!-- Ping Button - 超小按钮 -->
                     <button
                       @click.stop.prevent="pingSingleNode(node)"
-                      :disabled="pingStates[node.name]?.isPinging"
+                      :disabled="pingStates[getNodeKey(node)]?.isPinging"
                       class="inline-flex items-center px-2 py-1.5 rounded text-xs font-medium transition-all duration-200 w-full justify-center"
-                      :class="pingStates[node.name]?.isPinging 
+                      :class="pingStates[getNodeKey(node)]?.isPinging 
                         ? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
                         : 'bg-primary-50 hover:bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:hover:bg-primary-900/50 dark:text-primary-400'"
                     >
                       <svg 
-                        v-if="pingStates[node.name]?.isPinging" 
+                        v-if="pingStates[getNodeKey(node)]?.isPinging" 
                         class="w-3 h-3 mr-1 animate-spin" 
                         fill="none" 
                         stroke="currentColor" 
@@ -149,7 +149,7 @@
                       >
                         <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
                       </svg>
-                      <span>{{ pingStates[node.name]?.isPinging ? 'Testing...' : 'Test' }}</span>
+                      <span>{{ pingStates[getNodeKey(node)]?.isPinging ? 'Testing...' : 'Test' }}</span>
                     </button>
                   </div>
                 </div>
@@ -223,6 +223,11 @@ const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024
 
 let latencyInterval = null
 
+// Generate unique key for node to avoid conflicts
+const getNodeKey = (node) => {
+  return `${node.name}_${node.url.replace(/[^a-zA-Z0-9]/g, '_')}`
+}
+
 // 监听窗口大小变化
 const handleResize = () => {
   windowWidth.value = window.innerWidth
@@ -293,11 +298,12 @@ const testNodeLatency = async (node) => {
       const latency = Date.now() - timestamp
       console.log(`Latency response for ${node.name}:`, data) // 调试信息
       if (data.success) {
-        latencies.value[node.name] = {
+        const nodeKey = getNodeKey(node)
+        latencies.value[nodeKey] = {
           latency: latency,
           status: getStatusByLatency(latency)
         }
-        console.log(`Updated latencies for ${node.name}:`, latencies.value[node.name]) // 调试信息
+        console.log(`Updated latencies for ${node.name} (${nodeKey}):`, latencies.value[nodeKey]) // 调试信息
       } else {
         throw new Error('Server returned error')
       }
@@ -307,7 +313,8 @@ const testNodeLatency = async (node) => {
   } catch (error) {
     // 如果是超时或网络错误，标记为offline
     console.error('Failed to test latency for', node.name, error)
-    latencies.value[node.name] = {
+    const nodeKey = getNodeKey(node)
+    latencies.value[nodeKey] = {
       latency: -1,
       status: 'error'
     }
@@ -331,9 +338,10 @@ const testAllLatencies = async () => {
 
 // Manual ping for a single node
 const pingSingleNode = async (node) => {
-  pingStates.value[node.name] = { isPinging: true }
+  const nodeKey = getNodeKey(node)
+  pingStates.value[nodeKey] = { isPinging: true }
   await testNodeLatency(node)
-  pingStates.value[node.name] = { isPinging: false }
+  pingStates.value[nodeKey] = { isPinging: false }
 }
 
 // 分页相关 - 固定一行显示，通过翻页浏览
