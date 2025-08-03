@@ -8,7 +8,15 @@ The demo server for this project is sponsored by [Verasel](https://verasel.com).
 
 ## 🆕 Recent Updates
 
-### v2.1.0 - Node Management System (Latest)
+### v2.2.0 - Auto Deployment Scripts (Latest)
+- **⚡ One-Click Deployment**: Automated master and child node deployment script
+- **🔑 API Key Management**: Auto-generation and validation of admin API keys
+- **🐳 Docker Automation**: Automatic Docker installation and container management
+- **📡 Auto Registration**: Child nodes automatically register with master nodes
+- **✅ Validation System**: Connection and permission verification before deployment
+- **🛠️ Error Handling**: Comprehensive error detection and troubleshooting guidance
+
+### v2.1.0 - Node Management System
 - **🎛️ Admin Panel**: New web-based admin interface with modern card layout
 - **🔧 API Management**: Dynamic node management with API key authentication
 - **📡 GET API Support**: Add nodes via simple GET requests for automation
@@ -19,6 +27,8 @@ The demo server for this project is sponsored by [Verasel](https://verasel.com).
 - **📊 Real-time Stats**: Dashboard with node statistics and status indicators
 
 ### Key Features Added:
+- **One-Click Deployment**: `netmirror-deploy.sh` script for instant setup
+- **Master-Child Architecture**: Centralized node management with distributed deployment
 - **Dynamic Node Management**: Add, edit, delete nodes through web interface
 - **Automation Support**: `GET /api/admin/nodes/add` endpoint for scripting
 - **Backward Compatibility**: Existing environment variable configs still work
@@ -29,17 +39,51 @@ The demo server for this project is sponsored by [Verasel](https://verasel.com).
 
 ## ✨ Features
 
-- **Modern UI**: A clean and responsive user interface built with Vue.js.
-- **Node Management**: Web-based admin panel for dynamic node configuration.
-- **Network Tools**: A suite of tools including Ping, iPerf3, and Speedtest.
-- **Real-time Traffic**: Live monitoring of network interface traffic.
-- **Interactive Shell**: A fake shell environment for basic diagnostics.
-- **API Integration**: RESTful APIs for automation and scripting.
-- **Easy Deployment**: Ships as a single Docker container.
-- **Customizable**: Configure features and server details via environment variables.
+- **⚡ One-Click Deployment**: Automated deployment scripts for instant setup of master and child nodes.
+- **🎛️ Node Management**: Web-based admin panel for dynamic node configuration and monitoring.
+- **🌐 Network Tools**: A suite of tools including Ping, iPerf3, MTR, Traceroute, and Speedtest.
+- **📊 Real-time Traffic**: Live monitoring of network interface traffic with beautiful visualizations.
+- **🖥️ Interactive Shell**: A secure fake shell environment for basic diagnostics.
+- **🔌 API Integration**: Comprehensive RESTful APIs for automation and scripting.
+- **🐳 Easy Deployment**: Ships as a single Docker container with automated deployment scripts.
+- **🎨 Modern UI**: A clean and responsive user interface built with Vue.js and Tailwind CSS.
+- **⚙️ Customizable**: Configure features and server details via environment variables or web interface.
 
 ## 🚀 Quick Start
-### Using Docker Compose
+
+### ⚡ One-Click Deployment (Recommended)
+
+**Deploy Master Node:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/catcat-blog/NetMirror/main/scripts/netmirror-deploy.sh | bash -s -- \
+  --name "Master Node" \
+  --location "Your Location" \
+  --port 3000 \
+  --non-interactive
+```
+
+**Deploy Child Node:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/catcat-blog/NetMirror/main/scripts/netmirror-deploy.sh | bash -s -- \
+  --name "Child Node Name" \
+  --location "Child Location" \
+  --port 3001 \
+  --master "http://your-master-ip:3000" \
+  --admin-key "your-api-key" \
+  --non-interactive
+```
+
+The deployment script automatically:
+- 🐳 Installs Docker if needed
+- 🔑 Generates secure API keys (master nodes)
+- ⚙️ Configures environment variables
+- 🚀 Starts containers with optimal settings
+- 📡 Registers child nodes with master node
+- ✅ Validates connections and permissions
+
+> **📖 For detailed deployment options and troubleshooting, see [scripts/README.md](scripts/README.md)**
+
+### Manual Docker Compose Deployment
 
 1.  **Clone the repository:**
     ```bash
