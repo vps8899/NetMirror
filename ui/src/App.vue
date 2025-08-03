@@ -263,7 +263,7 @@ onUnmounted(() => {
       </header>
 
       <!-- Main content area -->
-      <main class="pb-16">
+      <main class="pb-8">
         <!-- Admin Panel -->
         <AdminPanel v-if="adminMode" @back="goBackToMain" />
         
@@ -324,7 +324,7 @@ onUnmounted(() => {
                 </div>
               </div>
               
-              <!-- Tab Content with improved mobile spacing -->
+              <!-- Tab Content with improved mobile spacing and dynamic height -->
               <div class="relative mt-4 md:mt-6 overflow-hidden">
                 <div 
                   class="flex transition-transform duration-300 ease-out"
