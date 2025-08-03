@@ -145,11 +145,11 @@
                 </div>
                 <div class="ml-4">
                   <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    {{ Object.values(nodeStatuses).filter(s => s.status === 'online').length > 0 ? 'Online Nodes' : 'Editable Nodes' }}
+                    {{ Object.values(nodeLatencies).filter(l => l && l.status !== 'error').length > 0 ? 'Online Nodes' : 'Editable Nodes' }}
                   </p>
                   <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                    {{ Object.values(nodeStatuses).filter(s => s.status === 'online').length > 0 
-                        ? Object.values(nodeStatuses).filter(s => s.status === 'online').length 
+                    {{ Object.values(nodeLatencies).filter(l => l && l.status !== 'error').length > 0 
+                        ? Object.values(nodeLatencies).filter(l => l && l.status !== 'error').length 
                         : nodes.filter(n => n.id).length }}
                   </p>
                 </div>
@@ -444,11 +444,13 @@ import {
 } from '@heroicons/vue/24/outline'
 import NodeEditModal from './NodeEditModal.vue'
 import { useNodeAdminStore } from '@/stores/nodeAdmin'
+import { useNodesStore } from '@/stores/nodes'
 import { storeToRefs } from 'pinia'
 
 const emit = defineEmits(['back'])
 
 const adminStore = useNodeAdminStore()
+const nodesStore = useNodesStore()
 
 const { 
   nodes, 
@@ -456,6 +458,14 @@ const {
   loading, 
   apiKey: storedApiKey 
 } = storeToRefs(adminStore)
+
+// 从首页store复用延迟测试逻辑
+const { 
+  latencies: nodeLatencies,
+  getNodeKey,
+  testNodeLatency,
+  testAllLatencies: testAllNodesLatency
+} = nodesStore
 
 const apiKey = ref('')
 const authenticating = ref(false)
@@ -465,60 +475,46 @@ const showDeleteModal = ref(false)
 const editingNode = ref(null)
 const deletingNode = ref(null)
 const deleting = ref(false)
-const nodeStatuses = ref({}) // Store connection status for each node
 
-// Test node connectivity
-const testNodeConnectivity = async (node) => {
-  try {
-    const timestamp = Date.now()
-    const response = await fetch(`${node.url}/nodes/latency?timestamp=${timestamp}`, {
-      method: 'GET',
-      timeout: 5000,
-      signal: AbortSignal.timeout(5000)
-    })
-    
-    if (response.ok) {
-      const data = await response.json()
-      if (data.success) {
-        nodeStatuses.value[node.url] = {
-          status: 'online',
-          latency: data.latency,
-          lastCheck: Date.now()
-        }
-        return true
-      }
-    }
-    throw new Error('Server returned error')
-  } catch (error) {
-    nodeStatuses.value[node.url] = {
-      status: 'offline',
-      error: error.message,
-      lastCheck: Date.now()
-    }
-    return false
-  }
-}
-
-// Test all nodes connectivity
+// 删除自定义的connectivity测试逻辑，直接使用首页的延迟测试
+// Test all nodes connectivity - 复用首页逻辑
 const testAllNodesConnectivity = async () => {
-  const promises = nodes.value.map(node => testNodeConnectivity(node))
-  await Promise.allSettled(promises)
+  // 首先确保nodes store有最新的节点数据
+  nodesStore.nodes = nodes.value
+  // 然后使用首页的测试逻辑
+  await testAllNodesLatency()
 }
 
-// Get node status
+// Get node status - 复用首页逻辑
 const getNodeStatus = (node) => {
-  const status = nodeStatuses.value[node.url]
-  if (!status) return { status: 'unknown', text: 'Unknown', class: 'text-gray-500', dot: 'bg-gray-500' }
+  const nodeKey = getNodeKey(node)
+  const latency = nodeLatencies[nodeKey]
   
-  switch (status.status) {
-    case 'online':
+  if (!latency) return { status: 'unknown', text: 'Unknown', class: 'text-gray-500', dot: 'bg-gray-500' }
+  
+  switch (latency.status) {
+    case 'good':
       return { 
         status: 'online', 
-        text: `Online (${status.latency}ms)`, 
+        text: `Online (${latency.latency}ms)`, 
         class: 'text-green-600 dark:text-green-400', 
         dot: 'bg-green-500 animate-pulse' 
       }
-    case 'offline':
+    case 'medium':
+      return { 
+        status: 'online', 
+        text: `Online (${latency.latency}ms)`, 
+        class: 'text-yellow-600 dark:text-yellow-400', 
+        dot: 'bg-yellow-500 animate-pulse' 
+      }
+    case 'high':
+      return { 
+        status: 'online', 
+        text: `Slow (${latency.latency}ms)`, 
+        class: 'text-orange-600 dark:text-orange-400', 
+        dot: 'bg-orange-500 animate-pulse' 
+      }
+    case 'error':
       return { 
         status: 'offline', 
         text: 'Offline', 
