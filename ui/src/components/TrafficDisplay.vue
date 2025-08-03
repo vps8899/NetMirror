@@ -1,12 +1,22 @@
 <script setup>
-import { ref, onMounted, onUnmounted, h, toRaw } from 'vue'
+import { ref, onMounted, onUnmounted, h, toRaw, watch } from 'vue'
 import { useMotion } from '@vueuse/motion'
 import { useAppStore } from '@/stores/app'
+import { useNodeTool } from '@/composables/useNodeTool'
 import { formatBytes } from '@/helper/unit'
 import { ChartBarIcon, ArrowDownIcon, ArrowUpIcon } from '@heroicons/vue/24/outline'
 import VueApexCharts from 'vue3-apexcharts'
 
 const appStore = useAppStore()
+const {
+  selectedNode,
+  selectedNodeName,
+  selectedNodeLocation,
+  hasSelectedNode,
+  hasNodeSession,
+  getEventSource
+} = useNodeTool()
+
 const interfaces = ref({})
 const cardRef = ref()
 
@@ -33,17 +43,20 @@ const handleCache = (e) => {
 }
 
 const handleTrafficUpdate = (e) => {
+  console.log('Received InterfaceTraffic event:', e.data)
   const data = e.data.split(',')
   const ifaceName = data[0]
   const time = data[1]
 
   if (!interfaces.value.hasOwnProperty(ifaceName)) {
+    console.log('Creating new interface graph for:', ifaceName)
     createGraph(ifaceName)
   }
 
   const iface = interfaces.value[ifaceName]
   iface.receive = data[2]
   iface.send = data[3]
+  console.log('Updated interface data:', ifaceName, {receive: iface.receive, send: iface.send})
   updateSerieByInterface(ifaceName, iface, new Date(time * 1000))
 }
 
@@ -225,15 +238,82 @@ const updateSerieByInterface = (interfaceName, iface, date = null) => {
   ])
 }
 
+// 设置事件监听器
+const setupEventListeners = () => {
+  console.log('=== TrafficDisplay setupEventListeners ===')
+  console.log('selectedNode:', selectedNode.value)
+  console.log('hasSelectedNode:', hasSelectedNode.value)
+  console.log('hasNodeSession:', hasNodeSession.value)
+  
+  try {
+    const source = getEventSource()
+    console.log('Successfully got event source:', source)
+    console.log('Event source URL:', source.url)
+    console.log('Event source readyState:', source.readyState)
+    
+    source.addEventListener('InterfaceCache', handleCache)
+    source.addEventListener('InterfaceTraffic', handleTrafficUpdate)
+    
+    console.log('Event listeners added successfully')
+    console.log('Current interfaces count:', Object.keys(interfaces.value).length)
+    
+  } catch (error) {
+    console.error('ERROR in setupEventListeners:', error)
+    console.error('Error message:', error.message)
+    console.error('Error stack:', error.stack)
+  }
+}
+
+// 清理事件监听器
+const cleanupEventListeners = () => {
+  const source = getEventSource()
+  source.removeEventListener('InterfaceCache', handleCache)
+  source.removeEventListener('InterfaceTraffic', handleTrafficUpdate)
+}
+
+// 监听节点session状态变化
+watch(() => hasNodeSession.value, (hasSession) => {
+  console.log('=== TrafficDisplay: Node session status changed ===')
+  console.log('Has session:', hasSession)
+  
+  if (hasSession) {
+    console.log('Session established, setting up traffic listeners...')
+    setupEventListeners()
+  }
+})
+
+// 监听节点变化，重新设置事件监听
+watch(() => selectedNode.value, (newNode, oldNode) => {
+  console.log('=== TrafficDisplay: Node changed ===')
+  console.log('Old node:', oldNode?.name)
+  console.log('New node:', newNode?.name)
+  
+  if (newNode !== oldNode) {
+    console.log('Cleaning up old listeners...')
+    // 清理旧的监听器
+    try {
+      cleanupEventListeners()
+    } catch (error) {
+      console.warn('Error cleaning up listeners:', error)
+    }
+    
+    // 清空现有的接口数据
+    interfaces.value = {}
+    console.log('Cleared interfaces data')
+    
+    // 新的监听器会在hasNodeSession变化时设置
+  }
+})
+
 onMounted(() => {
-  appStore.source.addEventListener('InterfaceCache', handleCache)
-  appStore.source.addEventListener('InterfaceTraffic', handleTrafficUpdate)
+  console.log('TrafficDisplay mounted, current selectedNode:', selectedNode.value)
+  console.log('Current interfaces before setup:', interfaces.value)
+  setupEventListeners()
   apply()
 })
 
 onUnmounted(() => {
-  appStore.source.removeEventListener('InterfaceCache', handleCache)
-  appStore.source.removeEventListener('InterfaceTraffic', handleTrafficUpdate)
+  cleanupEventListeners()
 })
 </script>
 

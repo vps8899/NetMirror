@@ -1,17 +1,22 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useAppStore } from '@/stores/app'
+import { ref, onMounted } from 'vue'
+import { useNodeTool } from '@/composables/useNodeTool'
 import { PlayIcon, StopIcon, ArrowTrendingUpIcon } from '@heroicons/vue/24/outline'
-import { markRaw } from 'vue'
 
-const appStore = useAppStore()
-const working = ref(false)
+const {
+  working,
+  selectedNode,
+  isNodeReady,
+  selectedNodeName,
+  selectedNodeLocation,
+  startTool,
+  stopTool
+} = useNodeTool()
+
 const output = ref('')
 const host = ref('')
 const inputRef = ref()
 const outputRef = ref()
-
-let abortController = markRaw(new AbortController())
 
 const handleTracerouteMessage = (e) => {
   try {
@@ -33,37 +38,30 @@ const handleTracerouteMessage = (e) => {
   }, 50)
 }
 
-onUnmounted(() => {
-  stopTraceroute()
-})
-
-const stopTraceroute = () => {
-  appStore.source.removeEventListener('TracerouteOutput', handleTracerouteMessage)
-  abortController.abort('Unmounted')
-}
-
 const runTraceroute = async () => {
-  if (working.value) return stopTraceroute()
+  if (working.value) {
+    stopTool()
+    return
+  }
   
   if (!host.value.trim()) {
     inputRef.value?.focus()
     return
   }
   
-  abortController = new AbortController()
   output.value = ''
-  working.value = true
   
-  appStore.source.addEventListener('TracerouteOutput', handleTracerouteMessage)
+  const success = await startTool(
+    'traceroute', 
+    { ip: host.value }, 
+    'TracerouteOutput', 
+    handleTracerouteMessage
+  )
   
-  try {
-    await appStore.requestMethod('traceroute', { ip: host.value }, abortController.signal)
-  } catch (e) {
-    console.error('Traceroute error:', e)
+  if (!success) {
+    // startTool已经处理了错误显示
+    return
   }
-  
-  stopTraceroute()
-  working.value = false
 }
 
 onMounted(() => {
@@ -73,6 +71,17 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
+    <!-- Node Selection Info -->
+    <div v-if="selectedNode" class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-xl p-4">
+      <div class="flex items-center">
+        <div class="w-2 h-2 bg-indigo-500 rounded-full mr-3"></div>
+        <div>
+          <h3 class="font-medium text-indigo-900 dark:text-indigo-100">Running Traceroute on {{ selectedNodeName }}</h3>
+          <p class="text-sm text-indigo-700 dark:text-indigo-300">{{ selectedNodeLocation }}</p>
+        </div>
+      </div>
+    </div>
+    
     <!-- Input Section -->
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
       <div class="flex flex-col sm:flex-row gap-4">

@@ -1,17 +1,22 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useAppStore } from '@/stores/app'
+import { ref, onMounted } from 'vue'
+import { useNodeTool } from '@/composables/useNodeTool'
 import { PlayIcon, StopIcon, ChartBarIcon } from '@heroicons/vue/24/outline'
-import { markRaw } from 'vue'
 
-const appStore = useAppStore()
-const working = ref(false)
+const {
+  working,
+  selectedNode,
+  isNodeReady,
+  selectedNodeName,
+  selectedNodeLocation,
+  startTool,
+  stopTool
+} = useNodeTool()
+
 const output = ref('')
 const host = ref('')
 const inputRef = ref()
 const outputRef = ref()
-
-let abortController = markRaw(new AbortController())
 
 const handleMTRMessage = (e) => {
   try {
@@ -33,37 +38,30 @@ const handleMTRMessage = (e) => {
   }, 50)
 }
 
-onUnmounted(() => {
-  stopMTR()
-})
-
-const stopMTR = () => {
-  appStore.source.removeEventListener('MTROutput', handleMTRMessage)
-  abortController.abort('Unmounted')
-}
-
 const runMTR = async () => {
-  if (working.value) return stopMTR()
+  if (working.value) {
+    stopTool()
+    return
+  }
   
   if (!host.value.trim()) {
     inputRef.value?.focus()
     return
   }
   
-  abortController = new AbortController()
   output.value = ''
-  working.value = true
   
-  appStore.source.addEventListener('MTROutput', handleMTRMessage)
+  const success = await startTool(
+    'mtr', 
+    { ip: host.value }, 
+    'MTROutput', 
+    handleMTRMessage
+  )
   
-  try {
-    await appStore.requestMethod('mtr', { ip: host.value }, abortController.signal)
-  } catch (e) {
-    console.error('MTR error:', e)
+  if (!success) {
+    // startTool已经处理了错误显示
+    return
   }
-  
-  stopMTR()
-  working.value = false
 }
 
 onMounted(() => {
@@ -73,6 +71,17 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
+    <!-- Node Selection Info -->
+    <div v-if="selectedNode" class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-xl p-4">
+      <div class="flex items-center">
+        <div class="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
+        <div>
+          <h3 class="font-medium text-purple-900 dark:text-purple-100">Running MTR on {{ selectedNodeName }}</h3>
+          <p class="text-sm text-purple-700 dark:text-purple-300">{{ selectedNodeLocation }}</p>
+        </div>
+      </div>
+    </div>
+
     <!-- Input Section -->
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
       <div class="flex flex-col sm:flex-row gap-4">
@@ -94,7 +103,7 @@ onMounted(() => {
           class="inline-flex items-center justify-center px-6 py-3 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           :class="working 
             ? 'bg-red-500 hover:bg-red-600 text-white' 
-            : 'bg-blue-500 hover:bg-blue-600 text-white hover:shadow-lg'"
+            : 'bg-purple-500 hover:bg-purple-600 text-white hover:shadow-lg'"
         >
           <component :is="working ? StopIcon : PlayIcon" class="w-5 h-5 mr-2" />
           {{ working ? 'Stop' : 'Start MTR' }}

@@ -1,17 +1,22 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useAppStore } from '@/stores/app'
+import { ref, onMounted } from 'vue'
+import { useNodeTool } from '@/composables/useNodeTool'
 import { PlayIcon, StopIcon, ArrowTrendingUpIcon } from '@heroicons/vue/24/outline'
-import { markRaw } from 'vue'
 
-const appStore = useAppStore()
-const working = ref(false)
+const {
+  working,
+  selectedNode,
+  isNodeReady,
+  selectedNodeName,
+  selectedNodeLocation,
+  startTool,
+  stopTool
+} = useNodeTool()
+
 const output = ref('')
 const host = ref('')
 const inputRef = ref()
 const outputRef = ref()
-
-let abortController = markRaw(new AbortController())
 
 const handleTraceroute6Message = (e) => {
   try {
@@ -33,37 +38,30 @@ const handleTraceroute6Message = (e) => {
   }, 50)
 }
 
-onUnmounted(() => {
-  stopTraceroute6()
-})
-
-const stopTraceroute6 = () => {
-  appStore.source.removeEventListener('Traceroute6Output', handleTraceroute6Message)
-  abortController.abort('Unmounted')
-}
-
 const runTraceroute6 = async () => {
-  if (working.value) return stopTraceroute6()
+  if (working.value) {
+    stopTool()
+    return
+  }
   
   if (!host.value.trim()) {
     inputRef.value?.focus()
     return
   }
   
-  abortController = new AbortController()
   output.value = ''
-  working.value = true
   
-  appStore.source.addEventListener('Traceroute6Output', handleTraceroute6Message)
+  const success = await startTool(
+    'traceroute6', 
+    { ip: host.value }, 
+    'Traceroute6Output', 
+    handleTraceroute6Message
+  )
   
-  try {
-    await appStore.requestMethod('traceroute6', { ip: host.value }, abortController.signal)
-  } catch (e) {
-    console.error('Traceroute6 error:', e)
+  if (!success) {
+    // startTool已经处理了错误显示
+    return
   }
-  
-  stopTraceroute6()
-  working.value = false
 }
 
 onMounted(() => {
@@ -73,6 +71,17 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
+    <!-- Node Selection Info -->
+    <div v-if="selectedNode" class="bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-700 rounded-xl p-4">
+      <div class="flex items-center">
+        <div class="w-2 h-2 bg-pink-500 rounded-full mr-3"></div>
+        <div>
+          <h3 class="font-medium text-pink-900 dark:text-pink-100">Running Traceroute IPv6 on {{ selectedNodeName }}</h3>
+          <p class="text-sm text-pink-700 dark:text-pink-300">{{ selectedNodeLocation }}</p>
+        </div>
+      </div>
+    </div>
+    
     <!-- Input Section -->
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
       <div class="flex flex-col sm:flex-row gap-4">

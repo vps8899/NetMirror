@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useMotion } from '@vueuse/motion'
+import { useNodeTool } from '@/composables/useNodeTool'
 import { useAppStore } from '@/stores/app'
 import { PlayIcon, StopIcon, ServerIcon, ClockIcon } from '@heroicons/vue/24/outline'
 import 'xterm/css/xterm.css'
@@ -9,13 +10,68 @@ import { FitAddon } from '@xterm/addon-fit'
 import Copy from '../Copy.vue'
 import { toRaw, markRaw } from 'vue'
 
+const {
+  working,
+  selectedNode,
+  isNodeReady,
+  selectedNodeName,
+  selectedNodeLocation,
+  addEventListener,
+  removeEventListener,
+  sendRequest,
+  stopTool: stopNodeTool
+} = useNodeTool()
+
 const appStore = useAppStore()
-const working = ref(false)
+// working is now managed by useNodeTool()
 const port = ref(0)
 const timeout = ref(60)
 const timeoutPercentage = ref(0)
 const timePass = ref(0)
 let timeoutInterval = null
+
+// 获取节点IP地址的函数
+const getNodeIP = (version) => {
+  if (selectedNode.value) {
+    // 尝试从节点的配置中获取IP
+    if (selectedNode.value.config) {
+      if (version === 'ipv4') {
+        return selectedNode.value.config.public_ipv4
+      } else if (version === 'ipv6') {
+        return selectedNode.value.config.public_ipv6
+      }
+    }
+    
+    // 尝试从节点URL中解析IP
+    try {
+      const url = new URL(selectedNode.value.url)
+      const hostname = url.hostname
+      
+      // 如果是IPv6地址（包含在[]中）
+      if (hostname.startsWith('[') && hostname.endsWith(']')) {
+        if (version === 'ipv6') {
+          return hostname.slice(1, -1) // 去掉[]
+        }
+      } else {
+        // IPv4地址或域名
+        if (version === 'ipv4') {
+          return hostname
+        }
+      }
+    } catch (error) {
+      console.error('Failed to parse node URL:', error)
+    }
+  }
+  
+  // 回退到本地配置
+  if (version === 'ipv4') {
+    return appStore.config?.public_ipv4
+  } else if (version === 'ipv6') {
+    return appStore.config?.public_ipv6
+  }
+  
+  return null
+}
 
 const terminal = new Terminal({
   theme: {
@@ -67,8 +123,6 @@ const startTimeout = () => {
   }, 1000)
 }
 
-let abortController = markRaw(new AbortController())
-
 const startServer = async () => {
   working.value = true
   terminal.clear()
@@ -76,12 +130,12 @@ const startServer = async () => {
   
   terminal.writeln('\x1b[1;33mStarting IPerf3 server...\x1b[0m')
 
-  abortController = new AbortController()
-  appStore.source.addEventListener('Iperf3', handlePortChange)
-  appStore.source.addEventListener('Iperf3Stream', handleMessage)
+  // 添加事件监听器
+  addEventListener('Iperf3', handlePortChange)
+  addEventListener('Iperf3Stream', handleMessage)
 
   try {
-    await appStore.requestMethod('iperf3/server', {}, abortController.signal)
+    await sendRequest('iperf3/server', {})
   } catch (e) {
     if (e.name !== 'AbortError') {
       terminal.writeln('\x1b[1;31mError: Failed to start server\x1b[0m')
@@ -95,9 +149,9 @@ const startServer = async () => {
 }
 
 const stopServer = () => {
-  appStore.source.removeEventListener('Iperf3', handlePortChange)
-  appStore.source.removeEventListener('Iperf3Stream', handleMessage)
-  abortController.abort('User stopped')
+  removeEventListener('Iperf3', handlePortChange)
+  removeEventListener('Iperf3Stream', handleMessage)
+  stopNodeTool()
   terminal.writeln('\r\n\x1b[1;31mIPerf3 Server stopped by user\x1b[0m')
 }
 
@@ -119,6 +173,17 @@ onUnmounted(() => {
 
 <template>
   <div class="space-y-6">
+    <!-- Node Selection Info -->
+    <div v-if="selectedNode" class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl p-4">
+      <div class="flex items-center">
+        <div class="w-2 h-2 bg-emerald-500 rounded-full mr-3"></div>
+        <div>
+          <h3 class="font-medium text-emerald-900 dark:text-emerald-100">Running IPerf3 on {{ selectedNodeName }}</h3>
+          <p class="text-sm text-emerald-700 dark:text-emerald-300">{{ selectedNodeLocation }}</p>
+        </div>
+      </div>
+    </div>
+
     <!-- Control Panel -->
     <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -171,27 +236,27 @@ onUnmounted(() => {
       <div v-if="working && port" ref="cardRef" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
         <h4 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-4">Connection Commands</h4>
         <div class="space-y-3">
-          <div v-if="appStore.config.public_ipv4" class="bg-white dark:bg-gray-800 rounded-lg p-3">
+          <div v-if="getNodeIP('ipv4')" class="bg-white dark:bg-gray-800 rounded-lg p-3">
             <div class="flex items-center justify-between">
               <div class="truncate">
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">IPv4</p>
                 <code class="text-sm font-mono text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                  iperf3 -c {{ appStore.config.public_ipv4 }} -p {{ port }}
+                  iperf3 -c {{ getNodeIP('ipv4') }} -p {{ port }}
                 </code>
               </div>
-              <Copy :value="`iperf3 -c ${appStore.config.public_ipv4} -p ${port}`" />
+              <Copy :value="`iperf3 -c ${getNodeIP('ipv4')} -p ${port}`" />
             </div>
           </div>
           
-          <div v-if="appStore.config.public_ipv6" class="bg-white dark:bg-gray-800 rounded-lg p-3">
+          <div v-if="getNodeIP('ipv6')" class="bg-white dark:bg-gray-800 rounded-lg p-3">
             <div class="flex items-center justify-between">
               <div class="truncate">
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">IPv6</p>
                 <code class="text-sm font-mono text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                  iperf3 -c {{ appStore.config.public_ipv6 }} -p {{ port }}
+                  iperf3 -c {{ getNodeIP('ipv6') }} -p {{ port }}
                 </code>
               </div>
-              <Copy :value="`iperf3 -c ${appStore.config.public_ipv6} -p ${port}`" />
+              <Copy :value="`iperf3 -c ${getNodeIP('ipv6')} -p ${port}`" />
             </div>
           </div>
         </div>

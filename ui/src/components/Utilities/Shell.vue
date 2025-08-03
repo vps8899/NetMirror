@@ -3,6 +3,8 @@ import { ref, onMounted, onUnmounted, toRaw } from 'vue'
 import 'xterm/css/xterm.css'
 import { Terminal } from 'xterm'
 import { FitAddon } from '@xterm/addon-fit'
+import { useNodeTool } from '@/composables/useNodeTool'
+import { useNodesStore } from '@/stores/nodes'
 import { useAppStore } from '@/stores/app'
 
 const terminal = new Terminal({
@@ -39,6 +41,29 @@ const terminal = new Terminal({
   scrollback: 1000,
   tabStopWidth: 4
 })
+
+const {
+  working,
+  selectedNode,
+  selectedNodeName,
+  selectedNodeLocation,
+  isNodeReady
+} = useNodeTool()
+
+const nodesStore = useNodesStore()
+const appStore = useAppStore()
+
+// 计算WebSocket URL - 只使用节点配置
+const getWebSocketUrl = () => {
+  if (selectedNode.value && nodesStore.selectedNodeSession) {
+    const nodeUrl = new URL(selectedNode.value.url)
+    const protocol = nodeUrl.protocol === 'http:' ? 'ws:' : 'wss:'
+    return `${protocol}//${nodeUrl.host}/session/${nodesStore.selectedNodeSession}/shell`
+  }
+  // 如果没有选择节点或没有session，返回 null
+  return null
+}
+
 const terminalRef = ref()
 const fitAddon = new FitAddon()
 const emit = defineEmits(['closed'])
@@ -55,7 +80,9 @@ const flushToTerminal = () => {
 
 const updateWindowSize = () => {
   fitAddon.fit()
-  websocket.send(new TextEncoder().encode('2' + terminal.rows + ';' + terminal.cols))
+  if (websocket && websocket.readyState === WebSocket.OPEN) {
+    websocket.send(new TextEncoder().encode('2' + terminal.rows + ';' + terminal.cols))
+  }
 }
 
 let resizeTimer
@@ -70,11 +97,16 @@ onMounted(() => {
   terminal.loadAddon(fitAddon)
   terminal.open(toRaw(terminalRef.value))
   fitAddon.fit()
-  const url = new URL(location.href)
-  const protocol = url.protocol == 'http:' ? 'ws:' : 'wss:'
-  websocket = new WebSocket(
-    protocol + '//' + url.host + url.pathname + 'session/' + useAppStore().sessionId + '/shell'
-  )
+  
+  const wsUrl = getWebSocketUrl()
+  if (!wsUrl) {
+    terminal.writeln('\r\n\x1b[1;31mPlease select a node first to use shell.\x1b[0m')
+    return
+  }
+  
+  console.log('Connecting to shell WebSocket:', wsUrl)
+  
+  websocket = new WebSocket(wsUrl)
   websocket.binaryType = 'arraybuffer'
   websocket.addEventListener('message', (event) => {
     buffer.push(event.data)
@@ -83,18 +115,24 @@ onMounted(() => {
 
   websocket.addEventListener('open', (event) => {
     window.addEventListener('resize', handleResize)
-
     handleResize()
     setTimeout(handleResize, 1000)
   })
 
   websocket.addEventListener('close', (event) => {
-    console.log(event)
+    console.log('WebSocket closed:', event)
     emit('closed')
   })
 
+  websocket.addEventListener('error', (event) => {
+    console.error('WebSocket error:', event)
+    terminal.writeln('\r\n\x1b[1;31mConnection error. Please check if the shell service is available on the selected node.\x1b[0m')
+  })
+
   terminal.onData((data) => {
-    websocket.send(new TextEncoder().encode('1' + data))
+    if (websocket && websocket.readyState === WebSocket.OPEN) {
+      websocket.send(new TextEncoder().encode('1' + data))
+    }
   })
   fitAddon.fit()
 })
@@ -120,7 +158,8 @@ onUnmounted(() => {
         <div class="w-3 h-3 bg-green-500 rounded-full"></div>
       </div>
       <div class="text-sm text-gray-300">
-        <span>Interactive Shell</span>
+        <span v-if="selectedNode">{{ selectedNodeName }} Shell</span>
+        <span v-else>Interactive Shell</span>
       </div>
       <div class="w-12"></div> <!-- Placeholder for balance -->
     </div>

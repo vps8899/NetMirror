@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useMotion } from '@vueuse/motion'
-import { useAppStore } from '@/stores/app'
+import { useNodeTool } from '@/composables/useNodeTool'
 import { formatBytes } from '@/helper/unit'
 import { 
   PlayIcon, 
@@ -15,8 +15,16 @@ import {
 } from '@heroicons/vue/24/outline'
 import { markRaw } from 'vue'
 
-const appStore = useAppStore()
-const working = ref(false)
+const {
+  working,
+  selectedNode,
+  isNodeReady,
+  selectedNodeName,
+  selectedNodeLocation,
+  startTool,
+  stopTool
+} = useNodeTool()
+// working is now managed by useNodeTool()
 const serverId = ref('')
 const isCrash = ref(false)
 const isQueue = ref(false)
@@ -115,17 +123,16 @@ const handleMessage = (e) => {
 }
 
 const stopTest = () => {
-  abortController.abort('')
-  appStore.source.removeEventListener('SpeedtestStream', handleMessage)
+  stopTool()
   isSpeedtest.value = false
-  working.value = false
 }
 
 const speedtest = async () => {
-  if (working.value) return stopTest()
+  if (working.value) {
+    stopTest()
+    return
+  }
   
-  abortController = new AbortController()
-  working.value = true
   isSpeedtest.value = true
   action.value = ''
   isCrash.value = false
@@ -141,22 +148,13 @@ const speedtest = async () => {
     serverInfo: { id: '', name: '', pos: '' }
   }
   
-  appStore.source.addEventListener('SpeedtestStream', handleMessage)
+  const data = serverId.value ? { node_id: serverId.value } : {}
+  const success = await startTool('speedtest_dot_net', data, 'SpeedtestStream', handleMessage)
   
-  try {
-    await appStore.requestMethod(
-      'speedtest_dot_net',
-      { node_id: serverId.value },
-      abortController.signal
-    )
-  } catch (e) {
-    if (e.name !== 'AbortError') {
-      isCrash.value = true
-    }
+  if (!success) {
+    if (!isSpeedtest.value) return // stopTest was called
+    isCrash.value = true
   }
-  
-  appStore.source.removeEventListener('SpeedtestStream', handleMessage)
-  working.value = false
 }
 
 onMounted(() => {
@@ -170,6 +168,17 @@ onUnmounted(() => {
 
 <template>
   <div ref="containerRef" class="space-y-6">
+    <!-- Node Selection Info -->
+    <div v-if="selectedNode" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4">
+      <div class="flex items-center">
+        <div class="w-2 h-2 bg-amber-500 rounded-full mr-3"></div>
+        <div>
+          <h3 class="font-medium text-amber-900 dark:text-amber-100">Running Speedtest on {{ selectedNodeName }}</h3>
+          <p class="text-sm text-amber-700 dark:text-amber-300">{{ selectedNodeLocation }}</p>
+        </div>
+      </div>
+    </div>
+
     <!-- Control Panel -->
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
       <div class="flex flex-col sm:flex-row gap-4">

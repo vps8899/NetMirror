@@ -1,27 +1,67 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useAppStore } from '@/stores/app'
+import { useNodesStore } from '@/stores/nodes'
+import { useNodeTool } from '@/composables/useNodeTool'
 import { DocumentArrowDownIcon, ClipboardDocumentIcon, CommandLineIcon } from '@heroicons/vue/24/outline'
 
 const appStore = useAppStore()
+const nodesStore = useNodesStore()
+
+const {
+  selectedNode,
+  selectedNodeName,
+  selectedNodeLocation,
+  hasSelectedNode
+} = useNodeTool()
+
+// 获取当前配置 - 使用节点的配置
+const currentConfig = computed(() => {
+  if (selectedNode.value && selectedNode.value.config) {
+    return selectedNode.value.config
+  }
+  return appStore.config
+})
+
+// 获取当前会话ID
+const currentSessionId = computed(() => {
+  if (selectedNode.value) {
+    return nodesStore.selectedNodeSession
+  }
+  return appStore.sessionId
+})
+
+// 获取基础URL
+const baseUrl = computed(() => {
+  if (selectedNode.value) {
+    return selectedNode.value.url
+  }
+  return ''
+})
+
 const url = ref(new URL(location.href))
 
 const shouldShowSeparateTests = computed(() => {
-  return appStore.config.public_ipv4 && appStore.config.public_ipv6 && 
-         (!appStore.config.filetest_follow_domain || !appStore.config.filetest_follow_domain.length)
+  return currentConfig.value.public_ipv4 && currentConfig.value.public_ipv6 && 
+         (!currentConfig.value.filetest_follow_domain || !currentConfig.value.filetest_follow_domain.length)
 })
 
 const getFileUrl = (fileSize, ipVersion = null) => {
-  const basePath = `/session/${appStore.sessionId}/speedtest/file/${fileSize}.test`
+  const basePath = `/session/${currentSessionId.value}/speedtest/file/${fileSize}.test`
   
   if (!ipVersion) {
-    return `.${basePath}`
+    // 如果选择了节点，使用节点的URL；否则使用相对路径
+    return baseUrl.value ? `${baseUrl.value}${basePath}` : `.${basePath}`
   }
   
-  const ip = ipVersion === 'ipv4' ? appStore.config.public_ipv4 : appStore.config.public_ipv6
+  const ip = ipVersion === 'ipv4' ? currentConfig.value.public_ipv4 : currentConfig.value.public_ipv6
   const formattedIp = ipVersion === 'ipv6' ? `[${ip}]` : ip
   
-  return `${url.value.protocol}//${formattedIp}:${url.value.port}${basePath}`
+  // 使用节点的协议，如果没有选择节点则使用当前页面的协议
+  const protocol = baseUrl.value ? new URL(baseUrl.value).protocol : url.value.protocol
+  const port = baseUrl.value ? new URL(baseUrl.value).port || (protocol === 'https:' ? '443' : '80') : url.value.port
+  
+  return `${protocol}//${formattedIp}:${port}${basePath}`
 }
 
 const getFullUrl = (fileSize, ipVersion = null) => {
@@ -105,7 +145,7 @@ const getWgetCommand = (fileSize, ipVersion = null) => {
     <div v-if="!shouldShowSeparateTests">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
-          v-for="fileSize in appStore.config.speedtest_files"
+          v-for="fileSize in currentConfig.speedtest_files"
           :key="fileSize"
           class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 p-6 transition-all duration-300 hover:shadow-xl hover:border-primary-300/50 dark:hover:border-primary-600/50"
         >
@@ -157,14 +197,14 @@ const getWgetCommand = (fileSize, ipVersion = null) => {
     <!-- Separate IPv4/IPv6 tests -->
     <div v-else class="space-y-8">
       <!-- IPv4 Test -->
-      <div v-if="appStore.config.public_ipv4">
+      <div v-if="currentConfig.public_ipv4">
         <div class="text-center mb-6">
           <h4 class="text-lg font-semibold text-primary-700 dark:text-primary-300 mb-2">IPv4 Speed Test</h4>
-          <p class="text-sm text-gray-600 dark:text-gray-400">{{ appStore.config.public_ipv4 }}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400">{{ currentConfig.public_ipv4 }}</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div
-            v-for="fileSize in appStore.config.speedtest_files"
+            v-for="fileSize in currentConfig.speedtest_files"
             :key="`ipv4-${fileSize}`"
             class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 p-6 transition-all duration-300 hover:shadow-xl hover:border-primary-300/50 dark:hover:border-primary-600/50"
           >
@@ -214,14 +254,14 @@ const getWgetCommand = (fileSize, ipVersion = null) => {
       </div>
 
       <!-- IPv6 Test -->
-      <div v-if="appStore.config.public_ipv6">
+      <div v-if="currentConfig.public_ipv6">
         <div class="text-center mb-6">
           <h4 class="text-lg font-semibold text-primary-700 dark:text-primary-300 mb-2">IPv6 Speed Test</h4>
-          <p class="text-sm text-gray-600 dark:text-gray-400">{{ appStore.config.public_ipv6 }}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400">{{ currentConfig.public_ipv6 }}</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div
-            v-for="fileSize in appStore.config.speedtest_files"
+            v-for="fileSize in currentConfig.speedtest_files"
             :key="`ipv6-${fileSize}`"
             class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 p-6 transition-all duration-300 hover:shadow-xl hover:border-primary-300/50 dark:hover:border-primary-600/50"
           >

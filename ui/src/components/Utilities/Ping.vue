@@ -1,18 +1,23 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useMotion } from '@vueuse/motion'
-import { useAppStore } from '@/stores/app'
+import { useNodeTool } from '@/composables/useNodeTool'
 import { PlayIcon, StopIcon, SignalIcon } from '@heroicons/vue/24/outline'
-import { markRaw } from 'vue'
 
-const appStore = useAppStore()
-const working = ref(false)
+const {
+  working,
+  selectedNode,
+  isNodeReady,
+  selectedNodeName,
+  selectedNodeLocation,
+  startTool,
+  stopTool
+} = useNodeTool()
+
 const records = ref([])
 const host = ref('')
 const inputRef = ref()
 const tableRef = ref()
-
-let abortController = markRaw(new AbortController())
 
 const { apply: applyTable } = useMotion(tableRef, {
   initial: { opacity: 0, y: 20 },
@@ -46,37 +51,30 @@ const handlePingMessage = (e) => {
   }, 100)
 }
 
-onUnmounted(() => {
-  stopPing()
-})
-
-const stopPing = () => {
-  appStore.source.removeEventListener('Ping', handlePingMessage)
-  abortController.abort('Unmounted')
-}
-
 const ping = async () => {
-  if (working.value) return stopPing()
+  if (working.value) {
+    stopTool()
+    return
+  }
   
   if (!host.value.trim()) {
     inputRef.value?.focus()
     return
   }
   
-  abortController = new AbortController()
   records.value = []
-  working.value = true
   
-  appStore.source.addEventListener('Ping', handlePingMessage)
+  const success = await startTool(
+    'ping', 
+    { ip: host.value }, 
+    'Ping', 
+    handlePingMessage
+  )
   
-  try {
-    await appStore.requestMethod('ping', { ip: host.value }, abortController.signal)
-  } catch (e) {
-    console.error('Ping error:', e)
+  if (!success) {
+    // startTool已经处理了错误显示
+    return
   }
-  
-  stopPing()
-  working.value = false
 }
 
 const getLatencyColor = (latency) => {
@@ -93,6 +91,17 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
+    <!-- Node Selection Info -->
+    <div v-if="selectedNode" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
+      <div class="flex items-center">
+        <div class="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+        <div>
+          <h3 class="font-medium text-blue-900 dark:text-blue-100">Running on {{ selectedNodeName }}</h3>
+          <p class="text-sm text-blue-700 dark:text-blue-300">{{ selectedNodeLocation }}</p>
+        </div>
+      </div>
+    </div>
+    
     <!-- Input Section -->
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
       <div class="flex flex-col sm:flex-row gap-4">

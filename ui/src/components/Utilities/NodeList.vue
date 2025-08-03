@@ -58,11 +58,13 @@
         <transition name="slide">
           <div :key="currentPage" class="grid grid-cols-2 md:grid-cols-4 gap-3 absolute inset-0">
             <template v-for="node in currentPageNodes" :key="node.url">
-              <a
-                :href="isCurrentNode(node) ? '#' : node.url"
-                @click="isCurrentNode(node) && $event.preventDefault()"
-                class="relative bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-primary-500 overflow-hidden group block no-underline"
-                :class="{ 'ring-2 ring-primary-500 cursor-default': isCurrentNode(node), 'cursor-pointer': !isCurrentNode(node) }"
+              <div
+                @click="selectNode(node)"
+                class="relative bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-primary-500 overflow-hidden group cursor-pointer"
+                :class="{ 
+                  'ring-2 ring-primary-500': selectedNode && selectedNode.url === node.url,
+                  'ring-2 ring-blue-500': isCurrentNode(node) && (!selectedNode || selectedNode.url !== node.url)
+                }"
               >
                 <!-- Background gradient on hover -->
                 <div class="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-primary-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -77,10 +79,17 @@
                       </h3>
                       <p class="text-xs text-gray-600 dark:text-gray-400 leading-tight">{{ node.location }}</p>
                     </div>
-                    <div v-if="isCurrentNode(node)" class="ml-1.5 flex-shrink-0">
-                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-300">
-                        Current
-                      </span>
+                    <div class="ml-1.5 flex-shrink-0 flex flex-col space-y-1">
+                      <div v-if="isCurrentNode(node)">
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                          Current
+                        </span>
+                      </div>
+                      <div v-if="selectedNode && selectedNode.url === node.url">
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-300">
+                          Selected
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -153,7 +162,7 @@
                     </button>
                   </div>
                 </div>
-              </a>
+              </div>
             </template>
           </div>
         </transition>
@@ -211,22 +220,34 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { useAppStore } from '@/stores/app'
+import { useNodesStore } from '@/stores/nodes'
+import { storeToRefs } from 'pinia'
 
-const appStore = useAppStore()
-const nodes = ref([])
-const latencies = ref({}) // 使用 node.name 作为 key
-const loading = ref(true)
-const pingStates = ref({}) // 存储 ping 状态
+const nodesStore = useNodesStore()
+const { 
+  nodes, 
+  selectedNode, 
+  currentNode, 
+  latencies, 
+  loading, 
+  pingStates 
+} = storeToRefs(nodesStore)
+
 const currentPage = ref(0)
 const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024)
 
 let latencyInterval = null
 
-// Generate unique key for node to avoid conflicts
-const getNodeKey = (node) => {
-  return `${node.name}_${node.url.replace(/[^a-zA-Z0-9]/g, '_')}`
-}
+// Use store methods
+const { 
+  getNodeKey, 
+  isCurrentNode, 
+  getStatusText, 
+  fetchNodes, 
+  testAllLatencies, 
+  pingSingleNode,
+  selectNode 
+} = nodesStore
 
 // 监听窗口大小变化
 const handleResize = () => {
@@ -235,113 +256,6 @@ const handleResize = () => {
   if (currentPage.value >= totalPages.value) {
     currentPage.value = 0
   }
-}
-
-// Get current page URL
-const getCurrentURL = () => {
-  const protocol = window.location.protocol
-  const host = window.location.host
-  const port = window.location.port
-  
-  // Construct base URL
-  let baseURL = `${protocol}//${window.location.hostname}`
-  
-  // Add port if it's not default for the protocol
-  if (port && ((protocol === 'http:' && port !== '80') || (protocol === 'https:' && port !== '443'))) {
-    baseURL += `:${port}`
-  }
-  
-  return baseURL
-}
-
-// Check if a node is the current node
-const isCurrentNode = (node) => {
-  const currentURL = getCurrentURL()
-  // Compare normalized URLs
-  return node.url.replace(/\/$/, '') === currentURL.replace(/\/$/, '')
-}
-
-// Fetch nodes list
-const fetchNodes = async () => {
-  try {
-    const response = await fetch('/nodes')
-    const data = await response.json()
-    if (data.success) {
-      nodes.value = data.nodes || []
-      console.log('Fetched nodes:', nodes.value) // 调试信息
-      // Start testing latencies immediately
-      testAllLatencies()
-    }
-  } catch (error) {
-    console.error('Failed to fetch nodes:', error)
-  } finally {
-    loading.value = false
-  }
-}
-
-// Test latency for a single node (using ping)
-const testNodeLatency = async (node) => {
-  try {
-    // Send timestamp with request
-    const timestamp = Date.now()
-    const targetUrl = isCurrentNode(node) ? '/nodes/latency' : `${node.url}/nodes/latency`
-    
-    const response = await fetch(`${targetUrl}?timestamp=${timestamp}`, {
-      method: 'GET',
-      mode: 'cors',
-      cache: 'no-cache',
-      signal: AbortSignal.timeout(5000) // 5 second timeout
-    })
-    
-    if (response.ok) {
-      const data = await response.json()
-      const latency = Date.now() - timestamp
-      console.log(`Latency response for ${node.name}:`, data) // 调试信息
-      if (data.success) {
-        const nodeKey = getNodeKey(node)
-        latencies.value[nodeKey] = {
-          latency: latency,
-          status: getStatusByLatency(latency)
-        }
-        console.log(`Updated latencies for ${node.name} (${nodeKey}):`, latencies.value[nodeKey]) // 调试信息
-      } else {
-        throw new Error('Server returned error')
-      }
-    } else {
-      throw new Error('Server not responding properly')
-    }
-  } catch (error) {
-    // 如果是超时或网络错误，标记为offline
-    console.error('Failed to test latency for', node.name, error)
-    const nodeKey = getNodeKey(node)
-    latencies.value[nodeKey] = {
-      latency: -1,
-      status: 'error'
-    }
-  }
-}
-
-// Test all node latencies
-const testAllLatencies = async () => {
-  loading.value = true
-  try {
-    // Test nodes sequentially to avoid congestion
-    for (const node of nodes.value) {
-      await testNodeLatency(node)
-      // Small delay between tests to avoid overwhelming the network
-      await new Promise(resolve => setTimeout(resolve, 100))
-    }
-  } finally {
-    loading.value = false
-  }
-}
-
-// Manual ping for a single node
-const pingSingleNode = async (node) => {
-  const nodeKey = getNodeKey(node)
-  pingStates.value[nodeKey] = { isPinging: true }
-  await testNodeLatency(node)
-  pingStates.value[nodeKey] = { isPinging: false }
 }
 
 // 分页相关 - 固定一行显示，通过翻页浏览
@@ -378,23 +292,6 @@ const goToNextPage = () => {
     // 循环到第一页
     currentPage.value = 0
   }
-}
-
-// Get human-readable status text
-const getStatusText = (status) => {
-  switch (status) {
-    case 'good': return 'Excellent'
-    case 'medium': return 'Good'
-    case 'high': return 'Slow'
-    case 'error': return 'Offline'
-    default: return 'Unknown'
-  }
-}
-
-const getStatusByLatency = (latency) => {
-  if (latency < 200) return 'good'
-  if (latency < 500) return 'medium'
-  return 'high'
 }
 
 onMounted(() => {

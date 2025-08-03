@@ -2,11 +2,39 @@
 import { ref, onMounted, toRaw, computed } from 'vue'
 import { useMotion } from '@vueuse/motion'
 import { useAppStore } from '@/stores/app'
+import { useNodesStore } from '@/stores/nodes'
+import { useNodeTool } from '@/composables/useNodeTool'
 import { PlayIcon, StopIcon, ArrowDownIcon, ArrowUpIcon, ChartBarIcon } from '@heroicons/vue/24/outline'
 import VueApexCharts from 'vue3-apexcharts'
 
 const appStore = useAppStore()
 const containerRef = ref()
+
+const {
+  selectedNode,
+  selectedNodeName,
+  selectedNodeLocation,
+  hasSelectedNode,
+  isNodeReady
+} = useNodeTool()
+
+// 获取当前会话ID和基础URL
+const currentSessionId = computed(() => {
+  if (selectedNode.value) {
+    // 使用选定节点的session
+    const nodesStore = useNodesStore()
+    return nodesStore.selectedNodeSession
+  }
+  // 回退到当前节点的session
+  return appStore.sessionId
+})
+
+const baseUrl = computed(() => {
+  if (selectedNode.value) {
+    return selectedNode.value.url
+  }
+  return ''
+})
 
 const { apply } = useMotion(containerRef, {
   initial: { opacity: 0, y: 20 },
@@ -180,7 +208,7 @@ const startOrStopSpeedtest = (force = false) => {
   charts.value.upload.data = []
   charts.value.upload.categories = []
   
-  workerInstance = new Worker('./speedtest_worker.js')
+  workerInstance = new Worker(`${baseUrl.value}/speedtest_worker.js`)
   workerInstance.onmessage = (e) => {
     const nowPointName = new Date().toLocaleTimeString()
     const data = JSON.parse(e.data)
@@ -233,12 +261,14 @@ const startOrStopSpeedtest = (force = false) => {
     }
   }
   
+  const sessionUrl = baseUrl.value ? `${baseUrl.value}/session/${currentSessionId.value}` : `./session/${currentSessionId.value}`
+  
   workerInstance.postMessage(
     'start ' + JSON.stringify({
       test_order: 'D_U',
-      url_dl: './session/' + appStore.sessionId + '/speedtest/download',
-      url_ul: './session/' + appStore.sessionId + '/speedtest/upload',
-      url_ping: './session/' + appStore.sessionId + '/speedtest/upload'
+      url_dl: `${sessionUrl}/speedtest/download`,
+      url_ul: `${sessionUrl}/speedtest/upload`,
+      url_ping: `${sessionUrl}/speedtest/upload`
     })
   )
   

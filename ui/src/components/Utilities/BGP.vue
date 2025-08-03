@@ -2,7 +2,7 @@
   <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 overflow-hidden animate-slide-up">
     <div class="p-6">
       <!-- BGP Info Header -->
-      <div v-if="appStore.config" class="mb-6">
+      <div v-if="currentConfig" class="mb-6">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h2 class="text-xl font-bold text-gray-900 dark:text-white">BGP Network Topology</h2>
@@ -67,7 +67,7 @@
         </div>
 
         <!-- No ASN State -->
-        <div v-else-if="!appStore.config?.asn" class="text-center text-gray-500 dark:text-gray-400">
+        <div v-else-if="!currentConfig?.asn" class="text-center text-gray-500 dark:text-gray-400">
           <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
           </svg>
@@ -87,13 +87,13 @@
       </div>
 
       <!-- Graph Info -->
-      <div v-if="bgpGraphContent && appStore.config?.asn" class="mt-4 p-4 bg-primary-50/50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-700/30">
+      <div v-if="bgpGraphContent && currentConfig?.asn" class="mt-4 p-4 bg-primary-50/50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-700/30">
         <div class="flex items-center justify-between text-sm">
           <div class="text-gray-600 dark:text-gray-400">
             <span class="font-medium">Current view:</span> {{ currentGraphName }}
           </div>
           <div class="text-gray-600 dark:text-gray-400">
-            <span class="font-medium">ASN:</span> {{ appStore.config.asn }}
+            <span class="font-medium">ASN:</span> {{ currentConfig.asn }}
           </div>
           <a 
             :href="`https://bgpview.io/asn/${asnNumber}`" 
@@ -114,8 +114,18 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
+import { useNodeTool } from '@/composables/useNodeTool'
 
 const appStore = useAppStore()
+
+const {
+  selectedNode,
+  hasSelectedNode,
+  selectedNodeName,
+  selectedNodeLocation,
+  isNodeReady,
+  sendRequest
+} = useNodeTool()
 
 // BGP Graph related
 const bgpGraphType = ref('combined')
@@ -129,7 +139,18 @@ const isDarkMode = computed(() => appStore.theme === 'dark')
 
 // Computed properties
 const asnNumber = computed(() => {
-  return appStore.config?.asn ? appStore.config.asn.replace('AS', '') : null
+  const config = currentConfig.value
+  return config?.asn ? config.asn.replace('AS', '') : null
+})
+
+// 获取当前节点的配置
+const currentConfig = computed(() => {
+  if (selectedNode.value && selectedNode.value.config) {
+    console.log('BGP using node config:', selectedNode.value.config) // 调试用
+    return selectedNode.value.config
+  }
+  console.log('BGP no node config, using appStore:', appStore.config) // 调试用
+  return appStore.config
 })
 
 const currentGraphName = computed(() => {
@@ -144,25 +165,35 @@ const currentGraphName = computed(() => {
 const bgpGraphUrl = computed(() => {
   if (!asnNumber.value) return null
   
-  // Use backend proxy instead of direct BGPView access
+  // 构建API请求URL - 如果有选中的节点，则请求节点的BGP端点
+  const baseUrl = selectedNode.value ? selectedNode.value.url : ''
+  
   switch (bgpGraphType.value) {
     case 'ipv4':
-      return `/bgp/graph/${asnNumber.value}/ipv4`
+      return `${baseUrl}/bgp/graph/${asnNumber.value}/ipv4`
     case 'ipv6':
-      return `/bgp/graph/${asnNumber.value}/ipv6`
+      return `${baseUrl}/bgp/graph/${asnNumber.value}/ipv6`
     case 'combined':
-      return `/bgp/graph/${asnNumber.value}/combined`
+      return `${baseUrl}/bgp/graph/${asnNumber.value}/combined`
     default:
-      return `/bgp/graph/${asnNumber.value}/combined`
+      return `${baseUrl}/bgp/graph/${asnNumber.value}/combined`
   }
 })
 
-// Auto load graph when ASN becomes available
-watch(() => appStore.config?.asn, (newAsn) => {
-  if (newAsn && !bgpGraphContent.value) {
+// Auto load graph when ASN becomes available or when node changes
+watch(() => currentConfig.value?.asn, (newAsn) => {
+  if (newAsn) {
     loadBGPGraph()
   }
 }, { immediate: true })
+
+// Watch for selected node changes and reload graph
+watch(() => selectedNode.value, (newNode, oldNode) => {
+  if (newNode !== oldNode && currentConfig.value?.asn) {
+    console.log('Node changed, reloading BGP graph for:', newNode?.name)
+    loadBGPGraph()
+  }
+}, { immediate: false })
 
 // Watch for graph type changes
 watch(bgpGraphType, () => {
@@ -184,7 +215,6 @@ watch(() => appStore.theme, () => {
   }
 })
 
-// Load BGP graph
 const loadBGPGraph = async () => {
   if (!bgpGraphUrl.value) return
   
@@ -196,6 +226,7 @@ const loadBGPGraph = async () => {
   console.log('Loading BGP graph from:', bgpGraphUrl.value)
   
   try {
+    // 基本的fetch请求，不需要特殊的session头
     const response = await fetch(bgpGraphUrl.value)
     console.log('BGP graph response status:', response.status)
     

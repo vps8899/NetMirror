@@ -18,6 +18,7 @@ declare module 'vue' {
     MTR: typeof import('./src/components/Utilities/MTR.vue')['default']
     MTR6: typeof import('./src/components/Utilities/MTR6.vue')['default']
     NodeList: typeof import('./src/components/Utilities/NodeList.vue')['default']
+    NodeSelector: typeof import('./src/components/NodeSelector.vue')['default']
     Ping: typeof import('./src/components/Utilities/Ping.vue')['default']
     Ping6: typeof import('./src/components/Utilities/Ping6.vue')['default']
     SafeHtml: typeof import('./src/components/SafeHtml.vue')['default']
