@@ -645,11 +645,7 @@ const copyToClipboard = async (text, nodeId = null) => {
   try {
     await navigator.clipboard.writeText(text)
     // 使用应用的toast系统显示成功提示
-    appStore.addToast({
-      message: 'URL copied to clipboard!',
-      type: 'success',
-      duration: 2000
-    })
+    appStore.showToast('URL copied to clipboard!', 'success', 2000)
   } catch (error) {
     console.error('Failed to copy to clipboard:', error)
     // 降级方案：选择文本
@@ -664,18 +660,10 @@ const copyToClipboard = async (text, nodeId = null) => {
       textArea.select()
       document.execCommand('copy')
       textArea.remove()
-      appStore.addToast({
-        message: 'URL copied to clipboard!',
-        type: 'success',
-        duration: 2000
-      })
+      appStore.showToast('URL copied to clipboard!', 'success', 2000)
     } catch (fallbackError) {
       console.error('Fallback copy failed:', fallbackError)
-      appStore.addToast({
-        message: 'Failed to copy URL to clipboard',
-        type: 'error',
-        duration: 3000
-      })
+      appStore.showToast('Failed to copy URL to clipboard', 'error', 3000)
     }
   } finally {
     // 短暂延迟后重置复制状态，给用户视觉反馈
