@@ -445,12 +445,14 @@ import {
 import NodeEditModal from './NodeEditModal.vue'
 import { useNodeAdminStore } from '@/stores/nodeAdmin'
 import { useNodesStore } from '@/stores/nodes'
+import { useAppStore } from '@/stores/app'
 import { storeToRefs } from 'pinia'
 
 const emit = defineEmits(['back'])
 
 const adminStore = useNodeAdminStore()
 const nodesStore = useNodesStore()
+const appStore = useAppStore()
 
 const { 
   nodes, 
@@ -631,9 +633,39 @@ const saveNode = async (nodeData) => {
 const copyToClipboard = async (text) => {
   try {
     await navigator.clipboard.writeText(text)
-    // 可以添加一个toast提示
+    // 使用应用的toast系统显示成功提示
+    appStore.addToast({
+      message: 'URL copied to clipboard!',
+      type: 'success',
+      duration: 2000
+    })
   } catch (error) {
     console.error('Failed to copy to clipboard:', error)
+    // 降级方案：选择文本
+    try {
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      textArea.style.position = 'fixed'
+      textArea.style.left = '-999999px'
+      textArea.style.top = '-999999px'
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      document.execCommand('copy')
+      textArea.remove()
+      appStore.addToast({
+        message: 'URL copied to clipboard!',
+        type: 'success',
+        duration: 2000
+      })
+    } catch (fallbackError) {
+      console.error('Fallback copy failed:', fallbackError)
+      appStore.addToast({
+        message: 'Failed to copy URL to clipboard',
+        type: 'error',
+        duration: 3000
+      })
+    }
   }
 }
 </script>
