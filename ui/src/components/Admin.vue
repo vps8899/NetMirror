@@ -565,6 +565,7 @@ const authenticate = async () => {
   authenticating.value = true
   try {
     await adminStore.authenticate(apiKey.value)
+    appStore.showToast('Admin authentication successful!', 'success', 2000)
     // Nodes are already loaded in authenticate function
     // Test connectivity after authentication
     setTimeout(() => {
@@ -572,6 +573,8 @@ const authenticate = async () => {
     }, 1000)
   } catch (error) {
     console.error('Authentication failed:', error)
+    const errorMessage = error.response?.data?.error || error.message || 'Authentication failed'
+    appStore.showToast(errorMessage, 'error', 4000)
   } finally {
     authenticating.value = false
   }
@@ -587,9 +590,16 @@ const goBack = () => {
 }
 
 const refreshNodes = async () => {
-  await adminStore.fetchNodes()
-  // Test connectivity after refresh
-  testAllNodesConnectivity()
+  try {
+    await adminStore.fetchNodes()
+    appStore.showToast('Node list refreshed successfully!', 'success', 2000)
+    // Test connectivity after refresh
+    testAllNodesConnectivity()
+  } catch (error) {
+    console.error('Failed to refresh nodes:', error)
+    const errorMessage = error.response?.data?.error || error.message || 'Failed to refresh nodes'
+    appStore.showToast(errorMessage, 'error', 3000)
+  }
 }
 
 const editNode = (node) => {
@@ -608,10 +618,13 @@ const confirmDelete = async () => {
   deleting.value = true
   try {
     await adminStore.deleteNode(deletingNode.value.id)
+    appStore.showToast(`Node "${deletingNode.value.name}" deleted successfully!`, 'success', 2000)
     showDeleteModal.value = false
     deletingNode.value = null
   } catch (error) {
     console.error('Failed to delete node:', error)
+    const errorMessage = error.response?.data?.error || error.message || 'Failed to delete node'
+    appStore.showToast(errorMessage, 'error', 4000)
   } finally {
     deleting.value = false
   }
@@ -627,12 +640,17 @@ const saveNode = async (nodeData) => {
   try {
     if (showEditModal.value && editingNode.value?.id) {
       await adminStore.updateNode(editingNode.value.id, nodeData)
+      appStore.showToast('Node updated successfully!', 'success', 2000)
     } else {
       await adminStore.createNode(nodeData)
+      appStore.showToast('Node created successfully!', 'success', 2000)
     }
     closeModal()
   } catch (error) {
     console.error('Failed to save node:', error)
+    // 显示具体的错误信息
+    const errorMessage = error.response?.data?.error || error.message || 'Failed to save node'
+    appStore.showToast(errorMessage, 'error', 4000)
   }
 }
 
