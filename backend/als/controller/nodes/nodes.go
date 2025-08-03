@@ -79,6 +79,16 @@ func (fs *FileStorage) AddNode(node Node) error {
 		return err
 	}
 
+	// Check for duplicate name or URL
+	for _, n := range nodes {
+		if n.Name == node.Name {
+			return fmt.Errorf("node with name '%s' already exists", node.Name)
+		}
+		if n.URL == node.URL {
+			return fmt.Errorf("node with URL '%s' already exists", node.URL)
+		}
+	}
+
 	// Generate ID if not provided
 	if node.ID == "" {
 		node.ID = fmt.Sprintf("node_%d", time.Now().Unix())
@@ -92,6 +102,18 @@ func (fs *FileStorage) UpdateNode(id string, node Node) error {
 	nodes, err := fs.GetNodes()
 	if err != nil {
 		return err
+	}
+
+	// Check for duplicate name or URL (excluding the node being updated)
+	for _, n := range nodes {
+		if n.ID != id {
+			if n.Name == node.Name {
+				return fmt.Errorf("node with name '%s' already exists", node.Name)
+			}
+			if n.URL == node.URL {
+				return fmt.Errorf("node with URL '%s' already exists", node.URL)
+			}
+		}
 	}
 
 	for i, n := range nodes {
@@ -304,10 +326,18 @@ func CreateNode(c *gin.Context) {
 	}
 
 	if err := storage.AddNode(node); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"error":   err.Error(),
-		})
+		// Handle specific duplicate errors
+		if strings.Contains(err.Error(), "already exists") {
+			c.JSON(http.StatusConflict, gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
+		}
 		return
 	}
 
@@ -341,6 +371,11 @@ func UpdateNode(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"success": false,
 				"error":   "Node not found",
+			})
+		} else if strings.Contains(err.Error(), "already exists") {
+			c.JSON(http.StatusConflict, gin.H{
+				"success": false,
+				"error":   err.Error(),
 			})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{
