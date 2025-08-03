@@ -776,10 +776,26 @@ main() {
 
 # Check if running as root for Docker installation
 if [[ $EUID -eq 0 ]] && [[ "${1:-}" != "--allow-root" ]]; then
-    warn "Running as root. This script will create files owned by root."
-    read -p "Continue? Add --allow-root to skip this check. [y/N]: " confirm
-    if [[ ! $confirm =~ ^[Yy]$ ]]; then
-        exit 1
+    # Check if we're in non-interactive mode by looking for --non-interactive flag
+    NON_INTERACTIVE_ROOT=false
+    for arg in "$@"; do
+        if [[ "$arg" == "--non-interactive" ]]; then
+            NON_INTERACTIVE_ROOT=true
+            break
+        fi
+    done
+    
+    if [[ "$NON_INTERACTIVE_ROOT" == "true" ]]; then
+        warn "Running as root in non-interactive mode. Files will be owned by root."
+    else
+        warn "Running as root. This script will create files owned by root."
+        if read -t 10 -p "Continue? Add --allow-root to skip this check. [y/N]: " confirm 2>/dev/null; then
+            if [[ ! $confirm =~ ^[Yy]$ ]]; then
+                exit 1
+            fi
+        else
+            warn "Cannot read input (possibly running via curl). Continuing as root..."
+        fi
     fi
 fi
 
