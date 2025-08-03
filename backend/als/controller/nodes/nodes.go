@@ -1,6 +1,8 @@
 package nodes
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -73,6 +75,17 @@ func (fs *FileStorage) GetNodes() ([]Node, error) {
 	return nodes, nil
 }
 
+// generateUniqueID generates a unique ID for nodes
+func generateUniqueID() string {
+	// Generate random bytes
+	bytes := make([]byte, 4)
+	if _, err := rand.Read(bytes); err != nil {
+		// Fallback to timestamp-based ID with nanoseconds
+		return fmt.Sprintf("node_%d_%d", time.Now().Unix(), time.Now().UnixNano()%1000000)
+	}
+	return fmt.Sprintf("node_%s", hex.EncodeToString(bytes))
+}
+
 func (fs *FileStorage) AddNode(node Node) error {
 	nodes, err := fs.GetNodes()
 	if err != nil {
@@ -89,9 +102,23 @@ func (fs *FileStorage) AddNode(node Node) error {
 		}
 	}
 
-	// Generate ID if not provided
+	// Generate unique ID if not provided
 	if node.ID == "" {
-		node.ID = fmt.Sprintf("node_%d", time.Now().Unix())
+		node.ID = generateUniqueID()
+		// Ensure ID is truly unique
+		for {
+			exists := false
+			for _, n := range nodes {
+				if n.ID == node.ID {
+					exists = true
+					break
+				}
+			}
+			if !exists {
+				break
+			}
+			node.ID = generateUniqueID()
+		}
 	}
 
 	nodes = append(nodes, node)
