@@ -98,9 +98,21 @@ func SetupHttpRoute(e *gin.Engine) {
 	})
 	
 	// Node management endpoints (no session required for cross-node functionality)
+	// Node management API (public endpoints)
 	e.GET("/nodes", nodes.GetNodes)
 	e.GET("/nodes/current", nodes.GetNodeConfig)
 	e.GET("/nodes/latency", nodes.TestLatency)
+	
+	// Node management API (admin endpoints with API key authentication)
+	admin := e.Group("/api/admin")
+	admin.Use(nodes.RequireApiKey)
+	{
+		admin.POST("/nodes", nodes.CreateNode)
+		admin.GET("/nodes/add", nodes.CreateNode)     // GET endpoint for easy automation
+		admin.GET("/nodes/:id", nodes.GetNodeDetail)
+		admin.PUT("/nodes/:id", nodes.UpdateNode)
+		admin.DELETE("/nodes/:id", nodes.DeleteNode)
+	}
 	
 	v1 := e.Group("/method", controller.MiddlewareSessionOnHeader())
 	{

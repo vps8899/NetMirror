@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    Admin: typeof import('./src/components/Admin.vue')['default']
     BGP: typeof import('./src/components/Utilities/BGP.vue')['default']
     Copy: typeof import('./src/components/Copy.vue')['default']
     FileSpeedtest: typeof import('./src/components/Speedtest/FileSpeedtest.vue')['default']
@@ -17,6 +18,7 @@ declare module 'vue' {
     Loading: typeof import('./src/components/Loading.vue')['default']
     MTR: typeof import('./src/components/Utilities/MTR.vue')['default']
     MTR6: typeof import('./src/components/Utilities/MTR6.vue')['default']
+    NodeEditModal: typeof import('./src/components/NodeEditModal.vue')['default']
     NodeList: typeof import('./src/components/Utilities/NodeList.vue')['default']
     NodeSelector: typeof import('./src/components/NodeSelector.vue')['default']
     Ping: typeof import('./src/components/Utilities/Ping.vue')['default']

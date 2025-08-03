@@ -7,6 +7,7 @@ import InfoCard from '@/components/Information.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import LanguageSelector from '@/components/LanguageSelector.vue'
 import Toast from '@/components/Toast.vue'
+import AdminPanel from '@/components/Admin.vue'
 
 // Lazy load heavy components
 const SpeedtestCard = defineAsyncComponent({
@@ -56,6 +57,7 @@ const NodeListCard = defineAsyncComponent({
 
 const appStore = useAppStore()
 const activeTab = ref('info')
+const adminMode = ref(false)
 const tabContainer = ref(null)
 const tabNavigation = ref(null)
 const showFab = ref(false)
@@ -130,6 +132,14 @@ const scrollToTop = () => {
     top: 0,
     behavior: 'smooth'
   })
+}
+
+const toggleAdminMode = () => {
+  adminMode.value = !adminMode.value
+}
+
+const goBackToMain = () => {
+  adminMode.value = false
 }
 
 // 设置页面标题（favicon由后端处理）
@@ -254,82 +264,88 @@ onUnmounted(() => {
 
       <!-- Main content area -->
       <main class="pb-16">
-        <LoadingCard v-if="appStore.connecting" />
+        <!-- Admin Panel -->
+        <AdminPanel v-if="adminMode" @back="goBackToMain" />
+        
+        <!-- Normal Application -->
         <template v-else>
-          <div class="max-w-7xl mx-auto space-y-4 md:space-y-6 px-4">
-            <!-- Node List Card with enhanced mobile spacing -->
-            <div class="animate-slide-up">
-              <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 overflow-hidden p-4 md:p-6">
-                <div class="mb-3 md:mb-4">
-                  <h2 class="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Looking Glass Nodes Configuration</h2>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">Select and test connectivity to different network nodes</p>
+          <LoadingCard v-if="appStore.connecting" />
+          <template v-else>
+            <div class="max-w-7xl mx-auto space-y-4 md:space-y-6 px-4">
+              <!-- Node List Card with enhanced mobile spacing -->
+              <div class="animate-slide-up">
+                <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 overflow-hidden p-4 md:p-6">
+                  <div class="mb-3 md:mb-4">
+                    <h2 class="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Looking Glass Nodes Configuration</h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Select and test connectivity to different network nodes</p>
+                  </div>
+                  <NodeListCard />
                 </div>
-                <NodeListCard />
               </div>
-            </div>
-            <!-- Tab Navigation with improved mobile layout -->
-            <div ref="tabNavigation" class="animate-slide-up mt-6 md:mt-8" style="animation-delay: 0.1s;">
-              <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 p-2">
-                <!-- Mobile: Scrollable horizontal tabs -->
-                <div class="md:hidden overflow-x-auto">
-                  <div class="flex gap-2 min-w-max px-1">
+              <!-- Tab Navigation with improved mobile layout -->
+              <div ref="tabNavigation" class="animate-slide-up mt-6 md:mt-8" style="animation-delay: 0.1s;">
+                <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 p-2">
+                  <!-- Mobile: Scrollable horizontal tabs -->
+                  <div class="md:hidden overflow-x-auto">
+                    <div class="flex gap-2 min-w-max px-1">
+                      <button
+                        v-for="tab in filteredTabs"
+                        :key="tab.id"
+                        @click="changeTab(tab.id)"
+                        class="flex items-center space-x-2 px-3 py-2 rounded-xl font-medium transition-all duration-200 group whitespace-nowrap flex-shrink-0"
+                        :class="activeTab === tab.id 
+                          ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg' 
+                          : 'bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80'"
+                      >
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="activeTab === tab.id ? 'rotate-12' : 'group-hover:rotate-6'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tab.icon"></path>
+                        </svg>
+                        <span class="text-sm">{{ tab.label }}</span>
+                      </button>
+                    </div>
+                  </div>
+                  <!-- Desktop: Regular flex layout -->
+                  <div class="hidden md:flex gap-2">
                     <button
                       v-for="tab in filteredTabs"
                       :key="tab.id"
                       @click="changeTab(tab.id)"
-                      class="flex items-center space-x-2 px-3 py-2 rounded-xl font-medium transition-all duration-200 group whitespace-nowrap flex-shrink-0"
+                      class="flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 group"
                       :class="activeTab === tab.id 
                         ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg' 
                         : 'bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80'"
                     >
-                      <svg class="w-4 h-4 transition-transform duration-200" :class="activeTab === tab.id ? 'rotate-12' : 'group-hover:rotate-6'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-5 h-5 transition-transform duration-200" :class="activeTab === tab.id ? 'rotate-12' : 'group-hover:rotate-6'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tab.icon"></path>
                       </svg>
-                      <span class="text-sm">{{ tab.label }}</span>
+                      <span>{{ tab.label }}</span>
                     </button>
                   </div>
                 </div>
-                <!-- Desktop: Regular flex layout -->
-                <div class="hidden md:flex gap-2">
-                  <button
-                    v-for="tab in filteredTabs"
-                    :key="tab.id"
-                    @click="changeTab(tab.id)"
-                    class="flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 group"
-                    :class="activeTab === tab.id 
-                      ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg' 
-                      : 'bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80'"
-                  >
-                    <svg class="w-5 h-5 transition-transform duration-200" :class="activeTab === tab.id ? 'rotate-12' : 'group-hover:rotate-6'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tab.icon"></path>
-                    </svg>
-                    <span>{{ tab.label }}</span>
-                  </button>
-                </div>
               </div>
-            </div>
-            
-            <!-- Tab Content with improved mobile spacing -->
-            <div class="relative mt-4 md:mt-6 overflow-hidden">
-              <div 
-                class="flex transition-transform duration-300 ease-out"
-                :style="{ transform: `translateX(-${tabIndex * 100}%)` }"
-              >
+              
+              <!-- Tab Content with improved mobile spacing -->
+              <div class="relative mt-4 md:mt-6 overflow-hidden">
                 <div 
-                  v-for="(tab, index) in filteredTabs" 
-                  :key="tab.id"
-                  class="w-full flex-shrink-0 px-1 md:px-0"
-                  :style="{ order: index }"
+                  class="flex transition-transform duration-300 ease-out"
+                  :style="{ transform: `translateX(-${tabIndex * 100}%)` }"
                 >
-                  <InfoCard v-if="tab.id === 'info'" />
-                  <UtilitiesCard v-else-if="tab.id === 'tools'" />
-                  <BGPCard v-else-if="tab.id === 'bgp'" />
-                  <SpeedtestCard v-else-if="tab.id === 'speedtest'" />
-                  <TrafficCard v-else-if="tab.id === 'traffic'" />
+                  <div 
+                    v-for="(tab, index) in filteredTabs" 
+                    :key="tab.id"
+                    class="w-full flex-shrink-0 px-1 md:px-0"
+                    :style="{ order: index }"
+                  >
+                    <InfoCard v-if="tab.id === 'info'" />
+                    <UtilitiesCard v-else-if="tab.id === 'tools'" />
+                    <BGPCard v-else-if="tab.id === 'bgp'" />
+                    <SpeedtestCard v-else-if="tab.id === 'speedtest'" />
+                    <TrafficCard v-else-if="tab.id === 'traffic'" />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </template>
         </template>
       </main>
 
@@ -380,6 +396,17 @@ onUnmounted(() => {
             <div class="w-14 h-14 flex items-center justify-center bg-white dark:bg-gray-700 rounded-full shadow-lg">
               <ThemeToggle :is-dark="isDark" @toggle="toggleTheme" />
             </div>
+            <!-- Admin Panel -->
+            <button 
+              @click="toggleAdminMode" 
+              class="w-14 h-14 flex items-center justify-center bg-white dark:bg-gray-700 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 transform hover:scale-110"
+              title="Admin Panel"
+            >
+              <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </button>
           </div>
           
           <!-- Main FAB -->
@@ -434,6 +461,33 @@ body {
   50% { opacity: 0.8; }
 }
 
+@keyframes bounce-gentle {
+  0%, 100% { 
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% { 
+    transform: translateY(-5px);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+@keyframes slide-in-left {
+  0% { opacity: 0; transform: translateX(-20px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-in-right {
+  0% { opacity: 0; transform: translateX(20px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.8s ease-out;
 }
@@ -448,6 +502,22 @@ body {
 
 .animate-pulse-slow {
   animation: pulse-slow 4s ease-in-out infinite;
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 2s ease-in-out infinite;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.6s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.6s ease-out;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
 }
 
 /* Mobile-friendly line clamping */
