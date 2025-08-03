@@ -273,12 +273,17 @@
                         {{ node.url }}
                       </code>
                       <button
-                        @click="copyToClipboard(node.url)"
-                        class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
-                        title="Copy URL"
+                        @click="copyToClipboard(node.url, node.id || node.url)"
+                        :disabled="copyingStates[node.id || node.url]"
+                        class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 disabled:opacity-50"
+                        :class="{ 'text-green-500 dark:text-green-400': copyingStates[node.id || node.url] }"
+                        :title="copyingStates[node.id || node.url] ? 'Copied!' : 'Copy URL'"
                       >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg v-if="!copyingStates[node.id || node.url]" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        <svg v-else class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
                       </button>
                     </div>
@@ -477,6 +482,7 @@ const showDeleteModal = ref(false)
 const editingNode = ref(null)
 const deletingNode = ref(null)
 const deleting = ref(false)
+const copyingStates = ref({}) // 追踪每个节点的复制状态
 
 // 删除自定义的connectivity测试逻辑，直接使用首页的延迟测试
 // Test all nodes connectivity - 复用首页逻辑
@@ -630,7 +636,12 @@ const saveNode = async (nodeData) => {
   }
 }
 
-const copyToClipboard = async (text) => {
+const copyToClipboard = async (text, nodeId = null) => {
+  // 设置复制状态
+  if (nodeId) {
+    copyingStates.value[nodeId] = true
+  }
+
   try {
     await navigator.clipboard.writeText(text)
     // 使用应用的toast系统显示成功提示
@@ -666,6 +677,13 @@ const copyToClipboard = async (text) => {
         duration: 3000
       })
     }
+  } finally {
+    // 短暂延迟后重置复制状态，给用户视觉反馈
+    setTimeout(() => {
+      if (nodeId) {
+        copyingStates.value[nodeId] = false
+      }
+    }, 1000)
   }
 }
 </script>
