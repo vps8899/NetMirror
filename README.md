@@ -54,10 +54,10 @@ The demo server for this project is sponsored by [Verasel](https://verasel.com).
 ```
 ⚡ One-Click Execution
 # English
-curl -sL https:// | bash
+curl -sL https://raw.githubusercontent.com/catcat-blog/NetMirror/refs/heads/main/scripts/netmirror-interactive.sh | bash
 
 # Chinese
-curl -sL https:// | bash -s -- -cn
+curl -sL https://raw.githubusercontent.com/catcat-blog/NetMirror/refs/heads/main/scripts/netmirror-interactive.sh | bash -s -cn
 
 ```
 
