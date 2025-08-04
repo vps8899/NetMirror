@@ -25,12 +25,41 @@ const { apply } = useMotion(cardRef, {
   enter: { opacity: 1, y: 0, transition: { duration: 500, delay: 500 } }
 })
 
+const currentNodeInterfaces = ref(new Set()) // 跟踪当前节点的网卡
+
+// 计算属性：只显示当前节点的网卡接口
+const currentInterfaces = computed(() => {
+  const result = {}
+  for (const [interfaceName, interfaceData] of Object.entries(interfaces.value)) {
+    if (currentNodeInterfaces.value.has(interfaceName)) {
+      result[interfaceName] = interfaceData
+    }
+  }
+  return result
+})
+
 const handleCache = (e) => {
+  console.log('=== Received InterfaceCache event ===')
+  console.log('Current selected node:', selectedNodeName.value)
+  console.log('Raw cache data:', e.data)
+  
   const data = JSON.parse(e.data)
+  console.log('Parsed cache data:', data)
+  
+  // 清空当前节点的网卡记录
+  currentNodeInterfaces.value.clear()
+  
   for (const ifaceIndex in data) {
     const iface = data[ifaceIndex]
     const ifaceName = iface.InterfaceName
+    
+    console.log('Processing interface:', ifaceName, 'for node:', selectedNodeName.value)
+    
+    // 记录这是当前节点的网卡
+    currentNodeInterfaces.value.add(ifaceName)
+    
     if (!interfaces.value.hasOwnProperty(ifaceName)) {
+      console.log('Creating new graph for interface:', ifaceName)
       createGraph(ifaceName)
     }
     const localIface = interfaces.value[ifaceName]
@@ -40,6 +69,8 @@ const handleCache = (e) => {
       updateSerieByInterface(ifaceName, localIface, new Date(point[0] * 1000))
     }
   }
+  
+  console.log('Current node interfaces:', Array.from(currentNodeInterfaces.value))
 }
 
 const handleTrafficUpdate = (e) => {
@@ -48,9 +79,18 @@ const handleTrafficUpdate = (e) => {
   const ifaceName = data[0]
   const time = data[1]
 
+  console.log('Traffic update for interface:', ifaceName, 'node:', selectedNodeName.value)
+
+  // 只处理属于当前节点的网卡
+  if (!currentNodeInterfaces.value.has(ifaceName)) {
+    console.log('Ignoring traffic update for interface not belonging to current node:', ifaceName)
+    return
+  }
+
   if (!interfaces.value.hasOwnProperty(ifaceName)) {
     console.log('Creating new interface graph for:', ifaceName)
     createGraph(ifaceName)
+    currentNodeInterfaces.value.add(ifaceName)
   }
 
   const iface = interfaces.value[ifaceName]
@@ -292,10 +332,11 @@ watch(() => selectedNode.value, (newNode, oldNode) => {
   console.log('Old node:', oldNode?.name)
   console.log('New node:', newNode?.name)
   
-  // 只要节点发生了变化就清空接口数据，无论新节点是否存在
+  // 只要节点发生了变化就清空接口数据和节点网卡记录，无论新节点是否存在
   console.log('Clearing interfaces data due to node change...')
   interfaces.value = {}
-  console.log('Interfaces data cleared')
+  currentNodeInterfaces.value.clear()
+  console.log('Interfaces data and node interfaces cleared')
   
   if (newNode !== oldNode) {
     console.log('Cleaning up old listeners...')
@@ -323,26 +364,27 @@ onUnmounted(() => {
   } catch (error) {
     console.warn('Error cleaning up listeners on unmount:', error)
   }
-  // 清空接口数据确保不会留在内存中
+  // 清空接口数据和节点网卡记录确保不会留在内存中
   interfaces.value = {}
+  currentNodeInterfaces.value.clear()
 })
 </script>
 
 <template>
   <div ref="cardRef" class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 overflow-hidden">
     <div class="p-6">
-      <div v-if="Object.keys(interfaces).length === 0" class="text-center py-12">
+      <div v-if="Object.keys(currentInterfaces).length === 0" class="text-center py-12">
         <ChartBarIcon class="w-16 h-16 text-gray-400/50 dark:text-gray-500/50 mx-auto mb-4" />
         <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">No Traffic Data</h3>
         <p class="text-gray-500 dark:text-gray-400">Waiting for network interface data...</p>
       </div>
       
-      <div v-else :class="Object.keys(interfaces).length === 1 ? 'block' : 'grid grid-cols-1 xl:grid-cols-2 gap-6'">
+      <div v-else :class="Object.keys(currentInterfaces).length === 1 ? 'block' : 'grid grid-cols-1 xl:grid-cols-2 gap-6'">
         <div 
-          v-for="(interfaceData, interfaceName) in interfaces" 
+          v-for="(interfaceData, interfaceName) in currentInterfaces" 
           :key="interfaceName"
           class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 border border-gray-200 dark:border-gray-600"
-          :class="Object.keys(interfaces).length === 1 ? 'mx-auto max-w-4xl' : ''"
+          :class="Object.keys(currentInterfaces).length === 1 ? 'mx-auto max-w-4xl' : ''"
         >
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ interfaceName }}</h3>
@@ -353,7 +395,7 @@ onUnmounted(() => {
           </div>
           
           <!-- Stats -->
-          <div :class="Object.keys(interfaces).length === 1 ? 'flex justify-center gap-16 mb-6' : 'grid grid-cols-2 gap-4 mb-6'">
+          <div :class="Object.keys(currentInterfaces).length === 1 ? 'flex justify-center gap-16 mb-6' : 'grid grid-cols-2 gap-4 mb-6'">
             <div class="text-center">
               <div class="flex items-center justify-center space-x-2 mb-2">
                 <ArrowDownIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
