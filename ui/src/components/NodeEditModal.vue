@@ -1,101 +1,194 @@
 <template>
-  <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white dark:bg-gray-800">
-      <div class="mt-3">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-          {{ isEdit ? 'Edit Node' : 'Add New Node' }}
-        </h3>
+  <!-- Enhanced Modal with glass morphism and modern animations -->
+  <transition
+    enter-active-class="transition-all duration-300 ease-out"
+    enter-from-class="opacity-0 scale-95"
+    enter-to-class="opacity-100 scale-100"
+    leave-active-class="transition-all duration-200 ease-in"
+    leave-from-class="opacity-100 scale-100"
+    leave-to-class="opacity-0 scale-95"
+  >
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+      <div class="relative bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg border border-primary-200/30 dark:border-primary-700/30 shadow-2xl rounded-2xl max-w-lg w-full animate-scale-in">
+        <!-- Modal Header -->
+        <div class="px-8 py-6 border-b border-gray-200/50 dark:border-gray-600/50">
+          <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg shadow-primary-500/25 flex items-center justify-center animate-scale-in">
+              <svg v-if="isEdit" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+              <svg v-else class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
+                {{ isEdit ? 'Edit Node' : 'Add New Node' }}
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {{ isEdit ? 'Update node information' : 'Configure a new network node' }}
+              </p>
+            </div>
+          </div>
+        </div>
         
-        <form @submit.prevent="handleSubmit" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Node Name *
-            </label>
-            <input
-              v-model="formData.name"
-              type="text"
-              required
-              placeholder="e.g., London Node"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            >
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Display name for this node
-            </p>
-          </div>
+        <!-- Modal Body -->
+        <div class="px-8 py-6">
+          <form @submit.prevent="handleSubmit" class="space-y-6">
+            <!-- Node Name Field -->
+            <div class="animate-slide-up" style="animation-delay: 0.1s;">
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Node Name *
+              </label>
+              <div class="relative">
+                <input
+                  v-model="formData.name"
+                  type="text"
+                  required
+                  placeholder="e.g., London Node"
+                  class="w-full px-4 py-3 pl-12 border border-gray-300/50 dark:border-gray-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 transition-all duration-200 placeholder-gray-500 dark:placeholder-gray-400"
+                >
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
+                  </svg>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ml-1">
+                Display name for this node
+              </p>
+            </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Location *
-            </label>
-            <input
-              v-model="formData.location"
-              type="text"
-              required
-              placeholder="e.g., London, UK"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            >
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Geographic location of the node
-            </p>
-          </div>
+            <!-- Location Field -->
+            <div class="animate-slide-up" style="animation-delay: 0.2s;">
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Location *
+              </label>
+              <div class="relative">
+                <input
+                  v-model="formData.location"
+                  type="text"
+                  required
+                  placeholder="e.g., London, UK"
+                  class="w-full px-4 py-3 pl-12 border border-gray-300/50 dark:border-gray-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 transition-all duration-200 placeholder-gray-500 dark:placeholder-gray-400"
+                >
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ml-1">
+                Geographic location of the node
+              </p>
+            </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              URL *
-            </label>
-            <input
-              v-model="formData.url"
-              type="url"
-              required
-              placeholder="https://lg.example.com"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            >
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Full URL including protocol (https://)
-            </p>
-          </div>
+            <!-- URL Field -->
+            <div class="animate-slide-up" style="animation-delay: 0.3s;">
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                URL *
+              </label>
+              <div class="relative">
+                <input
+                  v-model="formData.url"
+                  type="url"
+                  required
+                  placeholder="https://lg.example.com"
+                  class="w-full px-4 py-3 pl-12 border border-gray-300/50 dark:border-gray-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 transition-all duration-200 placeholder-gray-500 dark:placeholder-gray-400"
+                  :class="{ 'border-red-300 dark:border-red-600 focus:ring-red-500 focus:border-red-500': formData.url && !isValidUrl(formData.url) }"
+                >
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                  </svg>
+                </div>
+                <!-- URL Validation Indicator -->
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <svg v-if="formData.url && isValidUrl(formData.url)" class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <svg v-else-if="formData.url && !isValidUrl(formData.url)" class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </div>
+              </div>
+              <p class="text-xs mt-2 ml-1" :class="formData.url && !isValidUrl(formData.url) ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'">
+                {{ formData.url && !isValidUrl(formData.url) ? 'Please enter a valid URL' : 'Full URL including protocol (https://)' }}
+              </p>
+            </div>
 
-          <!-- Form Actions -->
-          <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button
-              type="button"
-              @click="$emit('close')"
-              class="px-4 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              :disabled="!isFormValid || saving"
-              class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span v-if="saving" class="flex items-center">
-                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <!-- Form Actions -->
+            <div class="flex justify-end space-x-3 pt-6 animate-slide-up" style="animation-delay: 0.4s;">
+              <button
+                type="button"
+                @click="$emit('close')"
+                class="px-6 py-3 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm text-gray-800 dark:text-gray-200 border border-gray-300/50 dark:border-gray-600/50 rounded-xl hover:bg-white dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 hover:scale-105 shadow-lg"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                :disabled="!isFormValid || saving"
+                class="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 shadow-lg shadow-primary-500/25"
+              >
+                <span v-if="saving" class="flex items-center">
+                  <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {{ isEdit ? 'Updating...' : 'Creating...' }}
+                </span>
+                <span v-else class="flex items-center">
+                  <svg v-if="isEdit" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                  <svg v-else class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                  </svg>
+                  {{ isEdit ? 'Update Node' : 'Create Node' }}
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Enhanced URL Validation Tips -->
+        <div class="px-8 pb-6 animate-slide-up" style="animation-delay: 0.5s;">
+          <div class="p-4 bg-gradient-to-r from-blue-50 to-primary-50 dark:from-blue-900/20 dark:to-primary-900/20 border border-blue-200/50 dark:border-blue-700/50 rounded-xl backdrop-blur-sm">
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0">
+                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                {{ isEdit ? 'Updating...' : 'Creating...' }}
-              </span>
-              <span v-else>
-                {{ isEdit ? 'Update Node' : 'Create Node' }}
-              </span>
-            </button>
+              </div>
+              <div>
+                <h4 class="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">URL Requirements:</h4>
+                <ul class="text-xs text-blue-700 dark:text-blue-400 space-y-1.5">
+                  <li class="flex items-center space-x-2">
+                    <div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <span>Must include protocol (https:// recommended)</span>
+                  </li>
+                  <li class="flex items-center space-x-2">
+                    <div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <span>Should be accessible from this server</span>
+                  </li>
+                  <li class="flex items-center space-x-2">
+                    <div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <span>Node must run the same Looking Glass software</span>
+                  </li>
+                  <li class="flex items-center space-x-2">
+                    <div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <span>CORS must be properly configured</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
-        </form>
-
-        <!-- URL Validation Tips -->
-        <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-md">
-          <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">URL Requirements:</h4>
-          <ul class="text-xs text-blue-700 dark:text-blue-400 space-y-1">
-            <li>• Must include protocol (https:// recommended)</li>
-            <li>• Should be accessible from this server</li>
-            <li>• Node must run the same Looking Glass software</li>
-            <li>• CORS must be properly configured</li>
-          </ul>
         </div>
       </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script setup>
