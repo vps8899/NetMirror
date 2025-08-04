@@ -25,41 +25,12 @@ const { apply } = useMotion(cardRef, {
   enter: { opacity: 1, y: 0, transition: { duration: 500, delay: 500 } }
 })
 
-const currentNodeInterfaces = ref(new Set()) // 跟踪当前节点的网卡
-
-// 计算属性：只显示当前节点的网卡接口
-const currentInterfaces = computed(() => {
-  const result = {}
-  for (const [interfaceName, interfaceData] of Object.entries(interfaces.value)) {
-    if (currentNodeInterfaces.value.has(interfaceName)) {
-      result[interfaceName] = interfaceData
-    }
-  }
-  return result
-})
-
 const handleCache = (e) => {
-  console.log('=== Received InterfaceCache event ===')
-  console.log('Current selected node:', selectedNodeName.value)
-  console.log('Raw cache data:', e.data)
-  
   const data = JSON.parse(e.data)
-  console.log('Parsed cache data:', data)
-  
-  // 清空当前节点的网卡记录
-  currentNodeInterfaces.value.clear()
-  
   for (const ifaceIndex in data) {
     const iface = data[ifaceIndex]
     const ifaceName = iface.InterfaceName
-    
-    console.log('Processing interface:', ifaceName, 'for node:', selectedNodeName.value)
-    
-    // 记录这是当前节点的网卡
-    currentNodeInterfaces.value.add(ifaceName)
-    
     if (!interfaces.value.hasOwnProperty(ifaceName)) {
-      console.log('Creating new graph for interface:', ifaceName)
       createGraph(ifaceName)
     }
     const localIface = interfaces.value[ifaceName]
@@ -69,8 +40,6 @@ const handleCache = (e) => {
       updateSerieByInterface(ifaceName, localIface, new Date(point[0] * 1000))
     }
   }
-  
-  console.log('Current node interfaces:', Array.from(currentNodeInterfaces.value))
 }
 
 const handleTrafficUpdate = (e) => {
@@ -79,18 +48,9 @@ const handleTrafficUpdate = (e) => {
   const ifaceName = data[0]
   const time = data[1]
 
-  console.log('Traffic update for interface:', ifaceName, 'node:', selectedNodeName.value)
-
-  // 只处理属于当前节点的网卡
-  if (!currentNodeInterfaces.value.has(ifaceName)) {
-    console.log('Ignoring traffic update for interface not belonging to current node:', ifaceName)
-    return
-  }
-
   if (!interfaces.value.hasOwnProperty(ifaceName)) {
     console.log('Creating new interface graph for:', ifaceName)
     createGraph(ifaceName)
-    currentNodeInterfaces.value.add(ifaceName)
   }
 
   const iface = interfaces.value[ifaceName]
@@ -286,28 +246,13 @@ const setupEventListeners = () => {
   console.log('hasNodeSession:', hasNodeSession.value)
   
   try {
-    let source
-    // 如果没有选中节点，直接使用appStore的EventSource（当前节点）
-    if (!hasSelectedNode.value || !hasNodeSession.value) {
-      console.log('No selected node or session, using appStore EventSource')
-      source = appStore.source
-      if (!source) {
-        console.error('No EventSource available from appStore')
-        return
-      }
-    } else {
-      source = getEventSource()
-    }
+    cleanupEventListeners()
     
+    const source = getEventSource()
     console.log('Successfully got event source:', source)
-    console.log('Event source URL:', source?.url)
-    console.log('Event source readyState:', source?.readyState)
+    console.log('Event source URL:', source.url)
+    console.log('Event source readyState:', source.readyState)
     
-    // 移除现有的监听器（防止重复添加）
-    source.removeEventListener('InterfaceCache', handleCache)
-    source.removeEventListener('InterfaceTraffic', handleTrafficUpdate)
-    
-    // 添加新的监听器
     source.addEventListener('InterfaceCache', handleCache)
     source.addEventListener('InterfaceTraffic', handleTrafficUpdate)
     
@@ -323,35 +268,10 @@ const setupEventListeners = () => {
 
 // 清理事件监听器
 const cleanupEventListeners = () => {
-  try {
-    let source
-    // 如果没有选中节点，直接使用appStore的EventSource（当前节点）
-    if (!hasSelectedNode.value || !hasNodeSession.value) {
-      source = appStore.source
-    } else {
-      source = getEventSource()
-    }
-    
-    if (source) {
-      source.removeEventListener('InterfaceCache', handleCache)
-      source.removeEventListener('InterfaceTraffic', handleTrafficUpdate)
-    }
-  } catch (error) {
-    console.warn('Failed to cleanup event listeners:', error)
-  }
+  const source = getEventSource()
+  source.removeEventListener('InterfaceCache', handleCache)
+  source.removeEventListener('InterfaceTraffic', handleTrafficUpdate)
 }
-
-// 监听appStore source的变化（用于处理默认节点情况）
-watch(() => appStore.source, (newSource) => {
-  console.log('=== TrafficDisplay: AppStore source changed ===')
-  console.log('New source available:', !!newSource)
-  
-  // 如果没有选中节点，且appStore的source变为可用，设置监听器
-  if (!hasSelectedNode.value && newSource) {
-    console.log('Setting up listeners for default node (appStore source)')
-    setupEventListeners()
-  }
-})
 
 // 监听节点session状态变化
 watch(() => hasNodeSession.value, (hasSession) => {
@@ -370,64 +290,50 @@ watch(() => selectedNode.value, (newNode, oldNode) => {
   console.log('Old node:', oldNode?.name)
   console.log('New node:', newNode?.name)
   
-  // 只要节点发生了变化就清空接口数据和节点网卡记录，无论新节点是否存在
-  console.log('Clearing interfaces data due to node change...')
-  interfaces.value = {}
-  currentNodeInterfaces.value.clear()
-  console.log('Interfaces data and node interfaces cleared')
-  
   if (newNode !== oldNode) {
     console.log('Cleaning up old listeners...')
-    // 清理旧的监听器 - 使用try-catch防止错误
+    // 清理旧的监听器
     try {
       cleanupEventListeners()
     } catch (error) {
       console.warn('Error cleaning up listeners:', error)
     }
     
+    // 清空现有的接口数据
+    interfaces.value = {}
+    console.log('Cleared interfaces data')
+    
     // 新的监听器会在hasNodeSession变化时设置
   }
-}, { immediate: false })
+})
 
 onMounted(() => {
   console.log('TrafficDisplay mounted, current selectedNode:', selectedNode.value)
   console.log('Current interfaces before setup:', interfaces.value)
-  console.log('Has node session:', hasNodeSession.value)
-  console.log('AppStore source available:', !!appStore.source)
-  
-  // 总是尝试设置监听器，如果没有选中节点就用appStore的source
   setupEventListeners()
-  
   apply()
 })
 
 onUnmounted(() => {
-  try {
-    cleanupEventListeners()
-  } catch (error) {
-    console.warn('Error cleaning up listeners on unmount:', error)
-  }
-  // 清空接口数据和节点网卡记录确保不会留在内存中
-  interfaces.value = {}
-  currentNodeInterfaces.value.clear()
+  cleanupEventListeners()
 })
 </script>
 
 <template>
   <div ref="cardRef" class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-primary-200/30 dark:border-primary-700/30 overflow-hidden">
     <div class="p-6">
-      <div v-if="Object.keys(currentInterfaces).length === 0" class="text-center py-12">
+      <div v-if="Object.keys(interfaces).length === 0" class="text-center py-12">
         <ChartBarIcon class="w-16 h-16 text-gray-400/50 dark:text-gray-500/50 mx-auto mb-4" />
         <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">No Traffic Data</h3>
         <p class="text-gray-500 dark:text-gray-400">Waiting for network interface data...</p>
       </div>
       
-      <div v-else :class="Object.keys(currentInterfaces).length === 1 ? 'block' : 'grid grid-cols-1 xl:grid-cols-2 gap-6'">
+      <div v-else :class="Object.keys(interfaces).length === 1 ? 'block' : 'grid grid-cols-1 xl:grid-cols-2 gap-6'">
         <div 
-          v-for="(interfaceData, interfaceName) in currentInterfaces" 
+          v-for="(interfaceData, interfaceName) in interfaces" 
           :key="interfaceName"
           class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 border border-gray-200 dark:border-gray-600"
-          :class="Object.keys(currentInterfaces).length === 1 ? 'mx-auto max-w-4xl' : ''"
+          :class="Object.keys(interfaces).length === 1 ? 'mx-auto max-w-4xl' : ''"
         >
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ interfaceName }}</h3>
@@ -438,7 +344,7 @@ onUnmounted(() => {
           </div>
           
           <!-- Stats -->
-          <div :class="Object.keys(currentInterfaces).length === 1 ? 'flex justify-center gap-16 mb-6' : 'grid grid-cols-2 gap-4 mb-6'">
+          <div :class="Object.keys(interfaces).length === 1 ? 'flex justify-center gap-16 mb-6' : 'grid grid-cols-2 gap-4 mb-6'">
             <div class="text-center">
               <div class="flex items-center justify-center space-x-2 mb-2">
                 <ArrowDownIcon class="w-4 h-4 text-green-600 dark:text-green-400" />

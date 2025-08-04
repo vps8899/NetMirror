@@ -131,7 +131,7 @@ export const useAppStore = defineStore('app', () => {
           
           // Handle 400 Bad Request errors
           if (error.response && error.response.status === 400) {
-            showToast('输入参数无效，请检查您的输入', 'error')
+            showToast('Bad Request, please check your input', 'error')
           }
           
           console.error(error)

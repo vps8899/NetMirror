@@ -66,17 +66,7 @@ export const useNodesStore = defineStore('nodes', () => {
   const establishNodeSession = async (node) => {
     if (!node) return null
 
-    // 如果是当前节点，使用现有的appStore session
-    if (isCurrentNode(node)) {
-      const appStore = useAppStore()
-      return {
-        sessionId: appStore.sessionId,
-        source: appStore.source,
-        config: appStore.config
-      }
-    }
-
-    // 为其他节点建立新的Session连接
+    // 为所有节点（包括当前节点）建立独立的Session连接
     return new Promise((resolve, reject) => {
       const eventSource = new EventSource(`${node.url}/session`)
       let sessionId = null
@@ -118,7 +108,7 @@ export const useNodesStore = defineStore('nodes', () => {
 
   // 清理选定节点的Session
   const cleanupNodeSession = () => {
-    if (selectedNodeSource.value && !isCurrentNode(selectedNode.value)) {
+    if (selectedNodeSource.value) {
       selectedNodeSource.value.close()
     }
     selectedNodeSession.value = null
@@ -262,13 +252,7 @@ export const useNodesStore = defineStore('nodes', () => {
     const targetNode = selectedNode.value
     const sessionId = selectedNodeSession.value
 
-    // 如果选择的是当前节点，使用现有的appStore方法
-    if (isCurrentNode(targetNode)) {
-      const appStore = useAppStore()
-      return appStore.requestMethod(method, data, signal)
-    }
-
-    // 对于其他节点，使用该节点的session ID
+    // 所有节点都使用独立的session ID
     const baseURL = targetNode.url
 
     let axiosConfig = {
