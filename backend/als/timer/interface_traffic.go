@@ -35,8 +35,32 @@ func SetupInterfaceBroadcast() {
 				continue
 			}
 
-			// skip docker
+			// skip docker related interfaces
 			if strings.Index(iface.Name, "docker") == 0 {
+				continue
+			}
+			if strings.Index(iface.Name, "br-") == 0 {
+				continue
+			}
+			if strings.Index(iface.Name, "veth") == 0 {
+				continue
+			}
+			if strings.Index(iface.Name, "virbr") == 0 {
+				continue
+			}
+			if strings.Index(iface.Name, "cni") == 0 {
+				continue
+			}
+			if strings.Index(iface.Name, "flannel") == 0 {
+				continue
+			}
+			if strings.Index(iface.Name, "weave") == 0 {
+				continue
+			}
+			if strings.Index(iface.Name, "calico") == 0 {
+				continue
+			}
+			if strings.Index(iface.Name, "tunl") == 0 {
 				continue
 			}
 
@@ -50,8 +74,11 @@ func SetupInterfaceBroadcast() {
 				continue
 			}
 
-			// skip veth
-			if strings.Index(iface.Name, "veth") == 0 {
+			// skip tailscale
+			if strings.Index(iface.Name, "tailscale") == 0 {
+				continue
+			}
+			if strings.Index(iface.Name, "ts") == 0 {
 				continue
 			}
 

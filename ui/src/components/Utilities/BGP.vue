@@ -279,22 +279,24 @@ const processSvgForDarkMode = (svgContent) => {
 
 // Get BGP description for display
 const getBGPDescription = () => {
-  if (!appStore.config?.bgp && !appStore.config?.asn) {
+  const config = currentConfig.value
+  
+  if (!config?.bgp && !config?.asn) {
     return 'Network topology visualization'
   }
   
   // If we have full BGP info, show it as is
-  if (appStore.config.bgp) {
-    return appStore.config.bgp
+  if (config.bgp) {
+    return config.bgp
   }
   
   // If we only have ASN, show it
-  return appStore.config.asn || 'Network topology visualization'
+  return config.asn || 'Network topology visualization'
 }
 
 // Load graph on component mount if ASN is already available
 onMounted(() => {
-  if (appStore.config?.asn) {
+  if (currentConfig.value?.asn) {
     loadBGPGraph()
   }
 })
