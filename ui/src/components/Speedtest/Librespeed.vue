@@ -12,10 +12,6 @@ const containerRef = ref()
 
 const {
   selectedNode,
-  selectedNodeName,
-  selectedNodeLocation,
-  hasSelectedNode,
-  isNodeReady
 } = useNodeTool()
 
 // 获取当前会话ID和基础URL

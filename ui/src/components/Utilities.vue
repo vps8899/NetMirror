@@ -2,9 +2,19 @@
 import { ref, computed, defineAsyncComponent, onMounted, h, shallowRef, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAppStore } from '@/stores/app'
+import { useNodeTool } from '@/composables/useNodeTool'
 
 const appStore = useAppStore()
-const { config } = storeToRefs(appStore)
+const {
+  selectedNode,
+} = useNodeTool()
+
+const config = computed(() => {
+  if (selectedNode.value && selectedNode.value.config) {
+    return selectedNode.value.config
+  }
+  return appStore.config
+})
 
 const toolComponent = shallowRef(null)
 const currentTool = ref(null)

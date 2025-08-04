@@ -1,12 +1,10 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useMotion } from '@vueuse/motion'
-import { useAppStore } from '@/stores/app'
 import { useNodeTool } from '@/composables/useNodeTool'
 import FileSpeedtest from '@/components/Speedtest/FileSpeedtest.vue'
 import Librespeed from '@/components/Speedtest/Librespeed.vue'
 
-const appStore = useAppStore()
 const cardRef = ref()
 
 const {

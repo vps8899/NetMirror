@@ -146,10 +146,8 @@ const asnNumber = computed(() => {
 // 获取当前节点的配置
 const currentConfig = computed(() => {
   if (selectedNode.value && selectedNode.value.config) {
-    console.log('BGP using node config:', selectedNode.value.config) // 调试用
     return selectedNode.value.config
   }
-  console.log('BGP no node config, using appStore:', appStore.config) // 调试用
   return appStore.config
 })
 
