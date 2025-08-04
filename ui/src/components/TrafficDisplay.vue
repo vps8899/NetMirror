@@ -286,11 +286,28 @@ const setupEventListeners = () => {
   console.log('hasNodeSession:', hasNodeSession.value)
   
   try {
-    const source = getEventSource()
-    console.log('Successfully got event source:', source)
-    console.log('Event source URL:', source.url)
-    console.log('Event source readyState:', source.readyState)
+    let source
+    // 如果没有选中节点，直接使用appStore的EventSource（当前节点）
+    if (!hasSelectedNode.value || !hasNodeSession.value) {
+      console.log('No selected node or session, using appStore EventSource')
+      source = appStore.source
+      if (!source) {
+        console.error('No EventSource available from appStore')
+        return
+      }
+    } else {
+      source = getEventSource()
+    }
     
+    console.log('Successfully got event source:', source)
+    console.log('Event source URL:', source?.url)
+    console.log('Event source readyState:', source?.readyState)
+    
+    // 移除现有的监听器（防止重复添加）
+    source.removeEventListener('InterfaceCache', handleCache)
+    source.removeEventListener('InterfaceTraffic', handleTrafficUpdate)
+    
+    // 添加新的监听器
     source.addEventListener('InterfaceCache', handleCache)
     source.addEventListener('InterfaceTraffic', handleTrafficUpdate)
     
@@ -307,13 +324,34 @@ const setupEventListeners = () => {
 // 清理事件监听器
 const cleanupEventListeners = () => {
   try {
-    const source = getEventSource()
-    source.removeEventListener('InterfaceCache', handleCache)
-    source.removeEventListener('InterfaceTraffic', handleTrafficUpdate)
+    let source
+    // 如果没有选中节点，直接使用appStore的EventSource（当前节点）
+    if (!hasSelectedNode.value || !hasNodeSession.value) {
+      source = appStore.source
+    } else {
+      source = getEventSource()
+    }
+    
+    if (source) {
+      source.removeEventListener('InterfaceCache', handleCache)
+      source.removeEventListener('InterfaceTraffic', handleTrafficUpdate)
+    }
   } catch (error) {
     console.warn('Failed to cleanup event listeners:', error)
   }
 }
+
+// 监听appStore source的变化（用于处理默认节点情况）
+watch(() => appStore.source, (newSource) => {
+  console.log('=== TrafficDisplay: AppStore source changed ===')
+  console.log('New source available:', !!newSource)
+  
+  // 如果没有选中节点，且appStore的source变为可用，设置监听器
+  if (!hasSelectedNode.value && newSource) {
+    console.log('Setting up listeners for default node (appStore source)')
+    setupEventListeners()
+  }
+})
 
 // 监听节点session状态变化
 watch(() => hasNodeSession.value, (hasSession) => {
@@ -354,7 +392,12 @@ watch(() => selectedNode.value, (newNode, oldNode) => {
 onMounted(() => {
   console.log('TrafficDisplay mounted, current selectedNode:', selectedNode.value)
   console.log('Current interfaces before setup:', interfaces.value)
+  console.log('Has node session:', hasNodeSession.value)
+  console.log('AppStore source available:', !!appStore.source)
+  
+  // 总是尝试设置监听器，如果没有选中节点就用appStore的source
   setupEventListeners()
+  
   apply()
 })
 
