@@ -9,7 +9,7 @@ import (
 func MiddlewareSessionOnHeader() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionId := c.GetHeader("session")
-		client, ok := client.Clients[sessionId]
+		client, ok := client.GetClient(sessionId)
 		if !ok {
 			c.JSON(400, &gin.H{
 				"success": false,
@@ -27,7 +27,7 @@ func MiddlewareSessionOnUrl() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionId := c.Param("session")
 		fmt.Printf("[Middleware] Session from URL: %s\n", sessionId)
-		client, ok := client.Clients[sessionId]
+		client, ok := client.GetClient(sessionId)
 		if !ok {
 			fmt.Printf("[Middleware] Session not found in clients map\n")
 			c.JSON(400, &gin.H{

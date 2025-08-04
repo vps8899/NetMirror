@@ -12,18 +12,18 @@ var queueWakeup = make(chan struct{})
 
 func WaitQueue(ctx context.Context, cb func()) {
 	queueCtx, cancel := context.WithCancel(ctx)
+	
+	queueLock.Lock()
 	queueLine[ctx] = cancel
+	if cb != nil {
+		queueNotify[ctx] = cb
+	}
+	queueLock.Unlock()
 
 	select {
 	case queueWakeup <- struct{}{}:
 	default:
 	}
-
-	queueLock.Lock()
-	if cb != nil {
-		queueNotify[ctx] = cb
-	}
-	queueLock.Unlock()
 
 	select {
 	case <-queueCtx.Done():
@@ -56,9 +56,12 @@ func GetQueuePostitionByCtx(ctx context.Context) (int, int) {
 func HandleQueue() {
 	for {
 		<-queueWakeup
+		queueLock.Lock()
 		for ctx, notify := range queueLine {
+			queueLock.Unlock()
 			notify()
 			<-ctx.Done()
+			queueLock.Lock()
 			delete(queueLine, ctx)
 			delete(queueNotify, ctx)
 
@@ -66,5 +69,6 @@ func HandleQueue() {
 				callNotify()
 			}
 		}
+		queueLock.Unlock()
 	}
 }

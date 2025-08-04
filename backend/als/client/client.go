@@ -2,9 +2,13 @@ package client
 
 import (
 	"context"
+	"sync"
 )
 
-var Clients = make(map[string]*ClientSession)
+var (
+	Clients   = make(map[string]*ClientSession)
+	ClientsMu sync.RWMutex
+)
 
 type Message struct {
 	Name    string
@@ -37,11 +41,40 @@ func (c *ClientSession) GetContext(requestCtx context.Context) context.Context {
 	return ctx
 }
 
+// AddClient safely adds a client to the map
+func AddClient(id string, client *ClientSession) {
+	ClientsMu.Lock()
+	defer ClientsMu.Unlock()
+	Clients[id] = client
+}
+
+// RemoveClient safely removes a client from the map
+func RemoveClient(id string) {
+	ClientsMu.Lock()
+	defer ClientsMu.Unlock()
+	delete(Clients, id)
+}
+
+// GetClient safely gets a client from the map
+func GetClient(id string) (*ClientSession, bool) {
+	ClientsMu.RLock()
+	defer ClientsMu.RUnlock()
+	client, ok := Clients[id]
+	return client, ok
+}
+
 func BroadCastMessage(name string, content string) {
+	ClientsMu.RLock()
+	defer ClientsMu.RUnlock()
+	
 	for _, client := range Clients {
-		client.Channel <- &Message{
+		select {
+		case client.Channel <- &Message{
 			Name:    name,
 			Content: content,
+		}:
+		default:
+			// Channel is full or closed, skip this client
 		}
 	}
 }
