@@ -266,9 +266,13 @@ const setupEventListeners = () => {
 
 // 清理事件监听器
 const cleanupEventListeners = () => {
-  const source = getEventSource()
-  source.removeEventListener('InterfaceCache', handleCache)
-  source.removeEventListener('InterfaceTraffic', handleTrafficUpdate)
+  try {
+    const source = getEventSource()
+    source.removeEventListener('InterfaceCache', handleCache)
+    source.removeEventListener('InterfaceTraffic', handleTrafficUpdate)
+  } catch (error) {
+    console.warn('Failed to cleanup event listeners:', error)
+  }
 }
 
 // 监听节点session状态变化
@@ -288,22 +292,23 @@ watch(() => selectedNode.value, (newNode, oldNode) => {
   console.log('Old node:', oldNode?.name)
   console.log('New node:', newNode?.name)
   
+  // 只要节点发生了变化就清空接口数据，无论新节点是否存在
+  console.log('Clearing interfaces data due to node change...')
+  interfaces.value = {}
+  console.log('Interfaces data cleared')
+  
   if (newNode !== oldNode) {
     console.log('Cleaning up old listeners...')
-    // 清理旧的监听器
+    // 清理旧的监听器 - 使用try-catch防止错误
     try {
       cleanupEventListeners()
     } catch (error) {
       console.warn('Error cleaning up listeners:', error)
     }
     
-    // 清空现有的接口数据
-    interfaces.value = {}
-    console.log('Cleared interfaces data')
-    
     // 新的监听器会在hasNodeSession变化时设置
   }
-})
+}, { immediate: false })
 
 onMounted(() => {
   console.log('TrafficDisplay mounted, current selectedNode:', selectedNode.value)
@@ -313,7 +318,13 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  cleanupEventListeners()
+  try {
+    cleanupEventListeners()
+  } catch (error) {
+    console.warn('Error cleaning up listeners on unmount:', error)
+  }
+  // 清空接口数据确保不会留在内存中
+  interfaces.value = {}
 })
 </script>
 
