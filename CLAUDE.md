@@ -126,6 +126,22 @@ make clean-all            # Clean everything including node_modules
    - Session-based isolation prevents cross-client interference
    - CORS middleware configured for web-based access
 
+## Deployment Scripts
+
+NetMirror includes automated deployment scripts in the `scripts/` directory:
+
+### `netmirror-deploy.sh` - One-Click Deployment
+- **Master Node**: `curl -fsSL https://raw.githubusercontent.com/catcat-blog/NetMirror/main/scripts/netmirror-deploy.sh | bash -s -- --name "Master Node" --location "Your Location" --port 3000 --non-interactive`
+- **Child Node**: `curl -fsSL https://raw.githubusercontent.com/catcat-blog/NetMirror/main/scripts/netmirror-deploy.sh | bash -s -- --name "Child Node" --location "Location" --port 3001 --master "http://master-ip:3000" --admin-key "api-key" --non-interactive`
+
+**Key Parameters**:
+- `--node-url`: Use for reverse proxy/CDN setups where public URL differs from container URL
+- `--non-interactive`: Skip prompts for automation
+- `--master`: Master node URL for child deployments
+- `--admin-key`: Required for child node registration
+
+**Docker Container Name**: `netmirror-node-{PORT}` (e.g., `netmirror-node-3000`)
+
 ## Environment Variables
 
 Key configuration via `.env` file:

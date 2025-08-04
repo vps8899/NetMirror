@@ -51,7 +51,15 @@ The demo server for this project is sponsored by [Verasel](https://verasel.com).
 
 ## 🚀 Quick Start
 
-### ⚡ One-Click Deployment (Recommended)
+```
+⚡ One-Click Execution
+# English
+curl -sL https:// | bash
+
+# Chinese
+curl -sL https:// | bash -s -- -cn
+
+```
 
 **Deploy Master Node:**
 ```bash

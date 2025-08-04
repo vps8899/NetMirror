@@ -53,6 +53,14 @@ NetMirror 是一个功能丰富的现代 Looking-glass 服务器，拥有美观�
 
 ### ⚡ 一键部署（推荐）
 
+```
+# English
+curl -sL https:// | bash
+
+# Chinese
+curl -sL https:// | bash -s -- -cn
+```
+
 **部署主节点：**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/catcat-blog/NetMirror/main/scripts/netmirror-deploy.sh | bash -s -- \
